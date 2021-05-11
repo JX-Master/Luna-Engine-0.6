@@ -9,12 +9,13 @@
 #ifdef LUNA_PLATFORM_WINDOWS
 
 #include "GraphicSystemWindows.hpp"
+#include <Runtime/Unicode.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			void GraphicAdapter::init(IDXGIAdapter1* adapter)
 			{

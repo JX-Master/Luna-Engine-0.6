@@ -11,11 +11,11 @@
 
 #include "GraphicDevice.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class RenderPass : public IRenderPass
 			{
@@ -26,8 +26,7 @@ namespace luna
 				P<GraphicDevice> m_device;
 				RenderPassDesc m_desc;
 
-				RenderPass() :
-					luibind(get_module_allocator()) {}
+				RenderPass() {}
 
 				virtual IGraphicDevice* get_device() override
 				{

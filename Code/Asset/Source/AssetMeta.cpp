@@ -8,9 +8,9 @@
 #include "AssetSystem.hpp"
 #include "AssetRequests.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		void AssetMeta::remove_dependent(const Guid& guid)
 		{
@@ -25,43 +25,36 @@ namespace luna
 			}
 		}
 
-		void AssetMeta::set_data_path(IPath* path)
+		void AssetMeta::set_data_path(const Path& path)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
-			if (path)
+			if (!path.empty())
 			{
-				luassert_msg_usr((path->flags() & EPathFlag::absolute) != EPathFlag::none, "IAssetMeta::set_data_path - The data and meta path for one asset must be absolute");
-				auto npath = new_path();
-				npath->assign(path);
-				m_data_path = npath;
+				lucheck_msg((path.flags() & EPathFlag::absolute) != EPathFlag::none, "IAssetMeta::set_data_path - The data and meta path for one asset must be absolute");
 			}
-			else
-			{
-				m_data_path = nullptr;
-			}
+			m_data_path = path;
 		}
 
-		RV AssetMeta::set_meta_path(IPath* path)
+		RV AssetMeta::set_meta_path(const Path& path)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(g_lock);
 			MutexGuard g2(m_mtx);
 
 			// Check collision.
-			if (path)
+			if (!path.empty())
 			{
-				luassert_msg_usr((path->flags() & EPathFlag::absolute) != EPathFlag::none, "IAssetMeta::set_meta_path - The data and meta path for one asset must be absolute");
+				lucheck_msg((path.flags() & EPathFlag::absolute) != EPathFlag::none, "IAssetMeta::set_meta_path - The data and meta path for one asset must be absolute");
 				auto iter = g_path_mapping.get().find(path);
 				if (iter != g_path_mapping.get().end())
 				{
-					set_err(e_item_already_exists, "The path %s is already used by another asset.", path->encode()->c_str());
-					return e_user_failure;
+					return custom_error(BasicError::already_exists(), "The path %s is already used by another asset.", path.encode().c_str());
 				}
 			}
 
 			// Remove old record.
-			if (m_meta_path)
+			if (!m_meta_path.empty())
 			{
 				auto eiter = g_path_mapping.get().find(m_meta_path);
 				if (eiter != g_path_mapping.get().end())
@@ -71,24 +64,19 @@ namespace luna
 			}
 			
 			// Insert new record.
-			if (path)
+			if (!path.empty())
 			{
-				auto npath = new_path();
-				npath->assign(path);
-				m_meta_path = npath;
 				// Add new record.
-				g_path_mapping.get().insert(Pair<P<IPath>, Guid>(npath, m_guid));
+				g_path_mapping.get().insert(Pair<Path, Guid>(path, m_guid));
 			}
-			else
-			{
-				m_meta_path = nullptr;
-			}
-			return s_ok;
+
+			m_meta_path = path;
+			return RV();
 		}
 
 		bool AssetMeta::unused()
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			if (m_pin_count)
 			{
@@ -110,9 +98,9 @@ namespace luna
 			return true;
 		}
 
-		void AssetMeta::load(EAssetLoadFlag flags, IVariant* params)
+		void AssetMeta::load(EAssetLoadFlag flags, const Variant& params)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			// Early out.
 			if (m_state == EAssetState::loading)
@@ -145,7 +133,7 @@ namespace luna
 			// Create a new load request.
 			m_state = EAssetState::loading;
 
-			P<AssetLoadRequest> request = box_ptr(new_obj<AssetLoadRequest>(get_module_allocator()));
+			P<AssetLoadRequest> request = newobj<AssetLoadRequest>();
 			request->m_asset = m_asset;
 			request->m_params = params;
 			request->m_flags = flags;
@@ -154,7 +142,7 @@ namespace luna
 
 		void AssetMeta::unload(EAssetUnloadFlag flags)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			if (m_state != EAssetState::loaded)
 			{
@@ -201,17 +189,16 @@ namespace luna
 			}
 		}
 
-		RP<IAssetSaveRequest> AssetMeta::save_data(EAssetSaveFormat save_format, IVariant* params)
+		RP<IAssetSaveRequest> AssetMeta::save_data(EAssetSaveFormat save_format, const Variant& params)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			P<AssetSaveRequest> req;
 			MutexGuard g(m_mtx);
 			if (m_state != EAssetState::loaded)
 			{
-				set_err(e_bad_calling_time, "IAssetMeta::save_data - Cannot save data when the data is not loaded.");
-				return e_user_failure;
+				return custom_error(BasicError::bad_calling_time(), "IAssetMeta::save_data - Cannot save data when the data is not loaded.");
 			}
-			req = box_ptr(new_obj<AssetSaveRequest>(get_module_allocator()));
+			req = newobj<AssetSaveRequest>();
 			req->m_asset = m_asset;
 			req->m_save_data = true;
 			req->m_format = save_format;
@@ -222,10 +209,10 @@ namespace luna
 
 		RP<IAssetSaveRequest> AssetMeta::save_meta(EAssetSaveFormat save_format)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			P<AssetSaveRequest> req;
 			MutexGuard g(m_mtx);
-			req = box_ptr(new_obj<AssetSaveRequest>(get_module_allocator()));
+			req = newobj<AssetSaveRequest>();
 			req->m_asset = m_asset;
 			req->m_save_data = false;
 			req->m_format = save_format;
@@ -235,25 +222,25 @@ namespace luna
 
 		void AssetMeta::internal_add_dependency(const Guid& guid)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			if (guid == Guid(0, 0))
 			{
 				return;
 			}
 			m_dependencies.push_back(guid);
-			asset::add_dependency(this, guid);
+			Asset::add_dependency(this, guid);
 		}
 
 		bool AssetMeta::internal_remove_dependency(const Guid& guid)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			if (guid == Guid(0, 0))
 			{
 				return false;
 			}
-			if (!asset::remove_dependency(this, guid))
+			if (!Asset::remove_dependency(this, guid))
 			{
 				return false;
 			}
@@ -270,11 +257,11 @@ namespace luna
 
 		RV AssetMeta::replace_dependency(const Guid& before, const Guid& after)
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			if (m_state != EAssetState::loaded)
 			{
-				return e_bad_calling_time;
+				return BasicError::bad_calling_time();
 			}
 			m_type_obj->on_dependency_replace(m_asset.lock(), before, after);
 			// Removes all old dependency, and adds new dependency.
@@ -287,15 +274,15 @@ namespace luna
 					internal_add_dependency(after);
 				}
 			}
-			return s_ok;
+			return RV();
 		}
 		void AssetMeta::internal_remove_all_dependencies()
 		{
-			luassert_usr(m_valid);
+			lucheck(m_valid);
 			MutexGuard g(m_mtx);
 			for (auto& i : m_dependencies)
 			{
-				asset::remove_dependency(this, i);
+				Asset::remove_dependency(this, i);
 			}
 			m_dependencies.clear();
 		}

@@ -7,12 +7,12 @@
 #pragma once
 #include <Core/Core.hpp>
 #include <Input/KeyCode.hpp>
-#include <Base/Math/Vector.hpp>
-namespace luna
+#include <Runtime/Math.hpp>
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EWindowDisplayMode : uint32
+		enum class EWindowDisplayMode : u32
 		{
 			unknown = 0,	// The display mode of the window is unknown.
 			windowed = 1,	// This window is currently displayed on the screen in windowed mode.
@@ -20,7 +20,7 @@ namespace luna
 			minimized = 3,	// This window is currently displayed on the screen in minimized mode.
 		};
 
-		enum class EWindowEvent : uint32
+		enum class EWindowEvent : u32
 		{
 			//! Called when the close (x) button of the window is clicked.
 			//! Applications can pop up messages to let users confirm the operation, and call `close` to close
@@ -104,7 +104,7 @@ namespace luna
 		struct WindowMove
 		{
 			Int2U pos;	// The new position of the window in screen space pixels.
-			input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
+			Input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
 		};
 
 		struct WindowResize
@@ -116,29 +116,29 @@ namespace luna
 		struct WindowMouseDown
 		{
 			Int2U pos;					// The mouse position in window space pixels when this event is triggered.
-			input::EMouseKey key;		// The mouse key that triggers this event.
-			input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
+			Input::EMouseKey key;		// The mouse key that triggers this event.
+			Input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
 			bool dblclk;				// If this mouse down event is a double click. The double click is determined by system.
 		};
 
 		struct WindowMouseUp
 		{
 			Int2U pos;					// The mouse position in window space pixels when this event is triggered.
-			input::EMouseKey key;		// The mouse key that triggers this event.
-			input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
+			Input::EMouseKey key;		// The mouse key that triggers this event.
+			Input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
 		};
 
 		struct WindowMouseMove
 		{
 			Int2U pos;					// The mouse position in window space pixels when this event is triggered.
-			input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
+			Input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
 		};
 
 		struct WindowMouseWheel
 		{
 			Int2U pos;					// The mouse position in window space pixels when this event is triggered.
-			input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
-			float32 delta;				// The number of spans the wheel is rotated.
+			Input::EMouseKey down_keys;	// A combination of mouse keys that is currently pressed.
+			f32 delta;				// The number of spans the wheel is rotated.
 		};
 	}
 }

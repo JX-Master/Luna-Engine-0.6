@@ -9,21 +9,22 @@
 #include "DrawList.hpp"
 #include "DrawListRenderer.hpp"
 #include "FontTexture.hpp"
+#include <Runtime/Module.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		using namespace gfx;
-		P<IBlob> g_vs;
-		P<IBlob> g_ps;
-		P<IBlob> g_ps_no_tex;
+		using namespace Gfx;
+		Blob g_vs;
+		Blob g_ps;
+		Blob g_ps_no_tex;
 
 		void deinit()
 		{
-			g_vs = nullptr;
-			g_ps = nullptr;
-			g_ps_no_tex = nullptr;
+			g_vs.resize(0);
+			g_ps.resize(0);
+			g_ps_no_tex.resize(0);
 		}
 
 		RV init()
@@ -88,29 +89,30 @@ namespace luna
 						return out_col; \
 					}";
 
-				luset(g_vs, gfx::compile_shader(ShaderCompileDesc(vs_shader_code, sizeof(vs_shader_code), "EasyDrawVS", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
+				luset(g_vs, Gfx::compile_shader(ShaderCompileDesc(vs_shader_code, sizeof(vs_shader_code), "EasyDrawVS", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
 					EShaderType::vertex, EShaderModel::sm_5_0, EShaderOptimizationLevel::speed, EShaderCompileFlag::debug_info)));
-				luset(g_ps, gfx::compile_shader(ShaderCompileDesc(ps_shader_code, sizeof(ps_shader_code), "EasyDrawPS", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
+				luset(g_ps, Gfx::compile_shader(ShaderCompileDesc(ps_shader_code, sizeof(ps_shader_code), "EasyDrawPS", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
 					EShaderType::pixel, EShaderModel::sm_5_0, EShaderOptimizationLevel::speed, EShaderCompileFlag::debug_info)));
-				luset(g_ps_no_tex, gfx::compile_shader(ShaderCompileDesc(ps_shader_code_no_tex, sizeof(ps_shader_code_no_tex), "EasyDrawPSNoTex", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
+				luset(g_ps_no_tex, Gfx::compile_shader(ShaderCompileDesc(ps_shader_code_no_tex, sizeof(ps_shader_code_no_tex), "EasyDrawPSNoTex", "main", EShaderSourceType::hlsl, EShaderTargetType::dx_bytecode,
 					EShaderType::pixel, EShaderModel::sm_5_0, EShaderOptimizationLevel::speed, EShaderCompileFlag::debug_info)));
-				add_module("EasyDraw", deinit);
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
+
+		StaticRegisterModule m("EasyDraw", "Core;Font;Gfx;Image;Input;RectPack", init, deinit);
 
 		P<IDrawList> new_draw_list()
 		{
-			P<DrawList> o = box_ptr(new_obj<DrawList>(get_module_allocator()));
+			P<DrawList> o = newobj<DrawList>();
 			o->init();
 			return o;
 		}
 
-		RP<IDrawListRenderer> new_draw_list_renderer(gfx::IRenderPass* render_pass)
+		RP<IDrawListRenderer> new_draw_list_renderer(Gfx::IRenderPass* render_pass)
 		{
-			luassert_usr(render_pass);
-			P<DrawListRenderer> o = box_ptr(new_obj<DrawListRenderer>(get_module_allocator()));
+			lucheck(render_pass);
+			P<DrawListRenderer> o = newobj<DrawListRenderer>();
 			lutry
 			{
 				o->m_rp = render_pass;
@@ -122,14 +124,14 @@ namespace luna
 
 		P<IDrawPath> new_draw_path()
 		{
-			P<DrawPath> o = box_ptr(new_obj_aligned<DrawPath>(get_module_allocator()));
+			P<DrawPath> o = newobj<DrawPath>();
 			return o;
 		}
 
-		RP<IFontTexture> new_font_texture(font::IFontAtlas* atlas, gfx::ICommandBuffer* command_buffer)
+		RP<IFontTexture> new_font_texture(Font::IFontAtlas* atlas, Gfx::ICommandBuffer* command_buffer)
 		{
-			luassert_usr(atlas && command_buffer);
-			P<FontTexture> o = box_ptr(new_obj<FontTexture>(get_module_allocator()));
+			lucheck(atlas && command_buffer);
+			P<FontTexture> o = newobj<FontTexture>();
 			lutry
 			{	
 				luexp(o->reset(atlas, command_buffer));

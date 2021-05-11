@@ -6,12 +6,12 @@
 */
 #pragma once
 #include "AssetHeader.hpp"
+#include <Core/Interface.hpp>
+#include <Runtime/HashMap.hpp>
 
-#include <Base/HashMap.hpp>
-
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		class AssetMeta : public IAssetMeta
 		{
@@ -21,14 +21,14 @@ namespace luna
 
 			EAssetState m_state;
 			EAssetFlag m_flags;
-			volatile uint32 m_pin_count;
+			volatile u32 m_pin_count;
 
 			Guid m_guid;
 			WP<IAsset> m_asset;
-			P<IName> m_type;
-			P<IPath> m_data_path;
-			P<IPath> m_meta_path;
-			P<IError> m_error;
+			Name m_type;
+			Path m_data_path;
+			Path m_meta_path;
+			Error m_error;
 			P<IMutex> m_mtx;
 			P<IAssetType> m_type_obj;
 
@@ -39,10 +39,7 @@ namespace luna
 			bool m_valid;		// Check if a non-valid asset is used.
 #endif
 
-			AssetMeta(IAllocator* alloc) :
-				luibind(alloc),
-				m_dependents(alloc),
-				m_dependencies(alloc),
+			AssetMeta() :
 				m_state(EAssetState::unloaded),
 				m_flags(EAssetFlag::none),
 #ifdef LUNA_PROFILE
@@ -51,7 +48,6 @@ namespace luna
 				m_pin_count(0)
 			{
 				m_mtx = new_mutex();
-				m_error = new_err();
 			}
 
 			void remove_dependent(const Guid& guid);
@@ -60,7 +56,7 @@ namespace luna
 			{
 				return m_guid;
 			}
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type;
 			}
@@ -85,17 +81,17 @@ namespace luna
 				m_flags = flags;
 			}
 			
-			virtual IPath* data_path() override
+			virtual const Path& data_path() override
 			{
 				return m_data_path;
 			}
-			virtual IPath* meta_path() override
+			virtual const Path& meta_path() override
 			{
 				return m_meta_path;
 			}
-			virtual void set_data_path(IPath* path) override;
-			virtual RV set_meta_path(IPath* path) override;
-			virtual IError* error_object() override
+			virtual void set_data_path(const Path& path) override;
+			virtual RV set_meta_path(const Path& path) override;
+			virtual Error& error_object() override
 			{
 				return m_error;
 			}
@@ -112,13 +108,13 @@ namespace luna
 			{
 				atom_dec_u32(&m_pin_count);
 			}
-			virtual uint32 pin_count() override
+			virtual u32 pin_count() override
 			{
 				return m_pin_count;
 			}
-			virtual void load(EAssetLoadFlag flags = EAssetLoadFlag::none, IVariant* params = nullptr) override;
+			virtual void load(EAssetLoadFlag flags = EAssetLoadFlag::none, const Variant& params = Variant()) override;
 			virtual void unload(EAssetUnloadFlag flags = EAssetUnloadFlag::none) override;
-			virtual RP<IAssetSaveRequest> save_data(EAssetSaveFormat save_format, IVariant* params = nullptr) override;
+			virtual RP<IAssetSaveRequest> save_data(EAssetSaveFormat save_format, const Variant& params = Variant()) override;
 			virtual RP<IAssetSaveRequest> save_meta(EAssetSaveFormat save_format) override;
 			virtual Vector<Guid> dependencies() override
 			{

@@ -5,25 +5,26 @@
 * @date 2019/7/27
 */
 #pragma once
-#include <Base/PlatformDefines.hpp>
+#include <Runtime/PlatformDefines.hpp>
 
 #ifdef LUNA_PLATFORM_WINDOWS
 
 #include "../InputHeader.hpp"
 #include "../../IController.hpp"
-#include <Base/Interface.hpp>
+#include <Core/Core.hpp>
+#include <Core/Interface.hpp>
 #include <Xinput.h>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		namespace win
+		namespace Win
 		{
 			struct XBOXControllerVibration
 			{
-				float32 vibration_l;
-				float32 vibration_r;
+				f32 vibration_l;
+				f32 vibration_r;
 			};
 			
 			class XBOXController : public IController
@@ -45,11 +46,11 @@ namespace luna
 					return EInputDeviceFlag::none;
 				}
 				virtual void update() override {}
-				virtual bool connected(uint32 index) override;
-				virtual bool button_down(uint32 index, EControllerButton button) override;
-				virtual float32 axis(uint32 index, EControllerAxis axis_to_check) override;
-				virtual float32 vibration(uint32 index, EControllerVibrationMotor part) override;
-				virtual RV set_vibration(uint32 index, EControllerVibrationMotor part, float32 level) override;
+				virtual bool connected(u32 index) override;
+				virtual bool button_down(u32 index, EControllerButton button) override;
+				virtual f32 axis(u32 index, EControllerAxis axis_to_check) override;
+				virtual f32 vibration(u32 index, EControllerVibrationMotor part) override;
+				virtual RV set_vibration(u32 index, EControllerVibrationMotor part, f32 level) override;
 			};
 		}
 	}

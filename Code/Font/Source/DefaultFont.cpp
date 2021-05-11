@@ -5,9 +5,9 @@
 * @date 2019/10/12
 */
 #include "DefaultFont.hpp"
-namespace luna
+namespace Luna
 {
-	namespace font
+	namespace Font
 	{
 		// Open Sans Font.
 		// https://fonts.google.com/specimen/Open+Sans
@@ -13607,9 +13607,9 @@ namespace luna
 		{
 			return opensans_regular_ttf;
 		}
-		size_t get_default_font_size()
+		usize get_default_font_size()
 		{
-			return (size_t)opensans_regular_ttf_size;
+			return (usize)opensans_regular_ttf_size;
 		}
 	}
 }

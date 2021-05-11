@@ -10,13 +10,13 @@
 #include <ImGuizmo/ImGuizmo.h>
 #include <Input/Input.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace imgui
+	namespace ImGui
 	{
 		extern P<IMutex> m_mtx;
 		extern P<IMutex> m_gizmo_mtx;
-		extern P<IBlob> m_vs_blob;
-		extern P<IBlob> m_ps_blob;
+		extern Blob m_vs_blob;
+		extern Blob m_ps_blob;
 	}
 }

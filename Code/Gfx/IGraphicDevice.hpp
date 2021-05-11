@@ -15,34 +15,34 @@
 #include "Views.hpp"
 #include "IShaderInputLayout.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EDeviceType : uint32
+		enum class EDeviceType : u32
 		{
 			d3d12 = 1,
 		};
 
-		enum class EDeviceFeature : uint32
+		enum class EDeviceFeature : u32
 		{
-			//! (uint32) The alignment for the size of one row texture data to follow when placing texture data in buffers.
+			//! (u32) The alignment for the size of one row texture data to follow when placing texture data in buffers.
 			texture_data_pitch_alignment = 1,
-			//! (uint32) The alignment for the start offset of texture data to follow when placing texture data in buffers.
+			//! (u32) The alignment for the start offset of texture data to follow when placing texture data in buffers.
 			texture_data_placement_alignment,
-			//! (uint32) The alignment for the buffer data start location and size.
+			//! (u32) The alignment for the buffer data start location and size.
 			buffer_data_alignment,
 			//! (bool) If the device underlying API supports resource heap creation and placed resource creation.
 			//! If this is `false`, then `IResourceHeap` cannot be created on the current device.
 			placed_resource_supported,
 		};
 
-		inline constexpr uint32 calc_subresource_index(uint32 mip_slice, uint32 array_slice, uint32 mip_levels)
+		inline constexpr u32 calc_subresource_index(u32 mip_slice, u32 array_slice, u32 mip_levels)
 		{
 			return mip_slice + array_slice * mip_levels;
 		}
 
-		inline constexpr void calc_mip_array_slice(uint32 subresource, uint32 mip_levels, uint32& mip_slice, uint32& array_slice)
+		inline constexpr void calc_mip_array_slice(u32 subresource, u32 mip_levels, u32& mip_slice, u32& array_slice)
 		{
 			mip_slice = subresource % mip_levels;
 			array_slice = subresource / mip_levels;
@@ -96,7 +96,7 @@ namespace luna
 			//! @param[in] rtvs An array of render target views with at least `num_rtvs` elements.
 			//! @param[in] ds The resource used for depth stencil, specify `nullptr` to bind an empty one.
 			//! @param[in] dsv The depth stencil view, specify `nullptr` to deduce from the depth stencil resource, or when `ds` is `nullptr`.
-			virtual RP<IFrameBuffer> new_frame_buffer(IRenderPass* render_pass, uint32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv) = 0;
+			virtual RP<IFrameBuffer> new_frame_buffer(IRenderPass* render_pass, u32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv) = 0;
 
 			//! Creates a new view set object that describes the SRV/CBV/UAVs that is bound to the pipeline.
 			//! @param[in] target_input_layout The shader input layout object this view set compacts to.
@@ -110,8 +110,8 @@ namespace luna
 			//! @param[out] row_pitch The row pitch of the subresource. Specify `nullptr` if this is not needed.
 			//! @param[out] slice_pitch The slice pitch (size) of the subresource. Specify `nullptr` if this is not needed.
 			//! @param[out] res_pitch The pitch of the whole subresource, which is the size of the subresource. Specify `nullptr` if this is not needed.
-			virtual void calc_texture_subresource_buffer_placement(uint32 width, uint32 height, uint32 depth, EResourceFormat format,
-				size_t* row_pitch, size_t* slice_pitch, size_t* res_pitch) = 0;
+			virtual void calc_texture_subresource_buffer_placement(u32 width, u32 height, u32 depth, EResourceFormat format,
+				usize* row_pitch, usize* slice_pitch, usize* res_pitch) = 0;
 		};
 	}
 }

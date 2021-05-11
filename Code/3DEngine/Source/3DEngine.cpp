@@ -13,26 +13,27 @@
 #include "Material.hpp"
 #include "Model.hpp"
 #include "ModelRenderer.hpp"
+#include <Runtime/Module.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		void deinit()
 		{
-			auto _ = scene::unregister_scene_component_type(&g_scene_renderer_type.get());
-			_ = scene::unregister_component_type(&g_transform_type.get());
-			_ = scene::unregister_component_type(&g_camera_type.get());
-			_ = scene::unregister_component_type(&g_directional_light_type.get());
-			_ = scene::unregister_component_type(&g_point_light_type.get());
-			_ = scene::unregister_component_type(&g_spot_light_type.get());
-			_ = asset::unregister_asset_type(intern_name("Mesh"));
-			_ = asset::unregister_asset_type(intern_name("Model"));
-			_ = asset::unregister_asset_type(intern_name("Material"));
-			_ = scene::unregister_component_type(&g_model_renderer_type.get());
+			auto _ = Scene::unregister_scene_component_type(&g_scene_renderer_type.get());
+			_ = Scene::unregister_component_type(&g_transform_type.get());
+			_ = Scene::unregister_component_type(&g_camera_type.get());
+			_ = Scene::unregister_component_type(&g_directional_light_type.get());
+			_ = Scene::unregister_component_type(&g_point_light_type.get());
+			_ = Scene::unregister_component_type(&g_spot_light_type.get());
+			_ = Asset::unregister_asset_type(Name("Mesh"));
+			_ = Asset::unregister_asset_type(Name("Model"));
+			_ = Asset::unregister_asset_type(Name("Material"));
+			_ = Scene::unregister_component_type(&g_model_renderer_type.get());
 		}
 
-		LUNA_3DENGINE_API RV init()
+		RV init()
 		{
 			g_mesh_type.construct();
 			g_transform_type.construct();
@@ -62,52 +63,52 @@ namespace luna
 
 			lutry
 			{
-				luexp(asset::register_asset_type(&g_mesh_type.get()));
-				luexp(scene::register_component_type(&g_transform_type.get()));
-				luexp(scene::register_component_type(&g_camera_type.get()));
-				luexp(scene::register_component_type(&g_directional_light_type.get()));
-				luexp(scene::register_component_type(&g_point_light_type.get()));
-				luexp(scene::register_component_type(&g_spot_light_type.get()));
-				luexp(scene::register_scene_component_type(&g_scene_renderer_type.get()));
-				luexp(asset::register_asset_type(&g_material_type.get()));
-				luexp(asset::register_asset_type(&g_model_type.get()));
-				luexp(scene::register_component_type(&g_model_renderer_type.get()));
+				luexp(Asset::register_asset_type(&g_mesh_type.get()));
+				luexp(Scene::register_component_type(&g_transform_type.get()));
+				luexp(Scene::register_component_type(&g_camera_type.get()));
+				luexp(Scene::register_component_type(&g_directional_light_type.get()));
+				luexp(Scene::register_component_type(&g_point_light_type.get()));
+				luexp(Scene::register_component_type(&g_spot_light_type.get()));
+				luexp(Scene::register_scene_component_type(&g_scene_renderer_type.get()));
+				luexp(Asset::register_asset_type(&g_material_type.get()));
+				luexp(Asset::register_asset_type(&g_model_type.get()));
+				luexp(Scene::register_component_type(&g_model_renderer_type.get()));
 			}
 			lucatch
 			{
 				return lures;
 			}
-
-			add_module("3DEngine", deinit);
-			return s_ok;
+			return RV();
 		}
+
+		StaticRegisterModule m("3DEngine", "Asset;Core;Gfx;Input;Renderer;Scene", init, deinit);
 
 		LUNA_3DENGINE_API RP<IMesh> new_mesh()
 		{
-			auto mesh = asset::new_asset(intern_name("Mesh"));
+			auto mesh = Asset::new_asset(Name("Mesh"));
 			if (failed(mesh))
 			{
-				return mesh.result();
+				return mesh.errcode();
 			}
 			return mesh.get();
 		}
 
 		LUNA_3DENGINE_API RP<IMaterial> new_material()
 		{
-			auto mat = asset::new_asset(intern_name("Material"));
+			auto mat = Asset::new_asset(Name("Material"));
 			if (failed(mat))
 			{
-				return mat.result();
+				return mat.errcode();
 			}
 			return mat.get();
 		}
 
 		LUNA_3DENGINE_API RP<IModel> new_model()
 		{
-			auto m = asset::new_asset(intern_name("Model"));
+			auto m = Asset::new_asset(Name("Model"));
 			if (failed(m))
 			{
-				return m.result();
+				return m.errcode();
 			}
 			return m.get();
 		}

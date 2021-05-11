@@ -6,14 +6,16 @@
 */
 #pragma once
 #include <Core/Core.hpp>
+#include <Runtime/Path.hpp>
+#include <Runtime/Vector.hpp>
 #include "IAsset.hpp"
 #include "IAssetSaveRequest.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
-		enum class EAssetState : uint32
+		enum class EAssetState : u32
 		{
 			//! The data for this asset is not loaded.
 			unloaded = 0,
@@ -23,7 +25,7 @@ namespace luna
 			loaded = 2,
 		};
 
-		enum class EAssetFlag : uint32
+		enum class EAssetFlag : u32
 		{
 			none = 0,
 			//! There are errors occurred when loading the asset. The error object is valid 
@@ -35,7 +37,7 @@ namespace luna
 			loading_error = 0x01,
 		};
 
-		enum class EAssetLoadFlag : uint32
+		enum class EAssetLoadFlag : u32
 		{
 			none = 0,
 			//! Always reload the data even if the data has been loaded. If this flag is not set and 
@@ -51,14 +53,14 @@ namespace luna
 			procedural = 0x02,
 		};
 
-		enum class EAssetUnloadFlag : uint32
+		enum class EAssetUnloadFlag : u32
 		{
 			none = 0,
 			//! Do not unload the data of any dependency assets of this asset even if they are unused.
 			no_unload_unused_deps = 0x01,
 		};
 
-		enum class EAssetSaveFormat : uint32
+		enum class EAssetSaveFormat : u32
 		{
 			ascii = 1,
 			// binary = 2, // [TODO] not implemented.
@@ -82,7 +84,7 @@ namespace luna
 
 			//! Gets the type of the asset. The asset type cannot be changed after
 			//! it is created.
-			virtual IName* type() = 0;
+			virtual Name type() = 0;
 
 			//! Gets the asset object this meta object is attached to.
 			virtual P<IAsset> attaching_asset() = 0;
@@ -96,14 +98,14 @@ namespace luna
 			//! Gets the path of the data file of this asset. The path does not include the extension 
 			//! (.data.la/lb).
 			//! 
-			//! This may be `nullptr` for runtime generated asset that does not have its file on VFS.
-			virtual IPath* data_path() = 0;
+			//! This may be `empty()` for runtime generated asset that does not have its file on VFS.
+			virtual const Path& data_path() = 0;
 
 			//! Gets the path of the meta file of this asset. The path does not include the extension 
 			//! (.data.la/lb).
 			//! 
-			//! This may be `nullptr` for runtime generated asset that does not have its file on VFS.
-			virtual IPath* meta_path() = 0;
+			//! This may be `empty()` for runtime generated asset that does not have its file on VFS.
+			virtual const Path& meta_path() = 0;
 
 			//! Sets the path of the data file of this asset. Note that this call will not move any file on the 
 			//! file system, the user should move the file manually before calling this if needed.
@@ -113,8 +115,8 @@ namespace luna
 			//! The path is always copy-assigned, so that the succeeding calls to modify the path passed in will not affect the 
 			//! set path.
 			//! 
-			//! The path may be `nullptr`, which removes the previous path.
-			virtual void set_data_path(IPath* path) = 0;
+			//! The path may be `empty()`, which removes the previous path.
+			virtual void set_data_path(const Path& path) = 0;
 
 			//! Sets the path of the meta file of this asset. Note that this call will not move any file on the 
 			//! file system, the user should move the file manually before calling this if needed.
@@ -124,12 +126,12 @@ namespace luna
 			//! The path is always copy-assigned, so that the succeeding calls to modify the path passed in will not affect the 
 			//! set path.
 			//! 
-			//! The path may be `nullptr`, which removes the previous path.
-			virtual RV set_meta_path(IPath* path) = 0;
+			//! The path may be `empty()`, which removes the previous path.
+			virtual RV set_meta_path(const Path& path) = 0;
 
 			//! Gets the error object attached with this asset. The error object is valid only if `EAssetFlag::error`
 			//! flag is set.
-			virtual IError* error_object() = 0;
+			virtual Error& error_object() = 0;
 
 			//! Gets the mutex attached to this asset.
 			virtual IMutex* mutex() = 0;
@@ -149,7 +151,7 @@ namespace luna
 			virtual void unpin() = 0;
 
 			//! Gets the pin count of this asset.
-			virtual uint32 pin_count() = 0;
+			virtual u32 pin_count() = 0;
 
 			//! Loads or reloads the data of the asset from file. This call is asynchronous.
 			//! @param[in] flags The load flags to specify.
@@ -160,13 +162,13 @@ namespace luna
 			//! * The asset is in `loaded` state and `EAssetLoadFlag::force_reload` is specified.
 			//! 
 			//! The load operation will be ignored if the asset is already in `loading` state.
-			virtual void load(EAssetLoadFlag flags = EAssetLoadFlag::none, IVariant* params = nullptr) = 0;
+			virtual void load(EAssetLoadFlag flags = EAssetLoadFlag::none, const Variant& params = Variant()) = 0;
 
 			//! Unloads the data of the asset. This call is synchronous.
 			virtual void unload(EAssetUnloadFlag flags = EAssetUnloadFlag::none) = 0;
 
 			//! Saves the data to the corresponding files. This call is asynchronous.
-			virtual RP<IAssetSaveRequest> save_data(EAssetSaveFormat save_format, IVariant* params = nullptr) = 0;
+			virtual RP<IAssetSaveRequest> save_data(EAssetSaveFormat save_format, const Variant& params = Variant()) = 0;
 
 			//! Saves the meta to the corresponding files. This call is asynchronous.
 			virtual RP<IAssetSaveRequest> save_meta(EAssetSaveFormat save_format) = 0;

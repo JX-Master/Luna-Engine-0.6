@@ -5,14 +5,14 @@
 * @date 2019/1/5
  */
 #pragma once
-#include <Base/BaseDefines.hpp>
+#include <Runtime/Base.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
 		//! A platform-independent key code mapping for standard QWERTY keyboard.
-		enum class EKeyCode : uint32
+		enum class EKeyCode : u32
 		{
 			invalid = 0x00,
 			backspace = 0x08,
@@ -142,7 +142,7 @@ namespace luna
 			quote = 0xDE,		// '" key on US standard keyboard
 		};
 
-		enum class EMouseKey : uint32
+		enum class EMouseKey : u32
 		{
 			none = 0x00,
 			lb = 0x01,
@@ -152,7 +152,7 @@ namespace luna
 			x2b = 0x10,
 		};
 
-		enum class EControllerAxis : uint32
+		enum class EControllerAxis : u32
 		{
 			lx = 0,	// Left thumb pad X axis.
 			ly = 1,	// Left thumb pad Y axis.
@@ -162,7 +162,7 @@ namespace luna
 			rt = 5,	// Right trigger.
 		};
 
-		enum class EControllerButton : uint32
+		enum class EControllerButton : u32
 		{
 			lthumb = 0,	// Left thumb button.
 			rthumb = 1,	// Right thumb button.
@@ -183,7 +183,7 @@ namespace luna
 		};
 
 		//! Identify the vibration motor to set in `set_vibration`.
-		enum class EControllerVibrationMotor : uint32
+		enum class EControllerVibrationMotor : u32
 		{
 			left = 1,
 			right = 2,

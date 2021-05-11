@@ -8,13 +8,13 @@
 
 #ifdef LUNA_GFX_D3D12
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
-			inline uint32 calc_subresource_index(uint32 mip_slice, uint32 array_slice, uint32 mip_levels)
+			inline u32 calc_subresource_index(u32 mip_slice, u32 array_slice, u32 mip_levels)
 			{
 				return mip_slice + array_slice * mip_levels;
 			}
@@ -36,7 +36,7 @@ namespace luna
 				return false;
 			}*/
 
-			void ResourceStateTrackingSystem::append_transition(Resource* res, uint32 subresource, EResourceState before, EResourceState after, EResourceBarrierFlag flags)
+			void ResourceStateTrackingSystem::append_transition(Resource* res, u32 subresource, EResourceState before, EResourceState after, EResourceBarrierFlag flags)
 			{
 				// Early out for unnecessary calls.
 				if (before == after)
@@ -86,12 +86,12 @@ namespace luna
 				m_barriers.push_back(t);
 			}
 
-			void ResourceStateTrackingSystem::pack_transition(Resource* res, uint32 subresource, EResourceState after, EResourceBarrierFlag flags)
+			void ResourceStateTrackingSystem::pack_transition(Resource* res, u32 subresource, EResourceState after, EResourceBarrierFlag flags)
 			{
 				if (subresource == resource_barrier_all_subresources_v)
 				{
-					uint32 num_subresources = res->count_subresources();
-					for (uint32 i = 0; i < num_subresources; ++i)
+					u32 num_subresources = res->count_subresources();
+					for (u32 i = 0; i < num_subresources; ++i)
 					{
 						pack_transition(res, i, after, flags);
 					}
@@ -184,25 +184,25 @@ namespace luna
 				hr = m_device->m_device->CreateCommandAllocator(encode_command_list_type(m_queue->m_desc.type), IID_PPV_ARGS(&m_ca));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_device->m_device->CreateCommandList(0, encode_command_list_type(m_queue->m_desc.type), m_ca.Get(), NULL, IID_PPV_ARGS(&m_li));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_device->m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_event = ::CreateEventA(NULL, TRUE, FALSE, NULL);
 				if (m_event == NULL)
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_wait_value = 1;	// The fist wait value.
-				return s_ok;
+				return RV();
 			}
 
 			RV CommandBuffer::reset()
@@ -210,7 +210,7 @@ namespace luna
 				BOOL b = ::ResetEvent(m_event);
 				if (!b)
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				++m_wait_value;
 				if (!m_cmdlist_closed)
@@ -218,30 +218,30 @@ namespace luna
 					HRESULT hr = m_li->Close();
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					m_cmdlist_closed = true;
 				}
 				HRESULT hr = m_ca->Reset();
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_li->Reset(m_ca.Get(), NULL);
 				m_cmdlist_closed = false;
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_tracking_system.reset();
 				m_objs.clear();
-				return s_ok;
+				return RV();
 			}
 
-			void CommandBuffer::begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, uint32 num_rt_clear_values, const Float4U* clear_values,
-				float32 depth_clear_value, uint8 stencil_clear_value)
+			void CommandBuffer::begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, u32 num_rt_clear_values, const Float4U* clear_values,
+				f32 depth_clear_value, u8 stencil_clear_value)
 			{
-				luassert_usr(render_pass && fbo);
+				lucheck(render_pass && fbo);
 				m_render_pass = render_pass;
 				m_frame_buffer = fbo;
 
@@ -273,7 +273,7 @@ namespace luna
 				}
 
 				// Clear render target and depth stencil if needed.
-				for (uint32 i = 0; (i < m_render_pass->m_desc.num_attachments) && (i < num_rt_clear_values); ++i)
+				for (u32 i = 0; (i < m_render_pass->m_desc.num_attachments) && (i < num_rt_clear_values); ++i)
 				{
 					if ((m_render_pass->m_desc.attachments[i].load_op == EAttachmentLoadOp::clear) && m_frame_buffer->m_rts[i])
 					{
@@ -307,23 +307,23 @@ namespace luna
 			void CommandBuffer::set_graphic_shader_input_layout(IShaderInputLayout* shader_input_layout)
 			{
 				lutsassert();
-				luassert_usr(shader_input_layout);
+				lucheck(shader_input_layout);
 				ShaderInputLayout* o = static_cast<ShaderInputLayout*>(shader_input_layout);
 				m_graphic_shader_input_layout = o;
 				m_li->SetGraphicsRootSignature(o->m_rs.Get());
 			}
 
-			void CommandBuffer::set_vertex_buffers(uint32 start_slot, uint32 num_views, const VertexBufferViewDesc* views)
+			void CommandBuffer::set_vertex_buffers(u32 start_slot, u32 num_views, const VertexBufferViewDesc* views)
 			{
 				lutsassert();
 				m_vbs.resize(start_slot + num_views);
-				for (uint32 i = start_slot; i < num_views; ++i)
+				for (u32 i = start_slot; i < num_views; ++i)
 				{
 					m_vbs[i] = views[i - start_slot];
 				}
 
 				D3D12_VERTEX_BUFFER_VIEW* vbv = (D3D12_VERTEX_BUFFER_VIEW*)alloca(sizeof(D3D12_VERTEX_BUFFER_VIEW) * num_views);
-				for (uint32 i = 0; i < num_views; ++i)
+				for (u32 i = 0; i < num_views; ++i)
 				{
 					vbv[i].BufferLocation = static_cast<Resource*>(views[i].resource)->m_res->GetGPUVirtualAddress() + views[i].offset_in_bytes;
 					vbv[i].SizeInBytes = views[i].size_in_bytes;
@@ -332,7 +332,7 @@ namespace luna
 				m_li->IASetVertexBuffers(start_slot, num_views, vbv);
 			}
 
-			void CommandBuffer::set_index_buffer(IResource* buffer, uint32 offset_in_bytes, uint32 size_in_bytes, EResourceFormat format)
+			void CommandBuffer::set_index_buffer(IResource* buffer, u32 offset_in_bytes, u32 size_in_bytes, EResourceFormat format)
 			{
 				lutsassert();
 				Resource* b = static_cast<Resource*>(buffer);
@@ -347,11 +347,11 @@ namespace luna
 			void CommandBuffer::set_graphic_view_set(IViewSet* view_set)
 			{
 				lutsassert();
-				luassert_msg_usr(m_graphic_shader_input_layout, "Graphic Shader Input Layout must be set before Graphic View Set can be bound!");
+				lucheck_msg(m_graphic_shader_input_layout, "Graphic Shader Input Layout must be set before Graphic View Set can be bound!");
 
 				m_view_set = view_set;
 				ID3D12DescriptorHeap* heaps[2];
-				uint32 num_heaps = 0;
+				u32 num_heaps = 0;
 				if (m_view_set->m_cbv_srv_uav_heap)
 				{
 					heaps[num_heaps] = m_view_set->m_cbv_srv_uav_heap.Get();
@@ -372,9 +372,9 @@ namespace luna
 				// |-CBV-|-SRV-----|-UAV--|
 				// How heaps are bind to groups are described by Pipeline State.
 				auto& groups = m_graphic_shader_input_layout->m_groups;
-				uint32 num_groups = (uint32)groups.size();
+				u32 num_groups = (u32)groups.size();
 
-				for (uint32 i = 0; i < num_groups; ++i)
+				for (u32 i = 0; i < num_groups; ++i)
 				{
 					D3D12_GPU_DESCRIPTOR_HANDLE h;
 					switch (groups[i].type)
@@ -542,11 +542,11 @@ namespace luna
 				m_li->IASetPrimitiveTopology(t);
 			}
 
-			void CommandBuffer::set_stream_output_targets(uint32 start_slot, uint32 num_views, const StreamOutputBufferView * views)
+			void CommandBuffer::set_stream_output_targets(u32 start_slot, u32 num_views, const StreamOutputBufferView * views)
 			{
 				lutsassert();
 				D3D12_STREAM_OUTPUT_BUFFER_VIEW* vs = (D3D12_STREAM_OUTPUT_BUFFER_VIEW*)alloca(sizeof(D3D12_STREAM_OUTPUT_BUFFER_VIEW) * num_views);
-				for (uint32 i = 0; i < num_views; ++i)
+				for (u32 i = 0; i < num_views; ++i)
 				{
 					vs[i].BufferLocation = static_cast<Resource*>(views[i].soresource)->m_res->GetGPUVirtualAddress() + views[i].offset_in_bytes;
 					vs[i].SizeInBytes = views[i].size_in_bytes;
@@ -555,11 +555,11 @@ namespace luna
 				m_li->SOSetTargets(start_slot, num_views, vs);
 			}
 
-			void CommandBuffer::set_viewports(uint32 num_viewports, const Viewport* viewports)
+			void CommandBuffer::set_viewports(u32 num_viewports, const Viewport* viewports)
 			{
 				lutsassert();
 				D3D12_VIEWPORT* vs = (D3D12_VIEWPORT*)alloca(sizeof(D3D12_VIEWPORT) * num_viewports);
-				for (uint32 i = 0; i < num_viewports; ++i)
+				for (u32 i = 0; i < num_viewports; ++i)
 				{
 					vs[i].Height = viewports[i].height;
 					vs[i].MaxDepth = viewports[i].max_depth;
@@ -571,11 +571,11 @@ namespace luna
 				m_li->RSSetViewports(num_viewports, vs);
 			}
 
-			void CommandBuffer::set_scissor_rects(uint32 num_rects, const RectI * rects)
+			void CommandBuffer::set_scissor_rects(u32 num_rects, const RectI * rects)
 			{
 				lutsassert();
 				D3D12_RECT* rs = (D3D12_RECT*)alloca(sizeof(D3D12_RECT) * num_rects);
-				for (uint32 i = 0; i < num_rects; ++i)
+				for (u32 i = 0; i < num_rects; ++i)
 				{
 					rs[i].top = rects[i].top;
 					rs[i].bottom = rects[i].bottom;
@@ -585,13 +585,13 @@ namespace luna
 				m_li->RSSetScissorRects(num_rects, rs);
 			}
 
-			void CommandBuffer::set_blend_factor(const float32 blend_factor[4])
+			void CommandBuffer::set_blend_factor(const f32 blend_factor[4])
 			{
 				lutsassert();
 				m_li->OMSetBlendFactor(blend_factor);
 			}
 
-			void CommandBuffer::set_stencil_ref(uint32 stencil_ref)
+			void CommandBuffer::set_stencil_ref(u32 stencil_ref)
 			{
 				lutsassert();
 				m_li->OMSetStencilRef(stencil_ref);
@@ -602,9 +602,9 @@ namespace luna
 				lutsassert();
 				HRESULT hr;
 				hr = m_li->Close();
-				if (failed(hr))
+				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_cmdlist_closed = true;
 
@@ -618,13 +618,13 @@ namespace luna
 					hr = m_device->m_device->CreateCommandList(0, encode_command_list_type(m_queue->m_desc.type), m_ca.Get(), NULL, IID_PPV_ARGS(&li));
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					li->ResourceBarrier((UINT)m_tracking_system.m_barriers.size(), m_tracking_system.m_barriers.data());
 					hr = li->Close();
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					ID3D12CommandList* lists[2];
 					lists[0] = li.Get();
@@ -645,41 +645,41 @@ namespace luna
 
 				// Set fences.
 				hr = m_fence->SetEventOnCompletion(m_wait_value, m_event);
-				if (failed(hr))
+				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_queue->m_queue->Signal(m_fence.Get(), m_wait_value);
-				if (failed(hr))
+				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				// Release the context.
 				m_frame_buffer = nullptr;
 
-				return s_ok;
+				return RV();
 			}
 
-			void CommandBuffer::draw_indexed_instanced(uint32 index_count_per_instance, uint32 instance_count, uint32 start_index_location, int32 base_vertex_location, uint32 start_instance_location)
+			void CommandBuffer::draw_indexed_instanced(u32 index_count_per_instance, u32 instance_count, u32 start_index_location, i32 base_vertex_location, u32 start_instance_location)
 			{
 				lutsassert();
 				m_li->DrawIndexedInstanced(index_count_per_instance, instance_count, start_index_location, base_vertex_location, start_instance_location);
 			}
 
-			void CommandBuffer::draw_instanced(uint32 vertex_count_per_instance, uint32 instance_count, uint32 start_vertex_location,
-				uint32 start_instance_location)
+			void CommandBuffer::draw_instanced(u32 vertex_count_per_instance, u32 instance_count, u32 start_vertex_location,
+				u32 start_instance_location)
 			{
 				lutsassert();
 				m_li->DrawInstanced(vertex_count_per_instance, instance_count, start_vertex_location, start_instance_location);
 			}
 
-			void CommandBuffer::clear_depth_stencil_view(EClearFlag clear_flags, float32 depth, uint8 stencil, uint32 num_rects, const RectI* rects)
+			void CommandBuffer::clear_depth_stencil_view(EClearFlag clear_flags, f32 depth, u8 stencil, u32 num_rects, const RectI* rects)
 			{
 				lutsassert();
 				D3D12_CPU_DESCRIPTOR_HANDLE h = m_frame_buffer->get_dsv_cpu_handle();
 				D3D12_RECT* d3drects = (D3D12_RECT*)alloca(sizeof(D3D12_RECT) * num_rects);
-				for (uint32 i = 0; i < num_rects; ++i)
+				for (u32 i = 0; i < num_rects; ++i)
 				{
 					d3drects[i].bottom = rects[i].bottom;
 					d3drects[i].left = rects[i].left;
@@ -709,12 +709,12 @@ namespace luna
 				m_li->ClearDepthStencilView(h, f, depth, stencil, num_rects, d3drects);
 			}
 
-			void CommandBuffer::clear_render_target_view(uint32 index, const float32 color_rgba[4], uint32 num_rects, const RectI* rects)
+			void CommandBuffer::clear_render_target_view(u32 index, const f32 color_rgba[4], u32 num_rects, const RectI* rects)
 			{
 				lutsassert();
 				D3D12_CPU_DESCRIPTOR_HANDLE h = m_frame_buffer->get_rtv_cpu_handle(index);
 				D3D12_RECT* d3drects = (D3D12_RECT*)alloca(sizeof(D3D12_RECT) * num_rects);
-				for (uint32 i = 0; i < num_rects; ++i)
+				for (u32 i = 0; i < num_rects; ++i)
 				{
 					d3drects[i].bottom = rects[i].bottom;
 					d3drects[i].left = rects[i].left;
@@ -734,11 +734,11 @@ namespace luna
 			void CommandBuffer::copy_resource(IResource* dest, IResource* src)
 			{
 				lutsassert();
-				luassert_usr(dest && src);
+				lucheck(dest && src);
 				m_li->CopyResource(static_cast<Resource*>(dest)->m_res.Get(), static_cast<Resource*>(src)->m_res.Get());
 			}
 
-			void CommandBuffer::copy_buffer_region(IResource* dest, uint64 dest_offset, IResource* src, uint64 src_offset, uint64 num_bytes)
+			void CommandBuffer::copy_buffer_region(IResource* dest, u64 dest_offset, IResource* src, u64 src_offset, u64 num_bytes)
 			{
 				lutsassert();
 				Resource* d = static_cast<Resource*>(dest);
@@ -746,7 +746,7 @@ namespace luna
 				m_li->CopyBufferRegion(d->m_res.Get(), dest_offset, s->m_res.Get(), src_offset, num_bytes);
 			}
 
-			void CommandBuffer::copy_texture_region(const TextureCopyLocation& dst, uint32 dst_x, uint32 dst_y, uint32 dst_z, const TextureCopyLocation& src, const BoxU* src_box)
+			void CommandBuffer::copy_texture_region(const TextureCopyLocation& dst, u32 dst_x, u32 dst_y, u32 dst_z, const TextureCopyLocation& src, const BoxU* src_box)
 			{
 				lutsassert();
 				Resource* d = static_cast<Resource*>(dst.resource);
@@ -803,7 +803,7 @@ namespace luna
 			void CommandBuffer::set_compute_shader_input_layout(IShaderInputLayout* shader_input_layout)
 			{
 				lutsassert();
-				luassert_usr(shader_input_layout);
+				lucheck(shader_input_layout);
 				ShaderInputLayout* o = static_cast<ShaderInputLayout*>(shader_input_layout);
 				m_compute_shader_input_layout = o;
 				m_li->SetComputeRootSignature(o->m_rs.Get());
@@ -812,12 +812,12 @@ namespace luna
 			void CommandBuffer::set_compute_view_set(IViewSet* view_set)
 			{
 				lutsassert();
-				luassert_usr(view_set);
-				luassert_msg_usr(m_compute_shader_input_layout, "Compute Shader Input Layout must be set before Compute View Set can be attached.");
+				lucheck(view_set);
+				lucheck_msg(m_compute_shader_input_layout, "Compute Shader Input Layout must be set before Compute View Set can be attached.");
 
 				m_view_set = view_set;
 				ID3D12DescriptorHeap* heaps[2];
-				uint32 num_heaps = 0;
+				u32 num_heaps = 0;
 				if (m_view_set->m_cbv_srv_uav_heap)
 				{
 					heaps[num_heaps] = m_view_set->m_cbv_srv_uav_heap.Get();
@@ -830,7 +830,7 @@ namespace luna
 				}
 				m_li->SetDescriptorHeaps(num_heaps, heaps);
 
-				for (uint32 i = 0; i < m_compute_shader_input_layout->m_groups.size(); ++i)
+				for (u32 i = 0; i < m_compute_shader_input_layout->m_groups.size(); ++i)
 				{
 					auto& group = m_compute_shader_input_layout->m_groups[i];
 					D3D12_GPU_DESCRIPTOR_HANDLE h;
@@ -871,11 +871,11 @@ namespace luna
 				}
 			}
 
-			void CommandBuffer::resource_barriers(uint32 num_barriers, const ResourceBarrierDesc* barriers)
+			void CommandBuffer::resource_barriers(u32 num_barriers, const ResourceBarrierDesc* barriers)
 			{
 				lutsassert();
 				m_tracking_system.begin_new_transition_batch();
-				for (uint32 i = 0; i < num_barriers; ++i)
+				for (u32 i = 0; i < num_barriers; ++i)
 				{
 					m_tracking_system.pack_barrier(barriers[i]);
 				}
@@ -885,7 +885,7 @@ namespace luna
 				}
 			}
 
-			void CommandBuffer::dispatch(uint32 thread_group_count_x, uint32 thread_group_count_y, uint32 thread_group_count_z)
+			void CommandBuffer::dispatch(u32 thread_group_count_x, u32 thread_group_count_y, u32 thread_group_count_z)
 			{
 				lutsassert();
 				m_li->Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z);

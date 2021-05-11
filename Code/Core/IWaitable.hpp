@@ -5,9 +5,9 @@
 * @date 2018/12/8
 */
 #pragma once
-#include <Base/IObject.hpp>
+#include "IObject.hpp"
 
-namespace luna
+namespace Luna
 {
 	//! @interface IWaitable
 	//! Represents a waitable object used for multi-thread synchronization. The object that implements

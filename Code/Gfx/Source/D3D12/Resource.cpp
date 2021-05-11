@@ -9,15 +9,15 @@
 
 #ifdef LUNA_GFX_D3D12
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
-			inline uint32 calc_mip_levels(uint32 width, uint32 height, uint32 depth)
+			inline u32 calc_mip_levels(u32 width, u32 height, u32 depth)
 			{
-				uint32 mip_levels = 0;
+				u32 mip_levels = 0;
 				while (width > 1 || height > 1 || depth > 1)
 				{
 					++mip_levels;
@@ -28,20 +28,20 @@ namespace luna
 				return mip_levels;
 			}
 
-			result_t Resource::init(const ResourceDesc& desc, const ClearValue* optimized_clear_value)
+			RV Resource::init(const ResourceDesc& desc, const ClearValue* optimized_clear_value)
 			{
-				luassert_usr(desc.access_type != EAccessType::unknown);
+				lucheck(desc.access_type != EAccessType::unknown);
 				m_desc = desc;
 
 				if (!m_desc.mip_levels)
 				{
 					if (m_desc.type != EResourceType::texture_3d)
 					{
-						m_desc.mip_levels = calc_mip_levels((uint32)desc.width, desc.height, 1);
+						m_desc.mip_levels = calc_mip_levels((u32)desc.width, desc.height, 1);
 					}
 					else
 					{
-						m_desc.mip_levels = calc_mip_levels((uint32)desc.width, desc.height, desc.depth_or_array_size);
+						m_desc.mip_levels = calc_mip_levels((u32)desc.width, desc.height, desc.depth_or_array_size);
 					}
 				}
 
@@ -110,7 +110,7 @@ namespace luna
 				if (FAILED(m_device->m_device->CreateCommittedResource(&hp, flags, &rd, s,
 					pcv, IID_PPV_ARGS(&m_res))))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				if (desc.type != EResourceType::buffer && ((desc.usages & EResourceUsageFlag::simultaneous_access) == EResourceUsageFlag::none))
@@ -118,9 +118,9 @@ namespace luna
 					m_states.resize(count_subresources(), EResourceState::common);
 				}
 
-				return s_ok;
+				return RV();
 			}
-			R<void*> Resource::map_subresource(uint32 subresource, bool read_full_range, size_t read_range_begin, size_t read_range_end)
+			R<void*> Resource::map_subresource(u32 subresource, bool read_full_range, usize read_range_begin, usize read_range_end)
 			{
 				lutsassert();
 				if (read_full_range)
@@ -129,7 +129,7 @@ namespace luna
 					HRESULT hr = m_res->Map(subresource, nullptr, &r);
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					return r;
 				}
@@ -142,12 +142,12 @@ namespace luna
 					HRESULT hr = m_res->Map(subresource, &range, &r);
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					return r;
 				}
 			}
-			void Resource::unmap_subresource(uint32 subresource, bool write_full_range, size_t write_range_begin, size_t write_range_end)
+			void Resource::unmap_subresource(u32 subresource, bool write_full_range, usize write_range_begin, usize write_range_end)
 			{
 				lutsassert();
 				if (write_full_range)
@@ -162,7 +162,7 @@ namespace luna
 					m_res->Unmap(subresource, &range);
 				}
 			}
-			RV Resource::write_subresource(uint32 subresource, const void* src, uint32 src_row_pitch, uint32 src_depth_pitch, const BoxU& write_box)
+			RV Resource::write_subresource(u32 subresource, const void* src, u32 src_row_pitch, u32 src_depth_pitch, const BoxU& write_box)
 			{
 				lutsassert();
 				D3D12_BOX b;
@@ -172,9 +172,9 @@ namespace luna
 				b.bottom = write_box.bottom;
 				b.front = write_box.front;
 				b.back = write_box.back;
-				return SUCCEEDED(m_res->WriteToSubresource(subresource, &b, src, src_row_pitch, src_depth_pitch)) ? s_ok : e_failure;
+				return SUCCEEDED(m_res->WriteToSubresource(subresource, &b, src, src_row_pitch, src_depth_pitch)) ? RV() : BasicError::failure();
 			}
-			RV Resource::read_subresource(void* dest, uint32 dest_row_pitch, uint32 dest_depth_pitch, uint32 subresource, const BoxU& read_box)
+			RV Resource::read_subresource(void* dest, u32 dest_row_pitch, u32 dest_depth_pitch, u32 subresource, const BoxU& read_box)
 			{
 				lutsassert();
 				D3D12_BOX b;
@@ -184,7 +184,7 @@ namespace luna
 				b.bottom = read_box.bottom;
 				b.front = read_box.front;
 				b.back = read_box.back;
-				return SUCCEEDED(m_res->ReadFromSubresource(dest, dest_row_pitch, dest_depth_pitch, subresource, &b)) ? s_ok : e_failure;
+				return SUCCEEDED(m_res->ReadFromSubresource(dest, dest_row_pitch, dest_depth_pitch, subresource, &b)) ? RV() : BasicError::failure();
 			}
 		}
 	}

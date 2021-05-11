@@ -8,7 +8,7 @@
 #include "../IAssetEditor.hpp"
 #include "../IAssetEditorType.hpp"
 #include "../IAssetImporterType.hpp"
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -21,21 +21,17 @@ namespace luna
 
 			ModelEditorType* m_type;
 
-			WP<e3d::IModel> m_model;
+			WP<E3D::IModel> m_model;
 
-			P<IStringBuffer> m_mesh_name;
+			String m_mesh_name;
 
-			Vector<P<IStringBuffer>> m_mat_names;
+			Vector<String> m_mat_names;
 
 			bool m_open = true;
 
-			ModelEditor(IAllocator* alloc) :
-				luibind(alloc) 
-			{
-				m_mesh_name = new_string_buffer();
-			}
+			ModelEditor() {}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 			virtual bool closed() override
 			{
 				return !m_open;
@@ -48,20 +44,19 @@ namespace luna
 			lucid("{6627e2aa-3638-4d35-a72a-0618d235fac6}");
 			luiimpl(ModelEditorType, IAssetEditorType, IObject);
 
-			P<IName> m_type;
+			Name m_type;
 
-			ModelEditorType(IAllocator* alloc) :
-				luibind(alloc)
+			ModelEditorType()
 			{
-				m_type = intern_name("Model");
+				m_type = "Model";
 			}
 
-			virtual IName* asset_type() override
+			virtual Name asset_type() override
 			{
 				return m_type;
 			}
-			virtual void on_draw_tile(imgui::IContext* ctx, asset::IAsset* asset, const RectF& draw_rect) override;
-			virtual P<IAssetEditor> new_editor(asset::IAsset* editing_asset) override;
+			virtual void on_draw_tile(ImGui::IContext* ctx, Asset::IAsset* asset, const RectF& draw_rect) override;
+			virtual P<IAssetEditor> new_editor(Asset::IAsset* editing_asset) override;
 		};
 
 		class ModelCreator : public IAssetEditor
@@ -70,18 +65,14 @@ namespace luna
 			lucid("{bd5b3a4d-d52c-4a6d-9e49-49a083096039}");
 			luiimpl(ModelCreator, IAssetEditor, IObject);
 
-			P<IPath> m_create_dir;
-			P<IStringBuffer> m_asset_name;
+			Path m_create_dir;
+			String m_asset_name;
 			bool m_open;
 
-			ModelCreator(IAllocator* alloc) :
-				luibind(alloc),
-				m_open(true)
-			{
-				m_asset_name = new_string_buffer();
-			}
+			ModelCreator() :
+				m_open(true) {}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 			virtual bool closed() override
 			{
 				return !m_open;
@@ -94,21 +85,20 @@ namespace luna
 			lucid("{a7cc3b27-fe34-4521-b052-797448364888}");
 			luiimpl(ModelCreatorType, IAssetImporterType, IObject);
 
-			P<IName> m_name;
+			Name m_name;
 
-			ModelCreatorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_name(intern_name("Model")) {}
+			ModelCreatorType() :
+				m_name("Model") {}
 
-			virtual IName* name() override
+			virtual Name name() override
 			{
 				return m_name;
 			}
 
-			virtual P<IAssetEditor> new_importer(IPath* create_dir) override
+			virtual P<IAssetEditor> new_importer(const Path& create_dir) override
 			{
-				auto dialog = box_ptr(new_obj<ModelCreator>(get_module_allocator()));
-				dialog->m_create_dir = create_dir->clone();
+				auto dialog = newobj<ModelCreator>();
+				dialog->m_create_dir = create_dir;
 				return dialog;
 			}
 		};

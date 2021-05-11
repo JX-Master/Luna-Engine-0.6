@@ -11,13 +11,13 @@
 #ifdef LUNA_GFX_D3D12
 #include "D3D12Common.hpp"
 #include "GraphicDevice.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class Resource : public IResource
 			{
@@ -34,11 +34,9 @@ namespace luna
 				//! One for each subresource, 0 if this resource does not have a global state.
 				Vector<EResourceState> m_states;
 
-				Resource() :
-					luibind(get_module_allocator()),
-					m_states(get_module_allocator()) {}
+				Resource() {}
 
-				uint32 count_subresources()
+				u32 count_subresources()
 				{
 					if (m_desc.type == EResourceType::texture_3d)
 					{
@@ -47,7 +45,7 @@ namespace luna
 					return m_desc.mip_levels * m_desc.depth_or_array_size;
 				}
 
-				result_t init(const ResourceDesc& desc, const ClearValue* optimized_clear_value);
+				RV init(const ResourceDesc& desc, const ClearValue* optimized_clear_value);
 
 				virtual IGraphicDevice* get_device() override
 				{
@@ -59,7 +57,7 @@ namespace luna
 					return m_desc;
 				}
 
-				virtual EResourceState global_state(uint32 subresource) override
+				virtual EResourceState global_state(u32 subresource) override
 				{
 					if (m_states.empty())
 					{
@@ -78,15 +76,15 @@ namespace luna
 					}
 					else
 					{
-						luassert_usr(subresource < m_states.size());
+						lucheck(subresource < m_states.size());
 						return m_states[subresource];
 					}
 				}
 
-				virtual R<void*> map_subresource(uint32 subresource, bool read_full_range, size_t read_range_begin = 0, size_t read_range_end = 0) override;
-				virtual void unmap_subresource(uint32 subresource, bool write_full_range, size_t write_range_begin = 0, size_t write_range_end = 0) override;
-				virtual RV write_subresource(uint32 subresource, const void* src, uint32 src_row_pitch, uint32 src_depth_pitch, const BoxU& write_box) override;
-				virtual RV read_subresource(void* dest, uint32 dest_row_pitch, uint32 dest_depth_pitch, uint32 subresource, const BoxU& read_box) override;
+				virtual R<void*> map_subresource(u32 subresource, bool read_full_range, usize read_range_begin = 0, usize read_range_end = 0) override;
+				virtual void unmap_subresource(u32 subresource, bool write_full_range, usize write_range_begin = 0, usize write_range_end = 0) override;
+				virtual RV write_subresource(u32 subresource, const void* src, u32 src_row_pitch, u32 src_depth_pitch, const BoxU& write_box) override;
+				virtual RV read_subresource(void* dest, u32 dest_row_pitch, u32 dest_depth_pitch, u32 subresource, const BoxU& read_box) override;
 			};
 		}
 	}

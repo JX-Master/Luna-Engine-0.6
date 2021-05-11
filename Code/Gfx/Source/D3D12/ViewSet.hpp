@@ -12,11 +12,11 @@
 #include "GraphicDevice.hpp"
 #include "Resource.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class ViewSet : public IViewSet
 			{
@@ -28,8 +28,8 @@ namespace luna
 				P<GraphicDevice> m_device;
 				ViewSetDesc m_desc;
 
-				size_t m_cbv_srv_uav_size;
-				size_t m_sampler_size;
+				usize m_cbv_srv_uav_size;
+				usize m_sampler_size;
 
 				ComPtr<ID3D12DescriptorHeap> m_cbv_srv_uav_heap;
 				ComPtr<ID3D12DescriptorHeap> m_sampler_heap;
@@ -45,15 +45,7 @@ namespace luna
 				Vector<ShaderResourceViewDesc> m_srvs;
 				Vector<UnorderedAccessViewDesc> m_uavs;
 
-				ViewSet() :
-					luibind(get_global_heap()),
-					m_cbvs(get_global_heap()),
-					m_srvs(get_global_heap()),
-					m_uavs(get_global_heap()),
-					m_cbs(get_global_heap()),
-					m_srs(get_global_heap()),
-					m_uas(get_global_heap()),
-					m_counter_ress(get_global_heap()) {}
+				ViewSet() {}
 
 				RV init(const ViewSetDesc& desc);
 
@@ -65,19 +57,19 @@ namespace luna
 				{
 					return m_desc;
 				}
-				virtual void set_cbv(uint32 index, IResource* res, const ConstantBufferViewDesc& cbv) override;
-				virtual void set_srv(uint32 index, IResource* res, const ShaderResourceViewDesc* srv = nullptr) override;
-				virtual void set_uav(uint32 index, IResource* res, IResource* counter_resource = nullptr, const UnorderedAccessViewDesc* uav = nullptr) override;
-				virtual void set_sampler(uint32 index, const SamplerDesc& sampler) override;
-				virtual void reset_cbv(uint32 index) override
+				virtual void set_cbv(u32 index, IResource* res, const ConstantBufferViewDesc& cbv) override;
+				virtual void set_srv(u32 index, IResource* res, const ShaderResourceViewDesc* srv = nullptr) override;
+				virtual void set_uav(u32 index, IResource* res, IResource* counter_resource = nullptr, const UnorderedAccessViewDesc* uav = nullptr) override;
+				virtual void set_sampler(u32 index, const SamplerDesc& sampler) override;
+				virtual void reset_cbv(u32 index) override
 				{
 					m_cbs[index] = nullptr;
 				}
-				virtual void reset_srv(uint32 index) override
+				virtual void reset_srv(u32 index) override
 				{
 					m_srs[index] = nullptr;
 				}
-				virtual void reset_uav(uint32 index) override
+				virtual void reset_uav(u32 index) override
 				{
 					m_uas[index] = nullptr;
 				}

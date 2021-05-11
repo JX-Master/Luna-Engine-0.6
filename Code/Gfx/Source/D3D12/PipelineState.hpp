@@ -12,11 +12,11 @@
 #include "GraphicDevice.hpp"
 #include "ShaderInputLayout.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class PipelineState : public IPipelineState
 			{
@@ -30,8 +30,6 @@ namespace luna
 				bool m_is_graphic;
 
 				PipelineState(GraphicDevice* dev) :
-					luibind(get_module_allocator()),
-					
 					m_device(dev) {}
 				
 				virtual IGraphicDevice* get_device() override

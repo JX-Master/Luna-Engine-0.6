@@ -6,39 +6,39 @@
 */
 #include "Lights.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		Unconstructed<DirectionalLightType> g_directional_light_type;
 		Unconstructed<PointLightType> g_point_light_type;
 		Unconstructed<SpotlLightType> g_spot_light_type;
 
-		RP<IVariant> DirectionalLight::serialize()
+		R<Variant> DirectionalLight::serialize()
 		{
-			P<IVariant> var = new_var(EVariantType::table);
-			auto intensity = new_var1(EVariantType::f32, 3);
-			intensity->f32_buf()[0] = m_intensity.r;
-			intensity->f32_buf()[1] = m_intensity.g;
-			intensity->f32_buf()[2] = m_intensity.b;
-			var->set_field(0, intern_name("intensity"), intensity);
-			auto intensity_multiplier = new_var(EVariantType::f32);
-			intensity_multiplier->f32() = m_intensity_multiplier;
-			var->set_field(0, intern_name("intensity_multiplier"), intensity_multiplier);
+			Variant var = Variant(EVariantType::table);
+			auto intensity = Variant(EVariantType::f32, 3);
+			intensity.to_f32_buf()[0] = m_intensity.r;
+			intensity.to_f32_buf()[1] = m_intensity.g;
+			intensity.to_f32_buf()[2] = m_intensity.b;
+			var.set_field(0, Name("intensity"), intensity);
+			auto intensity_multiplier = Variant(EVariantType::f32);
+			intensity_multiplier.to_f32() = m_intensity_multiplier;
+			var.set_field(0, Name("intensity_multiplier"), intensity_multiplier);
 			return var;
 		}
 
-		RV DirectionalLight::deserialize(IVariant* obj)
+		RV DirectionalLight::deserialize(const Variant& obj)
 		{
 			lutry
 			{
-				lulet(intensity, obj->field(0, intern_name("intensity")));
-				lulet(intensity_buf, intensity->check_f32_buf());
-				memcpy(m_intensity.m, intensity_buf, sizeof(float32) * 3);
-				auto intensity_multiplier = obj->field(0, intern_name("intensity_multiplier"));
-				if (succeeded(intensity_multiplier))
+				auto& intensity = obj.field(0, Name("intensity"));
+				lulet(intensity_buf, intensity.check_f32_buf());
+				memcpy(m_intensity.m, intensity_buf, sizeof(f32) * 3);
+				auto& intensity_multiplier = obj.field(0, Name("intensity_multiplier"));
+				if (intensity_multiplier.type() != EVariantType::null)
 				{
-					luset(m_intensity_multiplier, intensity_multiplier.get()->check_f32());
+					luset(m_intensity_multiplier, intensity_multiplier.check_f32());
 				}
 				else
 				{
@@ -46,45 +46,45 @@ namespace luna
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
-		scene::IComponentType* DirectionalLight::type_object()
+		Scene::IComponentType* DirectionalLight::type_object()
 		{
 			return &g_directional_light_type.get();
 		}
 
 
-		RP<IVariant> PointLight::serialize()
+		R<Variant> PointLight::serialize()
 		{
-			P<IVariant> var = new_var(EVariantType::table);
-			auto intensity = new_var1(EVariantType::f32, 3);
-			intensity->f32_buf()[0] = m_intensity.r;
-			intensity->f32_buf()[1] = m_intensity.g;
-			intensity->f32_buf()[2] = m_intensity.b;
-			var->set_field(0, intern_name("intensity"), intensity);
-			auto attenuation_power = new_var(EVariantType::f32);
-			attenuation_power->f32() = m_attenuation_power;
-			var->set_field(0, intern_name("attenuation_power"), attenuation_power);
-			auto intensity_multiplier = new_var(EVariantType::f32);
-			intensity_multiplier->f32() = m_intensity_multiplier;
-			var->set_field(0, intern_name("intensity_multiplier"), intensity_multiplier);
+			Variant var = Variant(EVariantType::table);
+			auto intensity = Variant(EVariantType::f32, 3);
+			intensity.to_f32_buf()[0] = m_intensity.r;
+			intensity.to_f32_buf()[1] = m_intensity.g;
+			intensity.to_f32_buf()[2] = m_intensity.b;
+			var.set_field(0, Name("intensity"), intensity);
+			auto attenuation_power = Variant(EVariantType::f32);
+			attenuation_power.to_f32() = m_attenuation_power;
+			var.set_field(0, Name("attenuation_power"), attenuation_power);
+			auto intensity_multiplier = Variant(EVariantType::f32);
+			intensity_multiplier.to_f32() = m_intensity_multiplier;
+			var.set_field(0, Name("intensity_multiplier"), intensity_multiplier);
 			return var;
 		}
 
-		RV PointLight::deserialize(IVariant* obj)
+		RV PointLight::deserialize(const Variant& obj)
 		{
 			lutry
 			{
-				lulet(intensity, obj->field(0, intern_name("intensity")));
-				lulet(intensity_buf, intensity->check_f32_buf());
-				memcpy(m_intensity.m, intensity_buf, sizeof(float32) * 3);
-				lulet(attenuation_power, obj->field(0, intern_name("attenuation_power")));
-				luset(m_attenuation_power, attenuation_power->check_f32());
-				auto intensity_multiplier = obj->field(0, intern_name("intensity_multiplier"));
-				if (succeeded(intensity_multiplier))
+				auto& intensity = obj.field(0, Name("intensity"));
+				lulet(intensity_buf, intensity.check_f32_buf());
+				memcpy(m_intensity.m, intensity_buf, sizeof(f32) * 3);
+				auto& attenuation_power = obj.field(0, Name("attenuation_power"));
+				luset(m_attenuation_power, attenuation_power.check_f32());
+				auto intensity_multiplier = obj.field(0, Name("intensity_multiplier"));
+				if (intensity_multiplier.type() != EVariantType::null)
 				{
-					luset(m_intensity_multiplier, intensity_multiplier.get()->check_f32());
+					luset(m_intensity_multiplier, intensity_multiplier.check_f32());
 				}
 				else
 				{
@@ -92,49 +92,49 @@ namespace luna
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
-		scene::IComponentType* PointLight::type_object()
+		Scene::IComponentType* PointLight::type_object()
 		{
 			return &g_point_light_type.get();
 		}
 
-		RP<IVariant> SpotLight::serialize()
+		R<Variant> SpotLight::serialize()
 		{
-			P<IVariant> var = new_var(EVariantType::table);
-			auto intensity = new_var1(EVariantType::f32, 3);
-			intensity->f32_buf()[0] = m_intensity.r;
-			intensity->f32_buf()[1] = m_intensity.g;
-			intensity->f32_buf()[2] = m_intensity.b;
-			var->set_field(0, intern_name("intensity"), intensity);
-			auto attenuation_power = new_var(EVariantType::f32);
-			attenuation_power->f32() = m_attenuation_power;
-			auto spot_power = new_var(EVariantType::f32);
-			spot_power->f32() = m_spot_power;
-			var->set_field(0, intern_name("attenuation_power"), attenuation_power);
-			var->set_field(0, intern_name("spot_power"), spot_power);
-			auto intensity_multiplier = new_var(EVariantType::f32);
-			intensity_multiplier->f32() = m_intensity_multiplier;
-			var->set_field(0, intern_name("intensity_multiplier"), intensity_multiplier);
+			Variant var = Variant(EVariantType::table);
+			auto intensity = Variant(EVariantType::f32, 3);
+			intensity.to_f32_buf()[0] = m_intensity.r;
+			intensity.to_f32_buf()[1] = m_intensity.g;
+			intensity.to_f32_buf()[2] = m_intensity.b;
+			var.set_field(0, Name("intensity"), intensity);
+			auto attenuation_power = Variant(EVariantType::f32);
+			attenuation_power.to_f32() = m_attenuation_power;
+			auto spot_power = Variant(EVariantType::f32);
+			spot_power.to_f32() = m_spot_power;
+			var.set_field(0, Name("attenuation_power"), attenuation_power);
+			var.set_field(0, Name("spot_power"), spot_power);
+			auto intensity_multiplier = Variant(EVariantType::f32);
+			intensity_multiplier.to_f32() = m_intensity_multiplier;
+			var.set_field(0, Name("intensity_multiplier"), intensity_multiplier);
 			return var;
 		}
 
-		RV SpotLight::deserialize(IVariant* obj)
+		RV SpotLight::deserialize(const Variant& obj)
 		{
 			lutry
 			{
-				lulet(intensity, obj->field(0, intern_name("intensity")));
-				lulet(intensity_buf, intensity->check_f32_buf());
-				memcpy(m_intensity.m, intensity_buf, sizeof(float32) * 3);
-				lulet(attenuation_power, obj->field(0, intern_name("attenuation_power")));
-				lulet(spot_power, obj->field(0, intern_name("spot_power")));
-				luset(m_attenuation_power, attenuation_power->check_f32());
-				luset(m_spot_power, spot_power->check_f32());
-				auto intensity_multiplier = obj->field(0, intern_name("intensity_multiplier"));
-				if (succeeded(intensity_multiplier))
+				auto& intensity = obj.field(0, Name("intensity"));
+				lulet(intensity_buf, intensity.check_f32_buf());
+				memcpy(m_intensity.m, intensity_buf, sizeof(f32) * 3);
+				auto& attenuation_power = obj.field(0, Name("attenuation_power"));
+				auto& spot_power = obj.field(0, Name("spot_power"));
+				luset(m_attenuation_power, attenuation_power.check_f32());
+				luset(m_spot_power, spot_power.check_f32());
+				auto& intensity_multiplier = obj.field(0, Name("intensity_multiplier"));
+				if (intensity_multiplier.type() != EVariantType::null)
 				{
-					luset(m_intensity_multiplier, intensity_multiplier.get()->check_f32());
+					luset(m_intensity_multiplier, intensity_multiplier.check_f32());
 				}
 				else
 				{
@@ -142,10 +142,10 @@ namespace luna
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
-		scene::IComponentType* SpotLight::type_object()
+		Scene::IComponentType* SpotLight::type_object()
 		{
 			return &g_spot_light_type.get();
 		}

@@ -18,11 +18,11 @@
 #include "ViewSet.hpp"
 #include "ShaderInputLayout.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			GraphicDevice::~GraphicDevice()
 			{
@@ -52,13 +52,13 @@ namespace luna
 				switch (feature)
 				{
 				case EDeviceFeature::texture_data_pitch_alignment:
-					*((uint32*)data) = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+					*((u32*)data) = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 					break;
 				case EDeviceFeature::texture_data_placement_alignment:
-					*((uint32*)data) = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
+					*((u32*)data) = D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
 					break;
 				case EDeviceFeature::buffer_data_alignment:
-					*((uint32*)data) = 256;
+					*((u32*)data) = 256;
 					break;
 				case EDeviceFeature::placed_resource_supported:
 					*((bool*)data) = true;
@@ -69,40 +69,39 @@ namespace luna
 			}
 			RP<IResource> GraphicDevice::new_resource(const ResourceDesc& desc, const ClearValue* optimized_clear_value)
 			{
-				P<Resource> res = box_ptr(new_obj<Resource>());
+				P<Resource> res = newobj<Resource>();
 				if (!res)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				res->m_device = (GraphicDevice*)this;
-				result_t r = res->init(desc, optimized_clear_value);
-				if (failed(r))
+				RV r = res->init(desc, optimized_clear_value);
+				if (!r.valid())
 				{
-					return r;
+					return r.errcode();
 				}
 				return res;
 			}
 			RP<IResourceHeap> GraphicDevice::new_resource_heap(const ResourceHeapDesc& desc)
 			{
-				ResourceHeap* h = new_obj<ResourceHeap>(this);
+				P<ResourceHeap> h = newobj<ResourceHeap>(this);
 				if (!h)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				auto r = h->init(desc);
-				if (failed(r))
+				if (!r.valid())
 				{
-					delete_obj(h);
-					return r.result();
+					return r.errcode();
 				}
-				return box_ptr(h);
+				return h;
 			}
 			RP<IShaderInputLayout> GraphicDevice::new_shader_input_layout(const ShaderInputLayoutDesc& desc)
 			{
-				P<ShaderInputLayout> slayout = box_ptr(new_obj<ShaderInputLayout>());
+				P<ShaderInputLayout> slayout = newobj<ShaderInputLayout>();
 				if (!slayout)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				lutry
 				{
@@ -114,91 +113,88 @@ namespace luna
 			}
 			RP<IPipelineState> GraphicDevice::new_graphics_pipeline_state(IShaderInputLayout* shader_input_layout, IRenderPass* render_pass, const GraphicsPipelineStateDesc& desc)
 			{
-				PipelineState* s = new_obj<PipelineState>(this);
+				P<PipelineState> s = newobj<PipelineState>(this);
 				if (!s)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				if (!s->init_as_graphic(desc, render_pass, shader_input_layout))
 				{
-					delete_obj(s);
-					return e_failure;
+					return BasicError::failure();
 				}
-				return box_ptr(s);
+				return s;
 			}
 			RP<IPipelineState> GraphicDevice::new_compute_pipline_state(IShaderInputLayout* shader_input_layout, const ComputePipelineStateDesc& desc)
 			{
-				PipelineState* s = new_obj<PipelineState>(this);
+				P<PipelineState> s = newobj<PipelineState>(this);
 				if (!s)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				if (!s->init_as_compute(desc, shader_input_layout))
 				{
-					delete_obj(s);
-					return e_failure;
+					return BasicError::failure();
 				}
-				return box_ptr(s);
+				return s;
 			}
 
 			RP<ICommandQueue> GraphicDevice::new_command_queue(const CommandQueueDesc& desc)
 			{
-				CommandQueue* q = new_obj<CommandQueue>(this);
-				result_t r = q->init(desc);
-				if (failed(r))
+				P<CommandQueue> q = newobj<CommandQueue>(this);
+				RV r = q->init(desc);
+				if (!r.valid())
 				{
-					delete_obj(q);
-					return r;
+					return r.errcode();
 				}
-				return box_ptr(q);
+				return q;
 			}
 
 			RP<IRenderPass> GraphicDevice::new_render_pass(const RenderPassDesc& desc)
 			{
-				P<RenderPass> rp = box_ptr(new_obj<RenderPass>());
+				P<RenderPass> rp = newobj<RenderPass>();
 				if (!rp)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				rp->m_device = (GraphicDevice*)this;
 				rp->m_desc = desc;
 				return rp;
 			}
 
-			RP<IFrameBuffer> GraphicDevice::new_frame_buffer(IRenderPass* render_pass, uint32 num_rtvs, IResource ** rts, RenderTargetViewDesc ** rtvs, IResource * ds, DepthStencilViewDesc * dsv)
+			RP<IFrameBuffer> GraphicDevice::new_frame_buffer(IRenderPass* render_pass, u32 num_rtvs, IResource ** rts, RenderTargetViewDesc ** rtvs, IResource * ds, DepthStencilViewDesc * dsv)
 			{
-				P<FrameBuffer> rp = box_ptr(new_obj<FrameBuffer>());
+				P<FrameBuffer> rp = newobj<FrameBuffer>();
 				rp->m_device = (GraphicDevice*)this;
-				result_t r = rp->init(num_rtvs, rts, rtvs, ds, dsv);
-				if (failed(r))
+				RV r = rp->init(num_rtvs, rts, rtvs, ds, dsv);
+				if (!r.valid())
 				{
-					return r;
+					return r.errcode();
 				}
 				return rp;
 			}
 
 			RP<IViewSet> GraphicDevice::new_view_set(IShaderInputLayout* shader_input_layout, const ViewSetDesc& desc)
 			{
-				P<ViewSet> vs = box_ptr(new_obj<ViewSet>());
+				P<ViewSet> vs = newobj<ViewSet>();
 				vs->m_device = (GraphicDevice*)this;
-				result_t r = vs->init(desc);
-				if (failed(r))
+				RV r = vs->init(desc);
+				if (!r.valid())
 				{
-					return r;
+					return r.errcode();
 				}
 				return vs;
 			}
 
-			void GraphicDevice::calc_texture_subresource_buffer_placement(uint32 width, uint32 height, uint32 depth, EResourceFormat format, size_t* row_pitch, size_t* slice_pitch, size_t* res_pitch)
+			void GraphicDevice::calc_texture_subresource_buffer_placement(u32 width, u32 height, u32 depth, EResourceFormat format, usize* row_pitch, usize* slice_pitch, usize* res_pitch)
 			{
-				uint64 numBytes = 0;
-				uint64 rowBytes = 0;
-				uint64 numRows = 0;
+				u64 numBytes = 0;
+				u64 rowBytes = 0;
+				u64 numRows = 0;
 
 				bool bc = false;
 				bool packed = false;
 				bool planar = false;
-				size_t bpe = 0;
+				usize bpe = 0;
 				DXGI_FORMAT fmt = encode_resource_format(format);
 				switch (fmt)
 				{
@@ -263,15 +259,15 @@ namespace luna
 
 				if (bc)
 				{
-					uint64 numBlocksWide = 0;
+					u64 numBlocksWide = 0;
 					if (width > 0)
 					{
-						numBlocksWide = max<uint64>(1u, (uint64(width) + 3u) / 4u);
+						numBlocksWide = max<u64>(1u, (u64(width) + 3u) / 4u);
 					}
-					uint64 numBlocksHigh = 0;
+					u64 numBlocksHigh = 0;
 					if (height > 0)
 					{
-						numBlocksHigh = max<uint64>(1u, (uint64(height) + 3u) / 4u);
+						numBlocksHigh = max<u64>(1u, (u64(height) + 3u) / 4u);
 					}
 					rowBytes = numBlocksWide * bpe;
 					numRows = numBlocksHigh;
@@ -279,25 +275,25 @@ namespace luna
 				}
 				else if (packed)
 				{
-					rowBytes = ((uint64(width) + 1u) >> 1) * bpe;
-					numRows = uint64(height);
+					rowBytes = ((u64(width) + 1u) >> 1) * bpe;
+					numRows = u64(height);
 					numBytes = rowBytes * height;
 				}
 				else if (fmt == DXGI_FORMAT_NV11)
 				{
-					rowBytes = ((uint64(width) + 3u) >> 2) * 4u;
-					numRows = uint64(height) * 2u; // Direct3D makes this simplifying assumption, although it is larger than the 4:1:1 data
+					rowBytes = ((u64(width) + 3u) >> 2) * 4u;
+					numRows = u64(height) * 2u; // Direct3D makes this simplifying assumption, although it is larger than the 4:1:1 data
 					numBytes = rowBytes * numRows;
 				}
 				else if (planar)
 				{
-					rowBytes = ((uint64(width) + 1u) >> 1) * bpe;
-					numBytes = (rowBytes * uint64(height)) + ((rowBytes* uint64(height) + 1u) >> 1);
-					numRows = height + ((uint64(height) + 1u) >> 1);
+					rowBytes = ((u64(width) + 1u) >> 1) * bpe;
+					numBytes = (rowBytes * u64(height)) + ((rowBytes* u64(height) + 1u) >> 1);
+					numRows = height + ((u64(height) + 1u) >> 1);
 				}
 				else
 				{
-					size_t bpp = bits_per_pixel(format);
+					usize bpp = bits_per_pixel(format);
 					if (!bpp)
 					{
 						if (row_pitch)
@@ -323,15 +319,15 @@ namespace luna
 
 				if (row_pitch)
 				{
-					*row_pitch = (size_t)rowBytes;
+					*row_pitch = (usize)rowBytes;
 				}
 				if (slice_pitch)
 				{
-					*slice_pitch = (size_t)numBytes;
+					*slice_pitch = (usize)numBytes;
 				}
 				if (res_pitch)
 				{
-					*res_pitch = (size_t)(numBytes * depth);
+					*res_pitch = (usize)(numBytes * depth);
 				}
 			}
 		}

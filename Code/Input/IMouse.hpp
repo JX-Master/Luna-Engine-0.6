@@ -7,11 +7,11 @@
 #pragma once
 #include "IInputDevice.hpp"
 #include "KeyCode.hpp"
-#include <Base/Math/Vector.hpp>
+#include <Runtime/Math.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
 		//! @interface IMouse
 		//! Represents the mouse input device. Get this interface from `IInputSystem::get_device("mouse")`.
@@ -29,7 +29,7 @@ namespace luna
 
 			//! Sets the OS mouse cursor position. The position is based on the screen coordinates.
 			//! This only works for Desktop-based system.
-			virtual RV set_pos(int32 x, int32 y) = 0;
+			virtual RV set_pos(i32 x, i32 y) = 0;
 		};
 	}
 }

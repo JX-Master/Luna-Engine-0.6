@@ -133,7 +133,7 @@
 //                                        to the xpos of the i+1'th char for a line of characters
 //                                        starting at character #n (i.e. accounts for kerning
 //                                        with previous char)
-//    STB_TEXTEDIT_KEYTOTEXT(k)         maps a keyboard input to an insertable character
+//    STB_TEXTEDIT_KEYTOTEXT(k)         maps a keyboard Input to an insertable character
 //                                        (return type is int, -1 means not valid to insert)
 //    STB_TEXTEDIT_GETCHAR(obj,i)       returns the i'th character of obj, 0-based
 //    STB_TEXTEDIT_NEWLINE              the character returned by _GETCHAR() we recognize
@@ -142,39 +142,39 @@
 //    STB_TEXTEDIT_DELETECHARS(obj,i,n)      delete n characters starting at i
 //    STB_TEXTEDIT_INSERTCHARS(obj,i,c*,n)   insert n characters at i (pointed to by STB_TEXTEDIT_CHARTYPE*)
 //
-//    STB_TEXTEDIT_K_SHIFT       a power of two that is or'd in to a keyboard input to represent the shift key
+//    STB_TEXTEDIT_K_SHIFT       a power of two that is or'd in to a keyboard Input to represent the shift key
 //
-//    STB_TEXTEDIT_K_LEFT        keyboard input to move cursor left
-//    STB_TEXTEDIT_K_RIGHT       keyboard input to move cursor right
-//    STB_TEXTEDIT_K_UP          keyboard input to move cursor up
-//    STB_TEXTEDIT_K_DOWN        keyboard input to move cursor down
-//    STB_TEXTEDIT_K_LINESTART   keyboard input to move cursor to start of line  // e.g. HOME
-//    STB_TEXTEDIT_K_LINEEND     keyboard input to move cursor to end of line    // e.g. END
-//    STB_TEXTEDIT_K_TEXTSTART   keyboard input to move cursor to start of text  // e.g. ctrl-HOME
-//    STB_TEXTEDIT_K_TEXTEND     keyboard input to move cursor to end of text    // e.g. ctrl-END
-//    STB_TEXTEDIT_K_DELETE      keyboard input to delete selection or character under cursor
-//    STB_TEXTEDIT_K_BACKSPACE   keyboard input to delete selection or character left of cursor
-//    STB_TEXTEDIT_K_UNDO        keyboard input to perform undo
-//    STB_TEXTEDIT_K_REDO        keyboard input to perform redo
+//    STB_TEXTEDIT_K_LEFT        keyboard Input to move cursor left
+//    STB_TEXTEDIT_K_RIGHT       keyboard Input to move cursor right
+//    STB_TEXTEDIT_K_UP          keyboard Input to move cursor up
+//    STB_TEXTEDIT_K_DOWN        keyboard Input to move cursor down
+//    STB_TEXTEDIT_K_LINESTART   keyboard Input to move cursor to start of line  // e.g. HOME
+//    STB_TEXTEDIT_K_LINEEND     keyboard Input to move cursor to end of line    // e.g. END
+//    STB_TEXTEDIT_K_TEXTSTART   keyboard Input to move cursor to start of text  // e.g. ctrl-HOME
+//    STB_TEXTEDIT_K_TEXTEND     keyboard Input to move cursor to end of text    // e.g. ctrl-END
+//    STB_TEXTEDIT_K_DELETE      keyboard Input to delete selection or character under cursor
+//    STB_TEXTEDIT_K_BACKSPACE   keyboard Input to delete selection or character left of cursor
+//    STB_TEXTEDIT_K_UNDO        keyboard Input to perform undo
+//    STB_TEXTEDIT_K_REDO        keyboard Input to perform redo
 //
 // Optional:
-//    STB_TEXTEDIT_K_INSERT              keyboard input to toggle insert mode
+//    STB_TEXTEDIT_K_INSERT              keyboard Input to toggle insert mode
 //    STB_TEXTEDIT_IS_SPACE(ch)          true if character is whitespace (e.g. 'isspace'),
 //                                          required for default WORDLEFT/WORDRIGHT handlers
 //    STB_TEXTEDIT_MOVEWORDLEFT(obj,i)   custom handler for WORDLEFT, returns index to move cursor to
 //    STB_TEXTEDIT_MOVEWORDRIGHT(obj,i)  custom handler for WORDRIGHT, returns index to move cursor to
-//    STB_TEXTEDIT_K_WORDLEFT            keyboard input to move cursor left one word // e.g. ctrl-LEFT
-//    STB_TEXTEDIT_K_WORDRIGHT           keyboard input to move cursor right one word // e.g. ctrl-RIGHT
-//    STB_TEXTEDIT_K_LINESTART2          secondary keyboard input to move cursor to start of line
-//    STB_TEXTEDIT_K_LINEEND2            secondary keyboard input to move cursor to end of line
-//    STB_TEXTEDIT_K_TEXTSTART2          secondary keyboard input to move cursor to start of text
-//    STB_TEXTEDIT_K_TEXTEND2            secondary keyboard input to move cursor to end of text
+//    STB_TEXTEDIT_K_WORDLEFT            keyboard Input to move cursor left one word // e.g. ctrl-LEFT
+//    STB_TEXTEDIT_K_WORDRIGHT           keyboard Input to move cursor right one word // e.g. ctrl-RIGHT
+//    STB_TEXTEDIT_K_LINESTART2          secondary keyboard Input to move cursor to start of line
+//    STB_TEXTEDIT_K_LINEEND2            secondary keyboard Input to move cursor to end of line
+//    STB_TEXTEDIT_K_TEXTSTART2          secondary keyboard Input to move cursor to start of text
+//    STB_TEXTEDIT_K_TEXTEND2            secondary keyboard Input to move cursor to end of text
 //
 // Todo:
-//    STB_TEXTEDIT_K_PGUP        keyboard input to move cursor up a page
-//    STB_TEXTEDIT_K_PGDOWN      keyboard input to move cursor down a page
+//    STB_TEXTEDIT_K_PGUP        keyboard Input to move cursor up a page
+//    STB_TEXTEDIT_K_PGDOWN      keyboard Input to move cursor down a page
 //
-// Keyboard input must be encoded as a single integer value; e.g. a character code
+// Keyboard Input must be encoded as a single integer value; e.g. a character code
 // and some bitflags that represent shift states. to simplify the interface, SHIFT must
 // be a bitflag, so we can test the shifted state of cursor movements to allow selection,
 // i.e. (STB_TEXTED_K_RIGHT|STB_TEXTEDIT_K_SHIFT) should be shifted right-arrow.
@@ -389,7 +389,7 @@ typedef struct
 
 /////////////////////////////////////////////////////////////////////////////
 //
-//      Mouse input handling
+//      Mouse Input handling
 //
 
 // traverse the layout to locate the nearest character to a display position
@@ -493,7 +493,7 @@ static void stb_textedit_drag(STB_TEXTEDIT_STRING *str, STB_TexteditState *state
 
 /////////////////////////////////////////////////////////////////////////////
 //
-//      Keyboard input handling
+//      Keyboard Input handling
 //
 
 // forward declarations
@@ -724,7 +724,7 @@ static int stb_textedit_paste_internal(STB_TEXTEDIT_STRING *str, STB_TexteditSta
 #define STB_TEXTEDIT_KEYTYPE int
 #endif
 
-// API key: process a keyboard input
+// API key: process a keyboard Input
 static void stb_textedit_key(STB_TEXTEDIT_STRING *str, STB_TexteditState *state, STB_TEXTEDIT_KEYTYPE key)
 {
 retry:

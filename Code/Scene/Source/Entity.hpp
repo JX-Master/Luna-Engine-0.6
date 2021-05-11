@@ -6,11 +6,12 @@
 */
 #pragma once
 #include "SceneHeader.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
 		class Entity : public IEntity
 		{
@@ -20,26 +21,24 @@ namespace luna
 			lutsassert_lock();
 
 			WP<IScene> m_belonging_scene;
-			P<IName> m_name;
+			Name m_name;
 			Vector<P<IComponent>> m_components;
 
-			Entity(IAllocator* alloc) :
-				luibind(alloc),
-				m_components(alloc) {}
+			Entity() {}
 
-			RP<IVariant> serialize();
+			R<Variant> serialize();
 			// Create the components but leaves their data uninitialized.
-			RV pre_deserialize(IVariant* obj);
+			RV pre_deserialize(const Variant& obj);
 			// Initializes the data of the components.
-			RV deserialize(IVariant* obj);
+			RV deserialize(const Variant& obj);
 			virtual P<IScene> belonging_scene() override;
-			virtual IName* name() override;
-			virtual RV set_name(IName* name) override;
-			virtual R<IComponent*> add_component(IName* component_type) override;
-			virtual RV remove_component(IName* component_type) override;
+			virtual Name name() override;
+			virtual RV set_name(const Name& name) override;
+			virtual R<IComponent*> add_component(const Name& component_type) override;
+			virtual RV remove_component(const Name& component_type) override;
 			virtual void clear_components() override;
-			virtual R<IComponent*> get_component(IName* type_name) override;
-			virtual R<IComponent*> add_or_get_component(IName* type_name) override
+			virtual R<IComponent*> get_component(const Name& type_name) override;
+			virtual R<IComponent*> add_or_get_component(const Name& type_name) override
 			{
 				auto comp = get_component(type_name);
 				if (failed(comp))

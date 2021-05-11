@@ -7,36 +7,36 @@
 #pragma once
 #include "Scene.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
-		class SceneAssetType : public asset::IAssetType
+		class SceneAssetType : public Asset::IAssetType
 		{
 		public:
 			lucid("{bda25fc8-f1df-4ebe-b294-4572fe3aa4d6}");
-			luiimpl_static(SceneAssetType, asset::IAssetType, IObject);
+			luiimpl_static(SceneAssetType, Asset::IAssetType, IObject);
 
-			P<IName> m_scene_type_name;
+			Name m_scene_type_name;
 
 			SceneAssetType()
 			{
-				m_scene_type_name = intern_name("Scene");
+				m_scene_type_name = Name(u8"Scene");
 			}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_scene_type_name;
 			}
 
-			virtual P<asset::IAsset> on_new_asset(asset::IAssetMeta* meta) override;
-			virtual RV on_load_data(asset::IAsset* target_asset, IVariant* data, IVariant* params) override;
-			virtual RV on_load_procedural_data(asset::IAsset* target_asset, IVariant* params) override;
-			virtual void on_unload_data(asset::IAsset* target_asset) override;
-			virtual RP<IVariant> on_save_data(asset::IAsset* target_asset, IVariant* params) override;
-			virtual void on_dependency_data_load(asset::IAsset* current_asset, asset::IAsset* dependency_asset) override;
-			virtual void on_dependency_data_unload(asset::IAsset* current_asset, asset::IAsset* dependency_asset) override;
-			virtual void on_dependency_replace(asset::IAsset* current_asset, const Guid& before, const Guid& after) override;
+			virtual P<Asset::IAsset> on_new_asset(Asset::IAssetMeta* meta) override;
+			virtual RV on_load_data(Asset::IAsset* target_asset, const Variant& data, const Variant& params) override;
+			virtual RV on_load_procedural_data(Asset::IAsset* target_asset, const Variant& params) override;
+			virtual void on_unload_data(Asset::IAsset* target_asset) override;
+			virtual R<Variant> on_save_data(Asset::IAsset* target_asset, const Variant& params) override;
+			virtual void on_dependency_data_load(Asset::IAsset* current_asset, Asset::IAsset* dependency_asset) override;
+			virtual void on_dependency_data_unload(Asset::IAsset* current_asset, Asset::IAsset* dependency_asset) override;
+			virtual void on_dependency_replace(Asset::IAsset* current_asset, const Guid& before, const Guid& after) override;
 		};
 	}
 }

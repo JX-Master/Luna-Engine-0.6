@@ -6,9 +6,9 @@
 */
 #pragma once
 #include "IGraphicDeviceChild.hpp"
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		//! @interface IFrameBuffer
 		//! The frame buffer object holds API-specific data to bind several render target views to one pass.

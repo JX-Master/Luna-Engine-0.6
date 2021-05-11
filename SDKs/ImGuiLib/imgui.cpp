@@ -114,7 +114,7 @@ CODE
  - Click and drag on lower right corner to resize window (double-click to auto fit window to its contents).
  - Click and drag on any empty space to move window.
  - TAB/SHIFT+TAB to cycle through keyboard editable fields.
- - CTRL+Click on a slider or drag box to input value as text.
+ - CTRL+Click on a slider or drag box to Input value as text.
  - Use mouse wheel to scroll.
  - Text editor:
    - Hold SHIFT or use mouse to select text.
@@ -342,7 +342,7 @@ CODE
        - io.NavActive: true when a window is focused and it doesn't have the ImGuiWindowFlags_NoNavInputs flag set.
        - io.NavVisible: true when the navigation cursor is visible (and usually goes false when mouse is used).
        - or query focus information with e.g. IsWindowFocused(ImGuiFocusedFlags_AnyWindow), IsItemFocused() etc. functions.
-      Please reach out if you think the game vs navigation input sharing could be improved.
+      Please reach out if you think the game vs navigation Input sharing could be improved.
  - Gamepad:
     - Set io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad to enable.
     - Backend: Set io.BackendFlags |= ImGuiBackendFlags_HasGamepad + fill the io.NavInputs[] fields before calling NewFrame().
@@ -350,10 +350,10 @@ CODE
     - See 'enum ImGuiNavInput_' in imgui.h for a description of inputs. For each entry of io.NavInputs[], set the following values:
          0.0f= not held. 1.0f= fully held. Pass intermediate 0.0f..1.0f values for analog triggers/sticks.
     - We uses a simple >0.0f test for activation testing, and won't attempt to test for a dead-zone.
-      Your code will probably need to transform your raw inputs (such as e.g. remapping your 0.2..0.9 raw input range to 0.0..1.0 imgui range, etc.).
+      Your code will probably need to transform your raw inputs (such as e.g. remapping your 0.2..0.9 raw Input range to 0.0..1.0 imgui range, etc.).
     - You can download PNG/PSD files depicting the gamepad controls for common controllers at: http://goo.gl/9LgVZW.
     - If you need to share inputs between your game and the imgui parts, the easiest approach is to go all-or-nothing, with a buttons combo
-      to toggle the target. Please reach out if you think the game vs navigation input sharing could be improved.
+      to toggle the target. Please reach out if you think the game vs navigation Input sharing could be improved.
  - Mouse:
     - PS4 users: Consider emulating a mouse cursor with DualShock4 touch pad or a spare analog stick as a mouse-emulation fallback.
     - Consoles/Tablet/Phone users: Consider using a Synergy 1.x server (on your PC) + uSynergy.c (on your console/tablet/phone app) to share your PC mouse/keyboard.
@@ -457,7 +457,7 @@ CODE
                        If you have IMGUI_DISABLE_OBSOLETE_FUNCTIONS enabled, the code will instead assert! You may run a reg-exp search on your codebase for e.g. "DragInt.*%f" to help you find them.
  - 2018/04/28 (1.61) - obsoleted InputFloat() functions taking an optional "int decimal_precision" in favor of an equivalent and more flexible "const char* format",
                        consistent with other functions. Kept redirection functions (will obsolete).
- - 2018/04/09 (1.61) - IM_DELETE() helper function added in 1.60 doesn't clear the input _pointer_ reference, more consistent with expectation and allows passing r-value.
+ - 2018/04/09 (1.61) - IM_DELETE() helper function added in 1.60 doesn't clear the Input _pointer_ reference, more consistent with expectation and allows passing r-value.
  - 2018/03/20 (1.60) - renamed io.WantMoveMouse to io.WantSetMousePos for consistency and ease of understanding (was added in 1.52, _not_ used by core and only honored by some binding ahead of merging the Nav branch).
  - 2018/03/12 (1.60) - removed ImGuiCol_CloseButton, ImGuiCol_CloseButtonActive, ImGuiCol_CloseButtonHovered as the closing cross uses regular button colors now.
  - 2018/03/08 (1.60) - changed ImFont::DisplayOffset.y to default to 0 instead of +1. Fixed rounding of Ascent/Descent to match TrueType renderer. If you were adding or subtracting to ImFont::DisplayOffset check if your fonts are correctly aligned vertically.
@@ -579,7 +579,7 @@ CODE
  - 2015/03/08 (1.35) - renamed style.ScrollBarWidth to style.ScrollbarWidth (casing)
  - 2015/02/27 (1.34) - renamed OpenNextNode(bool) to SetNextTreeNodeOpened(bool, ImGuiSetCond). Kept inline redirection function until 1.50.
  - 2015/02/27 (1.34) - renamed ImGuiSetCondition_*** to ImGuiSetCond_***, and _FirstUseThisSession becomes _Once.
- - 2015/02/11 (1.32) - changed text input callback ImGuiTextEditCallback return type from void-->int. reserved for future use, return 0 for now.
+ - 2015/02/11 (1.32) - changed text Input callback ImGuiTextEditCallback return type from void-->int. reserved for future use, return 0 for now.
  - 2015/02/10 (1.32) - renamed GetItemWidth() to CalcItemWidth() to clarify its evolving behavior
  - 2015/02/08 (1.31) - renamed GetTextLineSpacing() to GetTextLineHeightWithSpacing()
  - 2015/02/01 (1.31) - removed IO.MemReallocFn (unused)
@@ -640,7 +640,7 @@ CODE
  >> See https://www.dearimgui.org/faq for fully detailed answer. You really want to read this.
 
  Q. How can I enable keyboard controls?
- Q: How can I use this without a mouse, without a keyboard or without a screen? (gamepad, input share, remote display)
+ Q: How can I use this without a mouse, without a keyboard or without a screen? (gamepad, Input share, remote display)
  Q: I integrated Dear ImGui in my engine and the text or lines are blurry..
  Q: I integrated Dear ImGui in my engine and some elements are clipping or disappearing when I move windows around..
  >> See https://www.dearimgui.org/faq
@@ -778,7 +778,7 @@ CODE
  Q: How can I load a different font than the default?
  Q: How can I easily use icons in my application?
  Q: How can I load multiple fonts?
- Q: How can I display and input non-Latin characters such as Chinese, Japanese, Korean, Cyrillic?
+ Q: How can I display and Input non-Latin characters such as Chinese, Japanese, Korean, Cyrillic?
  >> See https://www.dearimgui.org/faq and docs/FONTS.txt
 
  Q&A: Concerns
@@ -1167,7 +1167,7 @@ ImGuiIO::ImGuiIO()
     for (int i = 0; i < IM_ARRAYSIZE(NavInputsDownDuration); i++) NavInputsDownDuration[i] = -1.0f;
 }
 
-// Pass in translated ASCII characters for text input.
+// Pass in translated ASCII characters for text Input.
 // - with glfw you can get those from the callback set in glfwSetCharCallback()
 // - on Windows you can get those using ToAscii+keyboard state, or via the WM_CHAR message
 void ImGuiIO::AddInputCharacter(unsigned int c)
@@ -1658,7 +1658,7 @@ void*   ImFileLoadToMemory(const char* filename, const char* mode, size_t* out_f
 // [SECTION] MISC HELPERS/UTILITIES (ImText* functions)
 //-----------------------------------------------------------------------------
 
-// Convert UTF-8 to 32-bit character, process single character input.
+// Convert UTF-8 to 32-bit character, process single character Input.
 // Based on stb_from_utf8() from github.com/nothings/stb/
 // We handle UTF-8 decoding error by skipping forward.
 int ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end)
@@ -3977,7 +3977,7 @@ void ImGui::NewFrame()
     g.DragDropWithinSource = false;
     g.DragDropWithinTarget = false;
 
-    // Update keyboard input state
+    // Update keyboard Input state
     // Synchronize io.KeyMods with individual modifiers io.KeyXXX bools
     g.IO.KeyMods = GetMergedKeyModFlags();
     memcpy(g.IO.KeysDownDurationPrev, g.IO.KeysDownDuration, sizeof(g.IO.KeysDownDuration));
@@ -3987,7 +3987,7 @@ void ImGui::NewFrame()
     // Update gamepad/keyboard navigation
     NavUpdate();
 
-    // Update mouse input state
+    // Update mouse Input state
     UpdateMouseInputs();
 
     // Undocking
@@ -3998,7 +3998,7 @@ void ImGui::NewFrame()
     // (needs to be before UpdateMouseMovingWindowNewFrame so we fill g.HoveredWindowUnderMovingWindow on the mouse release frame)
     UpdateHoveredWindowAndCaptureFlags();
 
-    // Handle user moving window with mouse (at the beginning of the frame to avoid input lag or sheering)
+    // Handle user moving window with mouse (at the beginning of the frame to avoid Input lag or sheering)
     UpdateMouseMovingWindowNewFrame();
 
     // Background darkening/whitening
@@ -4679,7 +4679,7 @@ bool ImGui::IsMouseHoveringRect(const ImVec2& r_min, const ImVec2& r_max, bool c
     if (clip)
         rect_clipped.ClipWith(g.CurrentWindow->ClipRect);
 
-    // Expand for touch input
+    // Expand for touch Input
     const ImRect rect_for_touch(rect_clipped.Min - g.Style.TouchExtraPadding, rect_clipped.Max + g.Style.TouchExtraPadding);
     if (!rect_for_touch.Contains(g.IO.MousePos))
         return false;
@@ -5685,7 +5685,7 @@ void ImGui::RenderWindowDecorations(ImGuiWindow* window, const ImRect& title_bar
         if (window->ScrollbarY)
             Scrollbar(ImGuiAxis_Y);
 
-        // Render resize grips (after their input handling so we don't have a frame of latency)
+        // Render resize grips (after their Input handling so we don't have a frame of latency)
         if (handle_borders_and_resize_grips && !(flags & ImGuiWindowFlags_NoResize))
         {
             for (int resize_grip_n = 0; resize_grip_n < resize_grip_count; resize_grip_n++)
@@ -6779,7 +6779,7 @@ void ImGui::FocusTopMostWindowUnderOne(ImGuiWindow* under_this_window, ImGuiWind
     }
     for (int i = start_idx; i >= 0; i--)
     {
-        // We may later decide to test for different NoXXXInputs based on the active navigation input (mouse vs nav) but that may feel more confusing to the user.
+        // We may later decide to test for different NoXXXInputs based on the active navigation Input (mouse vs nav) but that may feel more confusing to the user.
         ImGuiWindow* window = g.WindowsFocusOrder[i];
         if (window != ignore_window && window->WasActive && window->RootWindowDockStop == window)
             if ((window->Flags & (ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs)) != (ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs))
@@ -9115,14 +9115,14 @@ float ImGui::GetNavInputAmount(ImGuiNavInput n, ImGuiInputReadMode mode)
 {
     ImGuiContext& g = *GImGui;
     if (mode == ImGuiInputReadMode_Down)
-        return g.IO.NavInputs[n];                         // Instant, read analog input (0.0f..1.0f, as provided by user)
+        return g.IO.NavInputs[n];                         // Instant, read analog Input (0.0f..1.0f, as provided by user)
 
     const float t = g.IO.NavInputsDownDuration[n];
-    if (t < 0.0f && mode == ImGuiInputReadMode_Released)  // Return 1.0f when just released, no repeat, ignore analog input.
+    if (t < 0.0f && mode == ImGuiInputReadMode_Released)  // Return 1.0f when just released, no repeat, ignore analog Input.
         return (g.IO.NavInputsDownDurationPrev[n] >= 0.0f ? 1.0f : 0.0f);
     if (t < 0.0f)
         return 0.0f;
-    if (mode == ImGuiInputReadMode_Pressed)               // Return 1.0f when just pressed, no repeat, ignore analog input.
+    if (mode == ImGuiInputReadMode_Pressed)               // Return 1.0f when just pressed, no repeat, ignore analog Input.
         return (t == 0.0f) ? 1.0f : 0.0f;
     if (mode == ImGuiInputReadMode_Repeat)
         return (float)CalcTypematicRepeatAmount(t - g.IO.DeltaTime, t, g.IO.KeyRepeatDelay * 0.72f, g.IO.KeyRepeatRate * 0.80f);
@@ -9157,8 +9157,8 @@ static void ImGui::NavUpdate()
     if (g.NavScoringCount > 0) IMGUI_DEBUG_LOG("NavScoringCount %d for '%s' layer %d (Init:%d, Move:%d)\n", g.FrameCount, g.NavScoringCount, g.NavWindow ? g.NavWindow->Name : "NULL", g.NavLayer, g.NavInitRequest || g.NavInitResultId != 0, g.NavMoveRequest);
 #endif
 
-    // Set input source as Gamepad when buttons are pressed (as some features differs when used with Gamepad vs Keyboard)
-    // (do it before we map Keyboard input!)
+    // Set Input source as Gamepad when buttons are pressed (as some features differs when used with Gamepad vs Keyboard)
+    // (do it before we map Keyboard Input!)
     bool nav_keyboard_active = (g.IO.ConfigFlags & ImGuiConfigFlags_NavEnableKeyboard) != 0;
     bool nav_gamepad_active = (g.IO.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) != 0 && (g.IO.BackendFlags & ImGuiBackendFlags_HasGamepad) != 0;
     if (nav_gamepad_active)
@@ -9249,7 +9249,7 @@ static void ImGui::NavUpdate()
     g.IO.NavActive = (nav_keyboard_active || nav_gamepad_active) && g.NavWindow && !(g.NavWindow->Flags & ImGuiWindowFlags_NoNavInputs);
     g.IO.NavVisible = (g.IO.NavActive && g.NavId != 0 && !g.NavDisableHighlight) || (g.NavWindowingTarget != NULL);
 
-    // Process NavCancel input (to close a popup, get back to parent, clear focus)
+    // Process NavCancel Input (to close a popup, get back to parent, clear focus)
     if (IsNavInputTest(ImGuiNavInput_Cancel, ImGuiInputReadMode_Pressed))
     {
         if (g.ActiveId != 0)

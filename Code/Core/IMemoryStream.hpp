@@ -6,9 +6,9 @@
 */
 #pragma once
 #include "IStream.hpp"
-#include "IBuffer.hpp"
+#include <Runtime/Blob.hpp>
 
-namespace luna
+namespace Luna
 {
 	//! @interface IMemoryStream
 	//! The memory stream implements a stream object that is saved in the memory.
@@ -16,17 +16,46 @@ namespace luna
 	{
 		luiid("{b2fee308-b292-4fd4-b2c5-ece036a35e4a}");
 
-		//! Gets the underlying buffer.
-		virtual IBuffer* buffer() = 0;
+		//! Gets the underlying blob that contains the memory stream data. 
+		//! Note that the beginning of the blob is not the beginning of the 
+		//! data, the data range may be shifted due to alignment requirement.
+		virtual const Blob& get_blob() = 0;
 
-		//! Sets the underlying buffer.
-		//! 
-		//! The cursor position will be reset to 0.
-		virtual void set_buffer(IBuffer* buf) = 0;
+		//! Gets the offset of the data from the beginning of the blob memory.
+		virtual usize get_data_offset() = 0;
 
-		//! Creates a new memory buffer for this stream, and returns the old memory buffer.
+		//! Get the data of the memory stream. The returned pointer equals to 
+		//! `(usize)get_blob().data() + get_data_offset()`, which is also the 
+		//! cursor position 0.
+		//! The available data region is : [get_data(), get_data() + size()).
+		virtual void* get_data() = 0;
+
+		//! Sets the underlying blob object.
 		//! 
-		//! The cursor position will be reset to 0 after the stream has been reset.
-		virtual P<IBuffer> reset(size_t initial_buffer_size = 0, size_t alignment = 0, IAllocator* alloc = nullptr) = 0;
+		//! The cursor position will be reset to 0 after this call.
+		//! @param[in] blob The blob to set.
+		//! @param[in] offset The offset between the beginning of the blob memory 
+		//! and the beginning of the data region.
+		//! @param[in] sz The size of the data region. Specify `usize_max` will use the full 
+		//! range of the blob from `offset` to the end of the blob memory.
+		//! @return Returns the original blob object.
+		//! @remark The 0 position of the cursor will be set at 
+		//! `(usize)get_blob().data() + offset`, while the data region will be set as:
+		//! [(usize)get_blob().data() + offset, (usize)get_blob().data() + offset + sz)
+		virtual Blob set_blob(const Blob& blob, usize offset = 0, usize sz = usize_max) = 0;
+
+		//! Sets the underlying blob object.
+		//! 
+		//! The cursor position will be reset to 0 after this call.
+		//! @param[in] blob The blob to set.
+		//! @param[in] offset The offset between the beginning of the blob memory 
+		//! and the beginning of the data region.
+		//! @param[in] sz The size of the data region. Specify `usize_max` will use the full 
+		//! range of the blob from `offset` to the end of the blob memory.
+		//! @return Returns the original blob object.
+		//! @remark The 0 position of the cursor will be set at 
+		//! `(usize)get_blob().data() + offset`, while the data region will be set as:
+		//! [(usize)get_blob().data() + offset, (usize)get_blob().data() + offset + sz)
+		virtual Blob set_blob(Blob&& blob, usize offset = 0, usize sz = usize_max) = 0;
 	};
 }

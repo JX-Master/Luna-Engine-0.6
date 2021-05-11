@@ -6,33 +6,33 @@
 */
 #pragma once
 #include "AssetHeader.hpp"
-#include <Base/Interface.hpp>
-#include <Base/HashMap.hpp>
-#include <Base/RingDeque.hpp>
-#include <Base/Functional.hpp>
-namespace luna
+#include <Core/Interface.hpp>
+#include <Runtime/HashMap.hpp>
+#include <Runtime/RingDeque.hpp>
+#include <Runtime/Functional.hpp>
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		class AssetMeta;
 
-		extern P<IName> g_name_type;
-		extern P<IName> g_name_guid;
-		extern P<IName> g_name_data_path;
-		extern P<IName> g_name_attachments;
-		extern P<IName> g_name_dependencies;
+		extern Name g_name_type;
+		extern Name g_name_guid;
+		extern Name g_name_data_path;
+		extern Name g_name_attachments;
+		extern Name g_name_dependencies;
 
 		//! The registered asset types and their corresponding managers.
-		extern Unconstructed<HashMap<P<IName>, P<IAssetType>>> g_types;
+		extern Unconstructed<HashMap<Name, P<IAssetType>>> g_types;
 
 		//! the lock for the asset types.
-		extern P<IReadWriteLock> g_type_lock;
+		extern P<IMutex> g_type_lock;
 
 		//! The global asset registry.
 		extern Unconstructed<HashMap<Guid, P<IAsset>>> g_assets;
 
 		//! The mapping from meta path to asset Guid.
-		extern Unconstructed<HashMap<P<IPath>, Guid>> g_path_mapping;
+		extern Unconstructed<HashMap<Path, Guid>> g_path_mapping;
 
 		//! The lock for the asset registry.
 		extern P<IMutex> g_lock;
@@ -48,21 +48,21 @@ namespace luna
 		void deinit();
 
 		//! Gets the manager responsible for the specified extension.
-		inline RP<IAssetType> route_mgr(IName* type)
+		inline RP<IAssetType> route_mgr(const Name& type)
 		{
-			ReadGuard guard(g_type_lock);
+			MutexGuard guard(g_type_lock);
 			auto iter = g_types.get().find(type);
 			if (iter != g_types.get().end())
 			{
 				return iter->second;
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 
 		void add_dependency(AssetMeta* from, const Guid& to);
 		bool remove_dependency(AssetMeta* from, const Guid& to);
 
-		RP<IVariant> load_asset_from_file(IPath* path, bool load_meta = true);
+		R<Variant> load_asset_from_file(const Path& path, bool load_meta = true);
 
 		void insert_asset(IAsset* ass, AssetMeta* meta);
 	}

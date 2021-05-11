@@ -6,6 +6,8 @@
 */
 #pragma once
 #include <Core/Core.hpp>
+#include <Runtime/Path.hpp>
+#include <Runtime/Blob.hpp>
 
 #ifndef LUNA_GFX_API
 #define LUNA_GFX_API
@@ -18,11 +20,11 @@
 #include "IWindowInputDevice.hpp"
 #include "ISwapChain.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EWindowCreationFlag : uint32
+		enum class EWindowCreationFlag : u32
 		{
 			none = 0x00,
 			no_resize = 0x01,		// window cannot be resized by dragging the border.
@@ -32,19 +34,19 @@ namespace luna
 
 		struct IWindow;
 
-		enum class EShaderSourceType : uint32
+		enum class EShaderSourceType : u32
 		{
 			platform_default = 0,
 			hlsl = 1
 		};
 
-		enum class EShaderTargetType : uint32
+		enum class EShaderTargetType : u32
 		{
 			platform_default = 0,
 			dx_bytecode = 1,
 		};
 
-		enum class EShaderType : uint32
+		enum class EShaderType : u32
 		{
 			vertex = 1,
 			pixel = 2,
@@ -54,19 +56,19 @@ namespace luna
 			geometry = 6
 		};
 
-		enum class EShaderModel : uint32
+		enum class EShaderModel : u32
 		{
 			sm_5_0,
 		};
 
-		enum class EShaderCompileFlag : uint32
+		enum class EShaderCompileFlag : u32
 		{
 			none = 0x00,
 			debug_info = 0x01,
 			skip_validation = 0x02,
 		};
 
-		enum class EShaderOptimizationLevel : uint32
+		enum class EShaderOptimizationLevel : u32
 		{
 			none,
 			speed,
@@ -78,7 +80,7 @@ namespace luna
 			//! The data of the shader source.
 			const void* src_data;
 			//! The size of the data of the shader source in bytes.
-			size_t src_size;
+			usize src_size;
 			//! The debug name of the source code (file name), set to `nullptr` if this
 			//! is not needed.
 			const char* src_name;
@@ -100,7 +102,7 @@ namespace luna
 			ShaderCompileDesc() = default;
 			ShaderCompileDesc(
 				const void* _src_data,
-				size_t _src_size,
+				usize _src_size,
 				const char* _src_name,
 				const char* _entry_point,
 				EShaderSourceType _src_type,
@@ -123,7 +125,7 @@ namespace luna
 
 		};
 
-		enum class EMessageBoxType : uint32
+		enum class EMessageBoxType : u32
 		{
 			ok = 1,
 			ok_cancel = 2,
@@ -132,7 +134,7 @@ namespace luna
 			yes_no_cancel = 5,
 		};
 
-		enum class EMessageBoxIcon : uint32
+		enum class EMessageBoxIcon : u32
 		{
 			none = 0,
 			information = 1,
@@ -141,7 +143,7 @@ namespace luna
 			error = 4
 		};
 
-		enum class EMessageBoxButton : uint32
+		enum class EMessageBoxButton : u32
 		{
 			ok = 1,
 			cancel,
@@ -150,21 +152,19 @@ namespace luna
 			no
 		};
 
-		constexpr int32 window_default_v = 0x80000000;
+		constexpr i32 window_default_v = 0x80000000;
 
 		struct IGraphicAdapter;
 		struct IGraphicDevice;
 		struct ISwapChain;
 		struct ICommandQueue;
 
-		enum class EFileOpenDialogFlag : uint32
+		enum class EFileOpenDialogFlag : u32
 		{
 			none = 0,
 			//! Allows multiple files to be selected.
 			multi_select = 0x01,
 		};
-
-		LUNA_GFX_API RV init();
 
 		//! Create a new window. The window will be displayed unless EWindowCreationFlag::hidden is set.
 		//! @param[in] title The title of the window.
@@ -174,13 +174,13 @@ namespace luna
 		//! @param[in] h The height of the window. set to `window_default_v` to let the system choose the proper value.
 		//! @param[in] window_creation_flags Additional window creation flags.
 		//! @return Returns the window object, or `nullptr` if failed.
-		LUNA_GFX_API RP<IWindow> new_window(const char* title, int32 x = window_default_v, int32 y = window_default_v,
-			int32 w = window_default_v, int32 h = window_default_v, EWindowCreationFlag window_creation_flags = EWindowCreationFlag::none);
+		LUNA_GFX_API RP<IWindow> new_window(const c8* title, i32 x = window_default_v, i32 y = window_default_v,
+			i32 w = window_default_v, i32 h = window_default_v, EWindowCreationFlag window_creation_flags = EWindowCreationFlag::none);
 
 		//! Get information about the graphic adapters installed on this platform.
 		//! @param[in] index The index of the adapters to be enumerated.
 		//! @return The adapter interface, or `nullptr` if the index is invalid.
-		LUNA_GFX_API RP<IGraphicAdapter> enum_adapter(uint32 index);
+		LUNA_GFX_API RP<IGraphicAdapter> enum_adapter(u32 index);
 
 		//! Creates a new graphic device instance and initialize the corresponding graphic subsystem for this application.
 		//! @param[in] adapter The graphic adapter to use to create the device. Specify `nullptr` to let system choose the proper value.
@@ -196,11 +196,11 @@ namespace luna
 		//! Compile shader source code.
 		//! @param[in] desc The descriptor object of the shader.
 		//! @return Returns a blob that contains the compiled shader output, or `nullptr` if failed to compile the shader.
-		LUNA_GFX_API RP<IBlob> compile_shader(const ShaderCompileDesc& desc);
+		LUNA_GFX_API R<Blob> compile_shader(const ShaderCompileDesc& desc);
 
 		//! Displays one message box dialog. The current thread blocks until the dialog is closed.
 		//! @return Returns the clicked button.
-		LUNA_GFX_API R<EMessageBoxButton> message_box(const char* text, const char* caption, EMessageBoxType type, EMessageBoxIcon icon = EMessageBoxIcon::none);
+		LUNA_GFX_API R<EMessageBoxButton> message_box(const c8* text, const c8* caption, EMessageBoxType type, EMessageBoxIcon icon = EMessageBoxIcon::none);
 
 		//! Displays one open file dialog and fetches the selecting results.
 		//! @param[in] filter The filter string used by the open file dialog. The string contains multiple substrings, each of the substring ends with a NULL character (`\0`), and
@@ -210,12 +210,12 @@ namespace luna
 		//! path if specified.
 		//! @param[in] flags See EFileOpenDialogFlag.
 		//! @return Returns a list of selected file paths. All paths are platform native, absolute paths. This function returns failure if the user fails to select any file.
-		LUNA_GFX_API R<Vector<P<IMutPath>>> open_file_dialog(const char* filter, const char* title = nullptr, IPath* initial_dir = nullptr, EFileOpenDialogFlag flags = EFileOpenDialogFlag::none);
+		LUNA_GFX_API R<Vector<Path>> open_file_dialog(const c8* filter, const c8* title = nullptr, const Path& initial_dir = Path(), EFileOpenDialogFlag flags = EFileOpenDialogFlag::none);
 
 		//! Displays one save file dialog and fetches the selecting results.
-		LUNA_GFX_API RP<IMutPath> save_file_dialog(const char* filter, const char* title = nullptr, IPath* initial_file_path = nullptr);
+		LUNA_GFX_API R<Path> save_file_dialog(const c8* filter, const c8* title = nullptr, const Path& initial_file_path = Path());
 
 		//! Displays one open directory dialog and fetches the selecting results.
-		LUNA_GFX_API RP<IMutPath> open_dir_dialog(const char* title = nullptr, IPath* initial_dir = nullptr);
+		LUNA_GFX_API R<Path> open_dir_dialog(const c8* title = nullptr, const Path& initial_dir = Path());
 	}
 }

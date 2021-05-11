@@ -5,46 +5,42 @@
 * @date 2020/3/7
 */
 #pragma once
-#include <Base/Assert.hpp>
+#include <Runtime/Assert.hpp>
 #define STBIW_ASSERT(x) luassert(x)
+#include <Runtime/Memory.hpp>
 
-#include <Base/IAllocator.hpp>
-
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
-		// The global allocator being used by STB.
-		extern IAllocator* stbi_alloc;
-
-		inline void* stbiw_malloc(size_t sz)
+		inline void* stbiw_malloc(usize sz)
 		{
-			return stbi_alloc->allocate(sz);
+			return memalloc(sz);
 		}
 
 		inline void stbiw_free(void* p)
 		{
-			stbi_alloc->free(p);
+			memfree(p);
 		}
 
-		inline void* stbiw_realloc(void* p, size_t newsz)
+		inline void* stbiw_realloc(void* p, usize newsz)
 		{
-			return stbi_alloc->reallocate(p, newsz);
+			return memrealloc(p, newsz);
 		}
 	}
 }
 
-#define STBIW_MALLOC(sz)			luna::image::stbiw_malloc(sz)
-#define STBIW_REALLOC(p,newsz)		luna::image::stbiw_realloc(p,newsz)
-#define STBIW_FREE(p)				luna::image::stbiw_free(p)
+#define STBIW_MALLOC(sz)			Luna::Image::stbiw_malloc(sz)
+#define STBIW_REALLOC(p,newsz)		Luna::Image::stbiw_realloc(p,newsz)
+#define STBIW_FREE(p)				Luna::Image::stbiw_free(p)
 
 #define STBI_WRITE_NO_STDIO
 
 #include <Stb/stb_image_write.h>
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		void stbi_write_func(void* context, void* data, int size);
 

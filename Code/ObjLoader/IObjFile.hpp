@@ -6,9 +6,9 @@
 */
 #pragma once
 #include <Core/Core.hpp>
-#include <Base/Math.hpp>
+#include <Runtime/Math.hpp>
 
-namespace luna
+namespace Luna
 {
 	namespace obj_loader
 	{
@@ -16,9 +16,9 @@ namespace luna
 		// -1 means not used.
 		struct Index
 		{
-			int32 vertex_index;
-			int32 normal_index;
-			int32 texcoord_index;
+			i32 vertex_index;
+			i32 normal_index;
+			i32 texcoord_index;
 		};
 
 		struct Mesh
@@ -27,13 +27,13 @@ namespace luna
 			//! The number of vertices per
 			//! face. 3 = triangle, 4 = quad,
 			//! ... Up to 255 vertices per face.
-			Vector<uint8> num_face_vertices;
+			Vector<u8> num_face_vertices;
 			//! per-face material ID
-			Vector<int32> material_ids;
+			Vector<i32> material_ids;
 			// per-face smoothing group
 			// ID(0 = off. positive value
 			// = group id)
-			Vector<uint32> smoothing_group_ids;
+			Vector<u32> smoothing_group_ids;
 		};
 
 		//! Linear flattened indices.
@@ -42,7 +42,7 @@ namespace luna
 			//! indices for vertices(polygon lines)
 			Vector<Index> indices;
 			//! The number of vertices per line.
-			Vector<int32> num_line_vertices;
+			Vector<i32> num_line_vertices;
 		};
 
 		struct Points
@@ -53,7 +53,7 @@ namespace luna
 
 		struct Shape
 		{
-			P<IName> name;
+			Name name;
 			Mesh mesh;
 			Lines lines;
 			Points points;

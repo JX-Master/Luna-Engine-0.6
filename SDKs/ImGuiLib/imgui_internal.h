@@ -86,7 +86,7 @@ struct ImGuiDockContext;            // Docking system context
 struct ImGuiDockNode;               // Docking system node (hold a list of Windows OR two child dock nodes)
 struct ImGuiDockNodeSettings;       // Storage for a dock node in .ini file (we preserve those even if the associated dock node isn't active during the session)
 struct ImGuiGroupData;              // Stacked storage data for BeginGroup()/EndGroup()
-struct ImGuiInputTextState;         // Internal state of the currently focused/edited text input box
+struct ImGuiInputTextState;         // Internal state of the currently focused/edited text Input box
 struct ImGuiItemHoveredDataBackup;  // Backup and restore IsItemHovered() internal data
 struct ImGuiMenuColumns;            // Simple column measurement, currently used for MenuItem() only
 struct ImGuiNavMoveResult;          // Result of a gamepad/keyboard directional navigation move query result
@@ -261,8 +261,8 @@ static inline bool      ImCharIsBlankW(unsigned int c)  { return c == ' ' || c =
 
 // Helpers: UTF-8 <> wchar conversions
 IMGUI_API int           ImTextStrToUtf8(char* buf, int buf_size, const ImWchar* in_text, const ImWchar* in_text_end);      // return output UTF-8 bytes count
-IMGUI_API int           ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end);          // read one character. return input UTF-8 bytes count
-IMGUI_API int           ImTextStrFromUtf8(ImWchar* buf, int buf_size, const char* in_text, const char* in_text_end, const char** in_remaining = NULL);   // return input UTF-8 bytes count
+IMGUI_API int           ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end);          // read one character. return Input UTF-8 bytes count
+IMGUI_API int           ImTextStrFromUtf8(ImWchar* buf, int buf_size, const char* in_text, const char* in_text_end, const char** in_remaining = NULL);   // return Input UTF-8 bytes count
 IMGUI_API int           ImTextCountCharsFromUtf8(const char* in_text, const char* in_text_end);                            // return number of UTF-8 code-points (NOT bytes count)
 IMGUI_API int           ImTextCountUtf8BytesFromChar(const char* in_text, const char* in_text_end);                        // return number of bytes to express one char in UTF-8
 IMGUI_API int           ImTextCountUtf8BytesFromStr(const ImWchar* in_text, const ImWchar* in_text_end);                   // return number of bytes to express string in UTF-8
@@ -779,7 +779,7 @@ struct IMGUI_API ImGuiMenuColumns
     float       CalcExtraSpace(float avail_w) const;
 };
 
-// Internal state of the currently focused/edited text input box
+// Internal state of the currently focused/edited text Input box
 // For a given item ID, access with ImGui::GetInputTextState()
 struct IMGUI_API ImGuiInputTextState
 {
@@ -807,7 +807,7 @@ struct IMGUI_API ImGuiInputTextState
     void        OnKeyPressed(int key);      // Cannot be inline because we call in code in stb_textedit.h implementation
 
     // Cursor & Selection
-    void        CursorAnimReset()           { CursorAnim = -0.30f; }                                   // After a user-input the cursor stays on for a while without blinking
+    void        CursorAnimReset()           { CursorAnim = -0.30f; }                                   // After a user-Input the cursor stays on for a while without blinking
     void        CursorClamp()               { Stb.cursor = ImMin(Stb.cursor, CurLenW); Stb.select_start = ImMin(Stb.select_start, CurLenW); Stb.select_end = ImMin(Stb.select_end, CurLenW); }
     bool        HasSelection() const        { return Stb.select_start != Stb.select_end; }
     void        ClearSelection()            { Stb.select_start = Stb.select_end = Stb.cursor; }
@@ -1338,7 +1338,7 @@ struct ImGuiContext
     ImVec2                  LastValidMousePos;
     ImGuiInputTextState     InputTextState;
     ImFont                  InputTextPasswordFont;
-    ImGuiID                 TempInputId;                        // Temporary text input when CTRL+clicking on a slider, etc.
+    ImGuiID                 TempInputId;                        // Temporary text Input when CTRL+clicking on a slider, etc.
     ImGuiColorEditFlags     ColorEditOptions;                   // Store user options for color edit widgets
     float                   ColorEditLastHue;                   // Backup of last Hue associated to LastColor[3], so we can restore Hue in lossy RGB<>HSV round trips
     float                   ColorEditLastSat;                   // Backup of last Saturation associated to LastColor[3], so we can restore Saturation in lossy RGB<>HSV round trips
@@ -1983,7 +1983,7 @@ namespace ImGui
     // Inputs
     // FIXME: Eventually we should aim to move e.g. IsActiveIdUsingKey() into IsKeyXXX functions.
     inline bool             IsActiveIdUsingNavDir(ImGuiDir dir)                         { ImGuiContext& g = *GImGui; return (g.ActiveIdUsingNavDirMask & (1 << dir)) != 0; }
-    inline bool             IsActiveIdUsingNavInput(ImGuiNavInput input)                { ImGuiContext& g = *GImGui; return (g.ActiveIdUsingNavInputMask & (1 << input)) != 0; }
+    inline bool             IsActiveIdUsingNavInput(ImGuiNavInput Input)                { ImGuiContext& g = *GImGui; return (g.ActiveIdUsingNavInputMask & (1 << Input)) != 0; }
     inline bool             IsActiveIdUsingKey(ImGuiKey key)                            { ImGuiContext& g = *GImGui; IM_ASSERT(key < 64); return (g.ActiveIdUsingKeyInputMask & ((ImU64)1 << key)) != 0; }
     IMGUI_API bool          IsMouseDragPastThreshold(ImGuiMouseButton button, float lock_threshold = -1.0f);
     inline bool             IsKeyPressedMap(ImGuiKey key, bool repeat = true)           { ImGuiContext& g = *GImGui; const int key_index = g.IO.KeyMap[key]; return (key_index >= 0) ? IsKeyPressed(key_index, repeat) : false; }
@@ -2137,7 +2137,7 @@ namespace ImGui
     IMGUI_API bool          TempInputText(const ImRect& bb, ImGuiID id, const char* label, char* buf, int buf_size, ImGuiInputTextFlags flags);
     IMGUI_API bool          TempInputScalar(const ImRect& bb, ImGuiID id, const char* label, ImGuiDataType data_type, void* p_data, const char* format);
     inline bool             TempInputIsActive(ImGuiID id)       { ImGuiContext& g = *GImGui; return (g.ActiveId == id && g.TempInputId == id); }
-    inline ImGuiInputTextState* GetInputTextState(ImGuiID id)   { ImGuiContext& g = *GImGui; return (g.InputTextState.ID == id) ? &g.InputTextState : NULL; } // Get input text state if active
+    inline ImGuiInputTextState* GetInputTextState(ImGuiID id)   { ImGuiContext& g = *GImGui; return (g.InputTextState.ID == id) ? &g.InputTextState : NULL; } // Get Input text state if active
 
     // Color
     IMGUI_API void          ColorTooltip(const char* text, const float* col, ImGuiColorEditFlags flags);

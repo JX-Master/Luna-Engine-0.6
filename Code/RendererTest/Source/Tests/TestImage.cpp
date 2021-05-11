@@ -5,11 +5,11 @@
 * @date 2020/3/14
 */
 #include "TestImage.hpp"
-#include <Base/Math.hpp>
+#include <Runtime/Math.hpp>
 
-namespace luna
+namespace Luna
 {
-	using namespace gfx;
+	using namespace Gfx;
 
 	struct VertexData
 	{
@@ -24,10 +24,10 @@ namespace luna
 			// create render pass.
 			RenderPassDesc render_pass({AttachmentDesc(EResourceFormat::rgba8_unorm, EAttachmentLoadOp::clear, EAttachmentStoreOp::store)},
 			EResourceFormat::unknown, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care,1, false);
-			luset(m_render_pass, renderer::device()->new_render_pass(render_pass));
+			luset(m_render_pass, Renderer::device()->new_render_pass(render_pass));
 
 			// create fbo.
-			luset(m_fbo, renderer::device()->new_frame_buffer(m_render_pass, 1, g_rt.get_address_of(), nullptr, nullptr, nullptr));
+			luset(m_fbo, Renderer::device()->new_frame_buffer(m_render_pass, 1, g_rt.get_address_of(), nullptr, nullptr, nullptr));
 
 			// create pso
 			{
@@ -89,14 +89,14 @@ namespace luna
 					ShaderInputGroupDesc(EShaderInputGroupType::sampler, 0, 1, EShaderVisibility::pixel)
 				};
 
-				luset(m_shader_input_layout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2, EShaderInputLayoutFlag::allow_input_assembler_input_layout |
+				luset(m_shader_input_layout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2, EShaderInputLayoutFlag::allow_input_assembler_input_layout |
 					EShaderInputLayoutFlag::deny_domain_shader_access | EShaderInputLayoutFlag::deny_geometry_shader_access |
 					EShaderInputLayoutFlag::deny_hull_shader_access)));
 
 				GraphicsPipelineStateDesc desc(
 					InputLayoutDesc(2, input_elements),
-					ShaderBytecode(vs->data(), vs->size()),
-					ShaderBytecode(ps->data(), ps->size()),
+					ShaderBytecode(vs.data(), vs.size()),
+					ShaderBytecode(ps.data(), ps.size()),
 					ShaderBytecode(Default()),
 					ShaderBytecode(Default()),
 					ShaderBytecode(Default()),
@@ -108,20 +108,20 @@ namespace luna
 					EPrimitiveTopologyType::triangle,
 					0xFFFFFFFF, 0);
 
-				luset(m_pso, renderer::device()->new_graphics_pipeline_state(m_shader_input_layout, m_render_pass, desc));
+				luset(m_pso, Renderer::device()->new_graphics_pipeline_state(m_shader_input_layout, m_render_pass, desc));
 
-				luset(m_vb, renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::vertex_buffer, sizeof(VertexData) * 4)));
-				uint32 incides[] = { 0, 1, 2, 1, 3, 2 };
-				luset(m_ib, renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::index_buffer, sizeof(incides))));
+				luset(m_vb, Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::vertex_buffer, sizeof(VertexData) * 4)));
+				u32 incides[] = { 0, 1, 2, 1, 3, 2 };
+				luset(m_ib, Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::index_buffer, sizeof(incides))));
 				lulet(mapped_data, m_ib->map_subresource(0, false, 1, 0));
 				memcpy(mapped_data, incides, sizeof(incides));
 				m_ib->unmap_subresource(0, false, 0, sizeof(incides));
 
 				// prepare texture - 128x128 with only 1 mip level.
-				luset(m_tex, renderer::device()->new_resource(ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource,
+				luset(m_tex, Renderer::device()->new_resource(ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource,
 					128, 128, 1, 1)));
 
-				lulet(tex_buffer, renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, sizeof(test_image_data_v))));
+				lulet(tex_buffer, Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, sizeof(test_image_data_v))));
 				lulet(tex_data_mapped, tex_buffer->map_subresource(0, false, 1, 0));
 				memcpy(tex_data_mapped, test_image_data_v, sizeof(test_image_data_v));
 				tex_buffer->unmap_subresource(0, true);
@@ -142,11 +142,11 @@ namespace luna
 				g_cb->copy_texture_region(dest, 0, 0, 0, src);
 				g_cb->submit();
 
-				luset(m_view_set, renderer::device()->new_view_set(m_shader_input_layout, ViewSetDesc(0, 1, 0, 1)));
+				luset(m_view_set, Renderer::device()->new_view_set(m_shader_input_layout, ViewSetDesc(0, 1, 0, 1)));
 
 				m_view_set->set_srv(0, m_tex, nullptr);
 
-				float32 border_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+				f32 border_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 				m_view_set->set_sampler(0, SamplerDesc(EFilter::min_mag_mip_linear, ETextureAddressMode::clamp, 
 					ETextureAddressMode::clamp, ETextureAddressMode::clamp, 0.0f, 1, EComparisonFunc::always, border_color, 0.0f, 0.0f));
 
@@ -155,7 +155,7 @@ namespace luna
 			}
 		}
 		lucatchret;
-		return s_ok;
+		return RV();
 	}
 	void TestImage::update()
 	{
@@ -179,7 +179,7 @@ namespace luna
 		memcpy(mapped, data, sizeof(data));
 		m_vb->unmap_subresource(0, false, 0, sizeof(data));
 
-		Float4U clear_color = color::black;
+		Float4U clear_color = Color::black;
 		g_cb->resource_barrier(ResourceBarrierDesc::as_transition(g_rt, EResourceState::render_target, 0));
 		g_cb->begin_render_pass(m_render_pass, m_fbo, 1, &clear_color, 0.0f, 0);
 		g_cb->set_pipeline_state(m_pso);
@@ -187,12 +187,12 @@ namespace luna
 		g_cb->set_graphic_view_set(m_view_set);
 		g_cb->set_primitive_topology(EPrimitiveTopology::triangle_list);
 		g_cb->set_vertex_buffers(0, 1, &VertexBufferViewDesc(m_vb, 0, sizeof(VertexData) * 4, sizeof(VertexData)));
-		g_cb->set_index_buffer(m_ib, 0, sizeof(uint32) * 6, EResourceFormat::r32_uint);
+		g_cb->set_index_buffer(m_ib, 0, sizeof(u32) * 6, EResourceFormat::r32_uint);
 		sz = g_window->size();
 		w = sz.x;
 		h = sz.y;
-		g_cb->set_scissor_rect(RectI(0, 0, (int32)w, (int32)h));
-		g_cb->set_viewport(Viewport(0.0f, 0.0f, (float32)w, (float32)h, 0.0f, 1.0f));
+		g_cb->set_scissor_rect(RectI(0, 0, (i32)w, (i32)h));
+		g_cb->set_viewport(Viewport(0.0f, 0.0f, (f32)w, (f32)h, 0.0f, 1.0f));
 		g_cb->draw_indexed(6, 0, 0);
 		g_cb->end_render_pass();
 
@@ -201,6 +201,6 @@ namespace luna
 	}
 	void TestImage::resize()
 	{
-		m_fbo = renderer::device()->new_frame_buffer(m_render_pass, 1, g_rt.get_address_of(), nullptr, nullptr, nullptr).get();
+		m_fbo = Renderer::device()->new_frame_buffer(m_render_pass, 1, g_rt.get_address_of(), nullptr, nullptr, nullptr).get();
 	}
 }

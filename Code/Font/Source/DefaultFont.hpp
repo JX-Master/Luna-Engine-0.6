@@ -7,9 +7,9 @@
 #pragma once
 #include "FontHeader.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace font
+	namespace Font
 	{
 		extern const long int opensans_regular_ttf_size;
 		extern const unsigned char opensans_regular_ttf[];

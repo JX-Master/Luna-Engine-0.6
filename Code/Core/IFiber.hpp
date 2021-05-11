@@ -5,10 +5,10 @@
 * @date 2019/3/31
 */
 #pragma once
-#include <Base/IObject.hpp>
-namespace luna
+#include "IObject.hpp"
+namespace Luna
 {
-	enum class EFiberState : uint32
+	enum class EFiberState : u32
 	{
 		ready = 1,		// The fiber is created and ready to be executed for the first time.
 		running = 2,	// The fiber is running on one thread.

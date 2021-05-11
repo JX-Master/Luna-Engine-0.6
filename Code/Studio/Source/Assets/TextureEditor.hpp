@@ -7,7 +7,7 @@
 #pragma once
 #include "../IAssetEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -17,14 +17,13 @@ namespace luna
 			lucid("{5ef18c5d-5729-4f92-b1b6-2239a5a9aa8d}");
 			luiimpl(TextureEditor, IAssetEditor, IObject);
 
-			WP<texture::ITexture> m_tex;
+			WP<Texture::ITexture> m_tex;
 
 			bool m_open;
 
-			TextureEditor(IAllocator* alloc) :
-				luibind(alloc) {}
+			TextureEditor() {}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 			virtual bool closed() override
 			{
 				return !m_open;

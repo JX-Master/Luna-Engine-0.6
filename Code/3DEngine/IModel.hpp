@@ -9,30 +9,30 @@
 #include "IMesh.hpp"
 #include "IMaterial.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		//! @interface IModel
-		struct IModel : public asset::IAsset
+		struct IModel : public Asset::IAsset
 		{
 			luiid("{e0b7d1f0-d9af-4fb8-b929-1cf8745084ee}");
 
-			virtual asset::PAsset<IMesh> mesh() = 0;
+			virtual Asset::PAsset<IMesh> mesh() = 0;
 
-			virtual void set_mesh(asset::PAsset<IMesh> mesh_asset) = 0;
+			virtual void set_mesh(Asset::PAsset<IMesh> mesh_asset) = 0;
 
-			virtual size_t count_materials() = 0;
+			virtual usize count_materials() = 0;
 
 			//! Adds one material slot.
-			virtual void add_material(size_t index) = 0;
+			virtual void add_material(usize index) = 0;
 
 			//! Removes one material slot.
-			virtual void remove_material(size_t index) = 0;
+			virtual void remove_material(usize index) = 0;
 
-			virtual asset::PAsset<IMaterial> material(size_t index) = 0;
+			virtual Asset::PAsset<IMaterial> material(usize index) = 0;
 
-			virtual void set_material(size_t index, asset::PAsset<IMaterial> material) = 0;
+			virtual void set_material(usize index, Asset::PAsset<IMaterial> material) = 0;
 		};
 	}
 }

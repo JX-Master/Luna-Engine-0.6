@@ -11,11 +11,11 @@
 
 #include "GraphicDevice.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class ShaderInputLayout : public IShaderInputLayout
 			{
@@ -27,9 +27,7 @@ namespace luna
 				ComPtr<ID3D12RootSignature> m_rs;
 				Vector<ShaderInputGroupDesc> m_groups;
 
-				ShaderInputLayout() :
-					luibind(get_module_allocator()),
-					m_groups(get_module_allocator()) {}
+				ShaderInputLayout() {}
 				
 
 				RV init(const ShaderInputLayoutDesc& desc);

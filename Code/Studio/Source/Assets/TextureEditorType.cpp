@@ -9,14 +9,14 @@
 #include "TextureImporter.hpp"
 #include "TextureEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
-		void TextureEditorType::on_draw_tile(imgui::IContext* ctx, asset::IAsset* asset, const RectF& draw_rect)
+		void TextureEditorType::on_draw_tile(ImGui::IContext* ctx, Asset::IAsset* asset, const RectF& draw_rect)
 		{
-			P<texture::ITexture> tex = asset;
-			if (tex->meta()->state() == asset::EAssetState::loaded)
+			P<Texture::ITexture> tex = asset;
+			if (tex->meta()->state() == Asset::EAssetState::loaded)
 			{
 				MutexGuard g(tex->meta()->mutex());
 				auto texres = tex->texture();
@@ -35,10 +35,10 @@ namespace luna
 				ctx->text("Texture");
 			}
 		}
-		P<IAssetEditor> TextureEditorType::new_editor(asset::IAsset* editing_asset)
+		P<IAssetEditor> TextureEditorType::new_editor(Asset::IAsset* editing_asset)
 		{
-			auto edit = box_ptr(new_obj<TextureEditor>(get_module_allocator()));
-			edit->m_tex = P<texture::ITexture>(editing_asset);
+			auto edit = newobj<TextureEditor>();
+			edit->m_tex = P<Texture::ITexture>(editing_asset);
 			return edit;
 		}
 	}

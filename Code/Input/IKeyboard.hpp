@@ -8,9 +8,9 @@
 #include "IInputDevice.hpp"
 #include "KeyCode.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
 		//! @interface IKeyboard
 		//! Represent keyboard input. Get this interface from `IInputSystem::get_device("keyboard")`.

@@ -7,9 +7,9 @@
 #pragma once
 #include <Font/Font.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
 		//! @interface IFontTexture
 		//! Represents a texture resource that contains font information so that it can be used to draw characters.
@@ -24,13 +24,13 @@ namespace luna
 			//! `IFontAtlas::is_dirty` is `false`.
 			//! @param[in] command_buffer The command buffer used to upload textures. The command buffer will be submitted, 
 			//! waited and reset before this call returns.
-			virtual RV reset(font::IFontAtlas* atlas, gfx::ICommandBuffer* command_buffer) = 0;
+			virtual RV reset(Font::IFontAtlas* atlas, Gfx::ICommandBuffer* command_buffer) = 0;
 
 			//! Gets the generated font texture.
-			virtual gfx::IResource* get_font_texture() = 0;
+			virtual Gfx::IResource* get_font_texture() = 0;
 
 			//! Gets the font atlas.
-			virtual font::IFontAtlas* get_font_atlas() = 0;
+			virtual Font::IFontAtlas* get_font_atlas() = 0;
 		};
 	}
 }

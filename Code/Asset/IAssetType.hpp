@@ -7,9 +7,9 @@
 #pragma once
 #include "IAssetMeta.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		//! @interface IAssetType
 		//! @threadsafe
@@ -25,7 +25,7 @@ namespace luna
 			luiid("{e0a3caaa-c66c-43b2-b59a-b1b1570a746d}");
 
 			//! Gets the type name of this asset type.
-			virtual IName* type_name() = 0;
+			virtual Name type_name() = 0;
 
 			//! Called when a new empty asset object is required to be created.
 			//! @param[in] meta The asset meta object for the returned asset object, initialized with the meta information 
@@ -45,7 +45,7 @@ namespace luna
 			//! @return Returns success if the data is successfully loaded, or an error code if the data loading is failed. In case
 			//! of any error, the system will record the error in the error object of the asset meta. The asset state will be set as loaded
 			//! if the return value is success, or unloaded with error flag set if the return value is not success.
-			virtual RV on_load_data(IAsset* target_asset, IVariant* data, IVariant* params) = 0;
+			virtual RV on_load_data(IAsset* target_asset, const Variant& data, const Variant& params) = 0;
 
 			//! Called by the worker thread when the procedural asset data is required to be loaded to the target asset. This will be
 			//! called if the user specify `EAssetLoadFlag::procedural` flag when issuing the load request.
@@ -53,7 +53,7 @@ namespace luna
 			//! when this function is called, if this is a reloading call, the original data in the asset will be preserved.
 			//! @param[in] params Additional parameters the user provides. This may be `nullptr` if the user does not provide and 
 			//! parameters.
-			virtual RV on_load_procedural_data(IAsset* target_asset, IVariant* params) = 0;
+			virtual RV on_load_procedural_data(IAsset* target_asset, const Variant& params) = 0;
 
 			//! Called when the data of the asset is required to be unloaded. This call is not asynchronous.
 			//! @remark The implementation should set the state of the object to `unloaded` manually.
@@ -63,7 +63,7 @@ namespace luna
 			//! @param[in] target_asset The asset to save.
 			//! @return Returns the data object that holds the serialized data for the asset. This data 
 			//! object will be saved to file.
-			virtual RP<IVariant> on_save_data(IAsset* target_asset, IVariant* params) = 0;
+			virtual R<Variant> on_save_data(IAsset* target_asset, const Variant& params) = 0;
 
 			//! Called when the data of one of the dependency assets is loaded and the current asset's state is `loaded`.
 			virtual void on_dependency_data_load(IAsset* current_asset, IAsset* dependency_asset) = 0;

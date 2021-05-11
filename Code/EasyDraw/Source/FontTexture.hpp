@@ -7,9 +7,9 @@
 #pragma once
 #include "EasyDrawHeader.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
 		class FontTexture : public IFontTexture
 		{
@@ -17,18 +17,17 @@ namespace luna
 			luiid("{769ce73d-1b69-4e62-b715-e86a9e31e240}");
 			luiimpl(FontTexture, IFontTexture, IObject);
 
-			P<gfx::IResource> m_tex;
-			P<font::IFontAtlas> m_font;
+			P<Gfx::IResource> m_tex;
+			P<Font::IFontAtlas> m_font;
 
-			FontTexture(IAllocator* alloc) :
-				luibind(alloc) {}
+			FontTexture() {}
 
-			virtual RV reset(font::IFontAtlas* atlas, gfx::ICommandBuffer* command_buffer) override;
-			virtual gfx::IResource* get_font_texture() override
+			virtual RV reset(Font::IFontAtlas* atlas, Gfx::ICommandBuffer* command_buffer) override;
+			virtual Gfx::IResource* get_font_texture() override
 			{
 				return m_tex;
 			}
-			virtual font::IFontAtlas* get_font_atlas() override
+			virtual Font::IFontAtlas* get_font_atlas() override
 			{
 				return m_font;
 			}

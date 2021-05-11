@@ -18,29 +18,16 @@
 #include <3DEngine/3DEngine.hpp>
 #include <Scene/Scene.hpp>
 
-namespace luna
+namespace Luna
 {
-	inline IAllocator* get_module_allocator()
-	{
-		return get_global_heap();
-	}
-	namespace editor
-	{
-		extern ILogger* g_logger;
-	}
-	inline ILogger* get_logger()
-	{
-		return editor::g_logger;
-	}
-
-	inline void input_asset_entry(imgui::IContext* ctx, const char* label, IStringBuffer* asset_name, Guid& asset_guid, IName* required_type)
+	inline void input_asset_entry(ImGui::IContext* ctx, const char* label, String& asset_name, Guid& asset_guid, const Name& required_type)
 	{
 		ctx->input_text(label, asset_name);
 		bool editing = ctx->is_item_active();
 		if (!editing)
 		{
 			// Check if the asset path is valid.
-			auto ass = asset::fetch_asset(new_path(asset_name->c_str()));
+			auto ass = Asset::fetch_asset(Path(asset_name.c_str()));
 			if (succeeded(ass) && (ass.get()->meta()->type() == required_type))
 			{
 				// If valid, change the GUID to a new one.
@@ -51,19 +38,19 @@ namespace luna
 				// The reset behavior.
 				if (asset_guid == Guid(0, 0))
 				{
-					asset_name->clear();
+					asset_name.clear();
 				}
 				else
 				{
 					// Use the valid asset to change the string.
-					auto ass2 = asset::fetch_asset(asset_guid);
+					auto ass2 = Asset::fetch_asset(asset_guid);
 					if (succeeded(ass2))
 					{
-						asset_name->assign(ass2.get()->meta()->meta_path()->encode()->c_str());
+						asset_name.assign(ass2.get()->meta()->meta_path().encode().c_str());
 					}
 					else
 					{
-						asset_name->clear();
+						asset_name.clear();
 					}
 				}
 			}
@@ -73,7 +60,7 @@ namespace luna
 		if (ctx->button("Clear"))
 		{
 			asset_guid = Guid(0, 0);
-			asset_name->clear();
+			asset_name.clear();
 		}
 		ctx->pop_id();
 	}

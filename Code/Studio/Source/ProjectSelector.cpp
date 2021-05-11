@@ -6,53 +6,54 @@
 */
 #include "ProjectSelector.hpp"
 #include "StudioHeader.hpp"
+#include <Runtime/Time.hpp>
+#include <Runtime/Debug.hpp>
 
-namespace luna
+namespace Luna
 {
 	//! Creates project file at the specified directory.
-	static RP<IPath> create_project_dir(IPath* dir_path, IString* project_name, bool create_dir)
+	static R<Path> create_project_dir(const Path& dir_path, const String& project_name, bool create_dir)
 	{
-		if (project_name->size() == 0)
+		if (project_name.size() == 0)
 		{
-			set_err(e_bad_arguments, "Project name is empty.");
-			return e_user_failure;
+			return custom_error(BasicError::bad_arguments(), u8"Project name is empty.");
 		}
-		P<IPath> ret_path;
+		Path ret_path;
 		lutry
 		{
-			auto project_path = new_path();
-			project_path->assign(dir_path);
+			auto project_path = Path();
+			project_path.assign(dir_path);
 			if (create_dir)
 			{
-				project_path->push_back(intern_name(project_name->c_str()));
-				luexp(platform_create_dir(project_path->encode()->c_str()));
+				project_path.push_back(Name(project_name.c_str()));
+				luexp(platform_create_dir(project_path.encode().c_str()));
 			}
 
-			project_path->push_back(intern_name("Data"));
-			project_path->set_flags(project_path->flags() | EPathFlag::diretory);
-			luexp(platform_create_dir(project_path->encode()->c_str()));
-			project_path->pop_back();
+			project_path.push_back(Name("Data"));
+			project_path.flags() = project_path.flags() | EPathFlag::diretory;
+			luexp(platform_create_dir(project_path.encode().c_str()));
+			project_path.pop_back();
 
-			project_path->push_back(intern_name(project_name->c_str()));
-			project_path->set_flags(project_path->flags() & ~EPathFlag::diretory);
-			project_path->append_extension("lunaproj");
+			project_path.push_back(Name(project_name.c_str()));
+			project_path.flags() = project_path.flags() & ~EPathFlag::diretory;
+			project_path.append_extension(u8"lunaproj");
 
-			auto project_var = new_var(EVariantType::table);
-			auto mounts_var = new_var(EVariantType::variant);
-			project_var->set_field(0, intern_name("mounts"), mounts_var);
+			auto project_var = Variant(EVariantType::table);
+			auto mounts_var = Variant(EVariantType::variant);
 			// Only one mount registry exists for the initial file.
 			{
-				auto mount_point_var = new_var(EVariantType::path);
-				auto platform_path_var = new_var(EVariantType::path);
-				mount_point_var->path() = new_path("/");
-				platform_path_var->path() = new_path("./Data");
-				auto registry_var = new_var(EVariantType::table);
-				registry_var->set_field(0, intern_name("mount_point"), mount_point_var);
-				registry_var->set_field(0, intern_name("platform_path"), platform_path_var);
-				mounts_var->var() = registry_var;
+				auto mount_point_var = Variant(EVariantType::path);
+				auto platform_path_var = Variant(EVariantType::path);
+				mount_point_var.to_path() = Path(u8"/");
+				platform_path_var.to_path() = Path(u8"./Data");
+				auto registry_var = Variant(EVariantType::table);
+				registry_var.set_field(0, u8"mount_point", mount_point_var);
+				registry_var.set_field(0, u8"platform_path", platform_path_var);
+				mounts_var.to_var() = registry_var;
 			}
+			project_var.set_field(0, u8"mounts", mounts_var);
 			auto encoder = new_text_encoder();
-			lulet(f, platform_open_file(project_path->encode()->c_str(), EFileOpenFlag::write, EFileCreationMode::create_always));
+			lulet(f, platform_open_file(project_path.encode().c_str(), EFileOpenFlag::write, EFileCreationMode::create_always));
 			luexp(encoder->encode(project_var, f));
 			ret_path = project_path;
 		}
@@ -62,27 +63,27 @@ namespace luna
 
 	struct RecentFileRecord
 	{
-		uint64 m_last_use_time;
-		P<IPath> m_path;
+		u64 m_last_use_time;
+		Path m_path;
 	};
 
 	void read_recents(Vector<RecentFileRecord>& recents)
 	{
 		lutry
 		{
-			lulet(f, platform_open_file("Recents.la", EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing));
+			lulet(f, platform_open_file(u8"Recents.la", EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing));
 			auto decoder = new_text_decoder();
 			lulet(var, decoder->decode(f));
-			size_t count = var->length(1);
-			lulet(items, var->check_var_buf());
-			for (size_t i = 0; i < count; ++i)
+			usize count = var.length(1);
+			lulet(items, var.check_var_buf());
+			for (usize i = 0; i < count; ++i)
 			{
 				auto item = items[i];
 				RecentFileRecord rec;
-				lulet(time_field, item->field(0, intern_name("last_use_time")));
-				lulet(path_field, item->field(0, intern_name("path")));
-				luset(rec.m_last_use_time, time_field->check_u64());
-				luset(rec.m_path, path_field->check_path());
+				auto& time_field = item.field(0, u8"last_use_time");
+				auto& path_field = item.field(0, u8"path");
+				luset(rec.m_last_use_time, time_field.check_u64());
+				luset(rec.m_path, path_field.check_path());
 				recents.push_back(rec);
 			}
 		}
@@ -92,18 +93,18 @@ namespace luna
 		}
 	}
 
-	void write_recents(Vector<RecentFileRecord>& recents, IPath* opened)
+	void write_recents(Vector<RecentFileRecord>& recents, const Path& opened)
 	{
 		auto iter = recents.begin();
-		if (opened)
+		if (!opened.empty())
 		{
 			bool insert = true;
 			while (iter != recents.end())
 			{
-				if (iter->m_path->equal_to(opened))
+				if (iter->m_path.equal_to(opened))
 				{
 					RecentFileRecord rec = *iter;
-					rec.m_last_use_time = get_local_timestamp();
+					rec.m_last_use_time = get_timestamp();
 					recents.erase(iter);
 					iter = recents.begin();
 					recents.insert(iter, rec);
@@ -115,24 +116,24 @@ namespace luna
 			if (insert)
 			{
 				RecentFileRecord rec;
-				rec.m_last_use_time = get_local_timestamp();
+				rec.m_last_use_time = get_timestamp();
 				rec.m_path = opened;
 				recents.insert(recents.begin(), rec);
 			}
 		}
 		lutry
 		{
-			auto var = new_var1(EVariantType::variant, recents.size());
-			auto items = var->var_buf();
-			for (size_t i = 0; i < recents.size(); ++i)
+			auto var = Variant(EVariantType::variant, recents.size());
+			auto items = var.to_var_buf();
+			for (usize i = 0; i < recents.size(); ++i)
 			{
-				auto item = new_var(EVariantType::table);
-				auto time_field = new_var(EVariantType::u64);
-				auto path_field = new_var(EVariantType::path);
-				time_field->u64() = recents[i].m_last_use_time;
-				path_field->path() = recents[i].m_path;
-				item->set_field(0, intern_name("last_use_time"), time_field);
-				item->set_field(0, intern_name("path"), path_field);
+				auto item = Variant(EVariantType::table);
+				auto time_field = Variant(EVariantType::u64);
+				auto path_field = Variant(EVariantType::path);
+				time_field.to_u64() = recents[i].m_last_use_time;
+				path_field.to_path() = recents[i].m_path;
+				item.set_field(0, Name("last_use_time"), time_field);
+				item.set_field(0, Name("path"), path_field);
 				items[i] = item;
 			}
 			auto encoder = new_text_encoder();
@@ -145,30 +146,30 @@ namespace luna
 		}
 	}
 
-	RP<IPath> select_project()
+	R<Path> select_project()
 	{
-		P<IPath> path;
+		Path path;
 		lutry
 		{
-			lulet(window, gfx::new_window("Luna Studio Project Selector", gfx::window_default_v, gfx::window_default_v, 1000, 500));
-			lulet(swap_chain, gfx::new_swap_chain(renderer::main_graphic_queue(), window, gfx::SwapChainDesc(0, 0, gfx::EResourceFormat::rgba8_unorm, 2, true)));
-			lulet(cmdbuf, renderer::main_graphic_queue()->new_command_buffer());
+			lulet(window, Gfx::new_window("Luna Studio Project Selector", Gfx::window_default_v, Gfx::window_default_v, 1000, 500));
+			lulet(swap_chain, Gfx::new_swap_chain(Renderer::main_graphic_queue(), window, Gfx::SwapChainDesc(0, 0, Gfx::EResourceFormat::rgba8_unorm, 2, true)));
+			lulet(cmdbuf, Renderer::main_graphic_queue()->new_command_buffer());
 
 			// Create back buffer.
-			P<gfx::IResource> back_buffer;
-			uint32 w = 0, h = 0;
+			P<Gfx::IResource> back_buffer;
+			u32 w = 0, h = 0;
 
 			// Create ImGui context.
-			lulet(ctx, imgui::new_context(renderer::device(), cmdbuf, gfx::EResourceFormat::rgba8_unorm, window->dpi_scale_factor()));
+			lulet(ctx, ImGui::new_context(Renderer::device(), cmdbuf, Gfx::EResourceFormat::rgba8_unorm, window->dpi_scale_factor()));
 			luexp(ctx->attach_system_window(window));
 
-			lulet(rp, renderer::device()->new_render_pass(gfx::RenderPassDesc({ gfx::AttachmentDesc(gfx::EResourceFormat::rgba8_unorm, gfx::EAttachmentLoadOp::dont_care, gfx::EAttachmentStoreOp::store) },
-				gfx::EResourceFormat::unknown, gfx::EAttachmentLoadOp::dont_care, gfx::EAttachmentStoreOp::dont_care, gfx::EAttachmentLoadOp::dont_care, gfx::EAttachmentStoreOp::dont_care, 1, false)));
-			P<gfx::IFrameBuffer> back_buffer_fbo;
+			lulet(rp, Renderer::device()->new_render_pass(Gfx::RenderPassDesc({ Gfx::AttachmentDesc(Gfx::EResourceFormat::rgba8_unorm, Gfx::EAttachmentLoadOp::dont_care, Gfx::EAttachmentStoreOp::store) },
+				Gfx::EResourceFormat::unknown, Gfx::EAttachmentLoadOp::dont_care, Gfx::EAttachmentStoreOp::dont_care, Gfx::EAttachmentLoadOp::dont_care, Gfx::EAttachmentStoreOp::dont_care, 1, false)));
+			P<Gfx::IFrameBuffer> back_buffer_fbo;
 
-			auto new_solution_name = new_string_buffer();
+			auto new_solution_name = String();
 
-			Vector<RecentFileRecord> recents(get_module_allocator());
+			Vector<RecentFileRecord> recents;
 			read_recents(recents);
 
 			bool create_dir = true;
@@ -176,7 +177,7 @@ namespace luna
 			while (true)
 			{
 				new_frame();
-				input::update();
+				Input::update();
 
 				if (window->closed())
 				{
@@ -187,28 +188,28 @@ namespace luna
 				auto sz = window->size();
 				if (sz.x && sz.y && (!back_buffer || sz.x != w || sz.y != h))
 				{
-					luexp(swap_chain->resize_buffers(2, sz.x, sz.y, gfx::EResourceFormat::unknown));
-					float32 clear_color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-					luset(back_buffer, renderer::device()->new_resource(gfx::ResourceDesc::tex2d(gfx::EResourceFormat::rgba8_unorm, gfx::EAccessType::gpu_local, gfx::EResourceUsageFlag::render_target, sz.x, sz.y, 1, 1),
-						&gfx::ClearValue::as_color(gfx::EResourceFormat::rgba8_unorm, clear_color)));
+					luexp(swap_chain->resize_buffers(2, sz.x, sz.y, Gfx::EResourceFormat::unknown));
+					f32 clear_color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+					luset(back_buffer, Renderer::device()->new_resource(Gfx::ResourceDesc::tex2d(Gfx::EResourceFormat::rgba8_unorm, Gfx::EAccessType::gpu_local, Gfx::EResourceUsageFlag::render_target, sz.x, sz.y, 1, 1),
+						&Gfx::ClearValue::as_color(Gfx::EResourceFormat::rgba8_unorm, clear_color)));
 					w = sz.x;
 					h = sz.y;
-					luset(back_buffer_fbo, renderer::device()->new_frame_buffer(rp, 1, back_buffer.get_address_of(), nullptr, nullptr, nullptr));
+					luset(back_buffer_fbo, Renderer::device()->new_frame_buffer(rp, 1, back_buffer.get_address_of(), nullptr, nullptr, nullptr));
 				}
 
 				ctx->new_frame();
 
 				ctx->set_next_window_pos(Float2(0.0f, 0.0f));
-				ctx->set_next_window_size(Float2((float32)sz.x, (float32)sz.y));
-				ctx->begin("Luna Studio Project Selector", nullptr, imgui::EWindowFlag::no_title_bar | imgui::EWindowFlag::no_resize | imgui::EWindowFlag::no_move | imgui::EWindowFlag::no_collapse);
+				ctx->set_next_window_size(Float2((f32)sz.x, (f32)sz.y));
+				ctx->begin("Luna Studio Project Selector", nullptr, ImGui::EWindowFlag::no_title_bar | ImGui::EWindowFlag::no_resize | ImGui::EWindowFlag::no_move | ImGui::EWindowFlag::no_collapse);
 
-				if (ctx->collapsing_header("New Project", imgui::ETreeNodeFlag::default_open))
+				if (ctx->collapsing_header("New Project", ImGui::ETreeNodeFlag::default_open))
 				{
 					ctx->input_text("Project Name", new_solution_name);
 					ctx->checkbox("Create Project Folder", &create_dir);
 					if (ctx->button("Create New Project"))
 					{
-						auto rpath = gfx::open_dir_dialog("Select Project Folder");
+						auto rpath = Gfx::open_dir_dialog("Select Project Folder");
 						if (succeeded(rpath))
 						{
 							auto res2 = create_project_dir(rpath.get(), new_solution_name, create_dir);
@@ -219,17 +220,17 @@ namespace luna
 							}
 							else
 							{
-								auto _ = gfx::message_box(explain(res2.result()), "Project Creation Failed", gfx::EMessageBoxType::ok, gfx::EMessageBoxIcon::error);
+								auto _ = Gfx::message_box(get_errmsg(res2.errcode()), "Project Creation Failed", Gfx::EMessageBoxType::ok, Gfx::EMessageBoxIcon::error);
 							}
 						}
 					}
 				}
 
-				if (ctx->collapsing_header("Open Existing Project", imgui::ETreeNodeFlag::default_open))
+				if (ctx->collapsing_header("Open Existing Project", ImGui::ETreeNodeFlag::default_open))
 				{
 					if (ctx->button("Browse Project File"))
 					{
-						auto rpath = gfx::open_file_dialog("Luna Project File\0*.lunaproj\0\0", "Select Project File");
+						auto rpath = Gfx::open_file_dialog("Luna Project File\0*.lunaproj\0\0", "Select Project File");
 						if (succeeded(rpath) && !rpath.get().empty())
 						{
 							path = rpath.get()[0];
@@ -241,7 +242,7 @@ namespace luna
 					if(!recents.empty())
 					{
 						// Show recent files.
-						ctx->push_style_var(imgui::EStyle::child_rounding, 5.0f);
+						ctx->push_style_var(ImGui::EStyle::child_rounding, 5.0f);
 						ctx->begin_child("Recent Projects", Float2(0.0f, 0.0f), true);
 
 						ctx->text("Recent Projects");
@@ -263,13 +264,12 @@ namespace luna
 						auto iter = recents.begin();
 						while (iter != recents.end())
 						{
-							DateTime dt;
-							timestamp_to_data_time(iter->m_last_use_time, dt);
-							ctx->text(iter->m_path->encode()->c_str());
+							DateTime dt = timestamp_to_local_datetime(iter->m_last_use_time);
+							ctx->text(iter->m_path.encode().c_str());
 							ctx->next_column();
 							ctx->text("%hu/%hu/%hu %02hu:%02hu", dt.year, dt.month, dt.day, dt.hour, dt.minute);
 							ctx->next_column();
-							ctx->push_id(iter->m_path);
+							ctx->push_id(&(iter->m_path));
 							if (ctx->button("Open"))
 							{
 								path = iter->m_path;
@@ -278,7 +278,7 @@ namespace luna
 							if (ctx->button("Delete"))
 							{
 								iter = recents.erase(iter);
-								write_recents(recents, nullptr);
+								write_recents(recents, Path());
 							}
 							else
 							{
@@ -291,7 +291,7 @@ namespace luna
 						ctx->end_child();
 						ctx->pop_style_var();
 
-						if (path)
+						if (!path.empty())
 						{
 							break;
 						}
@@ -312,9 +312,9 @@ namespace luna
 				luexp(swap_chain->present(back_buffer, 0, 1));
 				swap_chain->wait();
 			}
-			if (!path)
+			if (path.empty())
 			{
-				return e_failure;
+				return BasicError::failure();
 			}
 
 			// Write to the recents.

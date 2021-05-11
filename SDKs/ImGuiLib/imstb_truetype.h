@@ -69,7 +69,7 @@
 //   1.08 (2015-09-13) document stbtt_Rasterize(); fixes for vertical & horizontal edges
 //   1.07 (2015-08-01) allow PackFontRanges to accept arrays of sparse codepoints;
 //                     variant PackFontRanges to pack and render in separate phases;
-//                     fix stbtt_GetFontOFfsetForIndex (never worked for non-0 input?);
+//                     fix stbtt_GetFontOFfsetForIndex (never worked for non-0 Input?);
 //                     fixed an assert() bug in the new rasterizer
 //                     replace assert() with STBTT_assert() in new rasterizer
 //
@@ -915,9 +915,9 @@ STBTT_DEF void stbtt_Rasterize(stbtt__bitmap *result,        // 1-channel bitmap
                                float flatness_in_pixels,     // allowable error of curve in pixels
                                stbtt_vertex *vertices,       // array of vertices defining shape
                                int num_verts,                // number of vertices in above array
-                               float scale_x, float scale_y, // scale applied to input vertices
-                               float shift_x, float shift_y, // translation applied to input vertices
-                               int x_off, int y_off,         // another translation applied to input
+                               float scale_x, float scale_y, // scale applied to Input vertices
+                               float shift_x, float shift_y, // translation applied to Input vertices
+                               int x_off, int y_off,         // another translation applied to Input
                                int invert,                   // if non-zero, vertically flip shape
                                void *userdata);              // context for to STBTT_MALLOC
 
@@ -4821,7 +4821,7 @@ STBTT_DEF int stbtt_CompareUTF8toUTF16_bigendian(const char *s1, int len1, const
 //   1.08 (2015-09-13) document stbtt_Rasterize(); fixes for vertical & horizontal edges
 //   1.07 (2015-08-01) allow PackFontRanges to accept arrays of sparse codepoints;
 //                     allow PackFontRanges to pack and render in separate phases;
-//                     fix stbtt_GetFontOFfsetForIndex (never worked for non-0 input?);
+//                     fix stbtt_GetFontOFfsetForIndex (never worked for non-0 Input?);
 //                     fixed an assert() bug in the new rasterizer
 //                     replace assert() with STBTT_assert() in new rasterizer
 //   1.06 (2015-07-14) performance improvements (~35% faster on x86 and x64 on test machine)

@@ -6,7 +6,7 @@
 */
 #pragma once
 #include "../IComponentEditorType.hpp"
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -16,18 +16,17 @@ namespace luna
 			lucid("{c8b8721a-22ad-4ef3-8d32-87d6671989cf}");
 			luiimpl(DirectionalLightComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<scene::IComponent> m_component;
+			Name m_type_name;
+			WP<Scene::IComponent> m_component;
 
-			DirectionalLightComponentEditor(IAllocator* alloc) :
-				luibind(alloc) {}
+			DirectionalLightComponentEditor() {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class PointLightComponentEditor : public IComponentEditor
@@ -36,18 +35,17 @@ namespace luna
 			lucid("{18bcac1e-b28a-46de-86b1-6a8e99c47b51}");
 			luiimpl(PointLightComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<scene::IComponent> m_component;
+			Name m_type_name;
+			WP<Scene::IComponent> m_component;
 
-			PointLightComponentEditor(IAllocator* alloc) :
-				luibind(alloc) {}
+			PointLightComponentEditor() {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class SpotlLightComponentEditor : public IComponentEditor
@@ -56,18 +54,17 @@ namespace luna
 			lucid("{c8b8721a-22ad-4ef3-8d32-87d6671989cf}");
 			luiimpl(SpotlLightComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<scene::IComponent> m_component;
+			Name m_type_name;
+			WP<Scene::IComponent> m_component;
 
-			SpotlLightComponentEditor(IAllocator* alloc) :
-				luibind(alloc) {}
+			SpotlLightComponentEditor() {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class DirectionalLightComponentEditorType : public IComponentEditorType
@@ -76,19 +73,18 @@ namespace luna
 			lucid("{41b820f7-fa84-453d-bebe-398a0cfeabee}");
 			luiimpl(DirectionalLightComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			DirectionalLightComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Directional Light")) {}
+			DirectionalLightComponentEditorType() :
+				m_type_name(Name("Directional Light")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<DirectionalLightComponentEditor>(get_module_allocator()));
+				auto r = newobj<DirectionalLightComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;
@@ -101,19 +97,18 @@ namespace luna
 			lucid("{3ebfe846-89a3-439b-8d9c-e1b962b02589}");
 			luiimpl(PointLightComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			PointLightComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Point Light")) {}
+			PointLightComponentEditorType() :
+				m_type_name(Name("Point Light")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<PointLightComponentEditor>(get_module_allocator()));
+				auto r = newobj<PointLightComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;
@@ -126,19 +121,18 @@ namespace luna
 			lucid("{86dfae1a-8786-4f83-83ef-15b410ead7cf}");
 			luiimpl(SpotLightComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			SpotLightComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Spot Light")) {}
+			SpotLightComponentEditorType() :
+				m_type_name(Name("Spot Light")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<SpotlLightComponentEditor>(get_module_allocator()));
+				auto r = newobj<SpotlLightComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;

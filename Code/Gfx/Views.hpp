@@ -8,54 +8,54 @@
 #pragma once
 #include "GraphicDefines.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		namespace rtv
 		{
 			struct Buffer
 			{
 				//! Number of bytes between the beginning of the buffer and the first element to access.
-				uint64 offset;
+				u64 offset;
 				//! The total number of elements in the view.
-				uint32 count;
+				u32 count;
 			};
 			struct Tex1D
 			{
-				uint32 mip_slice;	
+				u32 mip_slice;	
 			};
 			struct Tex1DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex2D
 			{
-				uint32 mip_slice;
+				u32 mip_slice;
 			};
 			struct Tex2DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex2DMS {};
 			struct Tex2DMSArray
 			{
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex3D
 			{
-				uint32 mip_slice;
-				uint32 first_layer_slice;
-				uint32 layer_size;
+				u32 mip_slice;
+				u32 first_layer_slice;
+				u32 layer_size;
 			};
 		}
 
-		enum class ERenderTargetViewType : uint32
+		enum class ERenderTargetViewType : u32
 		{
 			unknown = 0,
 			buffer,
@@ -84,7 +84,7 @@ namespace luna
 				rtv::Tex3D tex3d;
 			};
 
-			static RenderTargetViewDesc as_buffer(EResourceFormat _format, uint64 _offset, uint32 _count)
+			static RenderTargetViewDesc as_buffer(EResourceFormat _format, u64 _offset, u32 _count)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -94,7 +94,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex1d(EResourceFormat _format, uint32 _mip_slice)
+			static RenderTargetViewDesc as_tex1d(EResourceFormat _format, u32 _mip_slice)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -103,7 +103,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex1darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size)
+			static RenderTargetViewDesc as_tex1darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -114,7 +114,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex2d(EResourceFormat _format, uint32 _mip_slice)
+			static RenderTargetViewDesc as_tex2d(EResourceFormat _format, u32 _mip_slice)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -123,7 +123,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex2darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size)
+			static RenderTargetViewDesc as_tex2darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -142,7 +142,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex2dmsarray(EResourceFormat _format, uint32 _first_array_slice, uint32 _array_size)
+			static RenderTargetViewDesc as_tex2dmsarray(EResourceFormat _format, u32 _first_array_slice, u32 _array_size)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -152,7 +152,7 @@ namespace luna
 				return desc;
 			}
 
-			static RenderTargetViewDesc as_tex3d(EResourceFormat _format, uint32 _mip_slice, uint32 _first_layer_slice, uint32 _layer_size)
+			static RenderTargetViewDesc as_tex3d(EResourceFormat _format, u32 _mip_slice, u32 _first_layer_slice, u32 _layer_size)
 			{
 				RenderTargetViewDesc desc;
 				desc.format = _format;
@@ -169,76 +169,76 @@ namespace luna
 			struct Buffer
 			{
 				//! The index of the first element to be accessed by the view.
-				uint64 offset;
+				u64 offset;
 				//! The number of elements in the resource.
-				uint32 count;
+				u32 count;
 				//! The size of each element in the buffer structure (in bytes) when the buffer represents a structured buffer.
 				//! This can be ignored for typed 
-				uint32 element_size;
+				u32 element_size;
 				//! Indicates the buffer is a byte address buffer ( raw view buffer ).
 				bool raw_view;
 			};
 			struct Tex1D
 			{
 				//! The most detailed mip level to use.
-				uint32  most_detailed_mip;		
+				u32  most_detailed_mip;		
 				//! The mip levels to use. Set to -1 to indicate all the mipmap levels from `most_detailed_mip` on down to least detailed. 
 				//! Available mip levels are [most_detailed, most_detailed + mip_levels - 1].
-				uint32  mip_levels;
+				u32  mip_levels;
 				//! A value to clamp sample LOD values to. 
 				//! For example, if you specify 2.0f for the clamp value, you ensure that no individual sample accesses a mip level 
 				//! less than 2.0f.
-				float32 resource_min_lod_clamp;	
+				f32 resource_min_lod_clamp;	
 			};
 			struct Tex1DArray
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
+				u32  most_detailed_mip;
+				u32  mip_levels;
 				//! The index of the first texture to use in an array of textures.
-				uint32  first_array_slice;
+				u32  first_array_slice;
 				//! Number of textures in the array.
-				uint32  array_size;
-				float32 resource_min_lod_clamp;
+				u32  array_size;
+				f32 resource_min_lod_clamp;
 			};
 			struct Tex2D
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
-				float32 resource_min_lod_clamp;
+				u32  most_detailed_mip;
+				u32  mip_levels;
+				f32 resource_min_lod_clamp;
 			};
 			struct Tex2DArray
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
-				uint32  first_array_slice;
-				uint32  array_size;
-				float32 resource_min_lod_clamp;
+				u32  most_detailed_mip;
+				u32  mip_levels;
+				u32  first_array_slice;
+				u32  array_size;
+				f32 resource_min_lod_clamp;
 			};
 			struct Tex2DMS {};
 			struct Tex2DMSArray
 			{
-				uint32  first_array_slice;
-				uint32  array_size;
+				u32  first_array_slice;
+				u32  array_size;
 			};
 			struct Tex3D
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
-				float32 resource_min_lod_clamp;
+				u32  most_detailed_mip;
+				u32  mip_levels;
+				f32 resource_min_lod_clamp;
 			};
 			struct TexCube
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
-				float32 resource_min_lod_clamp;
+				u32  most_detailed_mip;
+				u32  mip_levels;
+				f32 resource_min_lod_clamp;
 			};
 			struct TexCubeArray
 			{
-				uint32  most_detailed_mip;
-				uint32  mip_levels;
-				uint32  first_2darray_face;
-				uint32  num_cubes;
-				float32 resource_min_lod_clamp;
+				u32  most_detailed_mip;
+				u32  mip_levels;
+				u32  first_2darray_face;
+				u32  num_cubes;
+				f32 resource_min_lod_clamp;
 			};
 		}
 
@@ -275,7 +275,7 @@ namespace luna
 				srv::TexCubeArray texcubearray;
 			};
 
-			static ShaderResourceViewDesc as_buffer(EResourceFormat _format, uint64 _offset, uint32 _count, uint32 _element_size, bool _raw_view = false)
+			static ShaderResourceViewDesc as_buffer(EResourceFormat _format, u64 _offset, u32 _count, u32 _element_size, bool _raw_view = false)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -287,7 +287,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex1d(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_tex1d(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -298,7 +298,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex1darray(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, uint32 _first_array_slice, uint32 _array_size, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_tex1darray(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, u32 _first_array_slice, u32 _array_size, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -311,7 +311,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex2d(EResourceFormat _format, uint32  _most_detailed_mip, uint32  _mip_levels, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_tex2d(EResourceFormat _format, u32  _most_detailed_mip, u32  _mip_levels, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -322,7 +322,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex2darray(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, uint32 _first_array_slice, uint32 _array_size, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_tex2darray(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, u32 _first_array_slice, u32 _array_size, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -343,7 +343,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex2dmsarray(EResourceFormat _format, uint32 _first_array_slice, uint32 _array_size)
+			static ShaderResourceViewDesc as_tex2dmsarray(EResourceFormat _format, u32 _first_array_slice, u32 _array_size)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -353,7 +353,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_tex3d(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_tex3d(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -364,7 +364,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_texcube(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_texcube(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -375,7 +375,7 @@ namespace luna
 				return desc;
 			}
 
-			static ShaderResourceViewDesc as_texcubearray(EResourceFormat _format, uint32 _most_detailed_mip, uint32 _mip_levels, uint32 _first_2d_array_face, uint32 _num_cubes, float32 _resource_min_lod_clamp)
+			static ShaderResourceViewDesc as_texcubearray(EResourceFormat _format, u32 _most_detailed_mip, u32 _mip_levels, u32 _first_2d_array_face, u32 _num_cubes, f32 _resource_min_lod_clamp)
 			{
 				ShaderResourceViewDesc desc;
 				desc.format = _format;
@@ -393,37 +393,37 @@ namespace luna
 		{
 			struct Buffer
 			{
-				uint64 offset;
-				uint32 count;
-				uint32 element_size;
-				uint64 counter_offset_in_bytes;
+				u64 offset;
+				u32 count;
+				u32 element_size;
+				u64 counter_offset_in_bytes;
 				bool raw_view;
 			};
 			struct Tex1D
 			{
-				uint32 mip_slice;
+				u32 mip_slice;
 			};
 			struct Tex1DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex2D
 			{
-				uint32 mip_slice;
+				u32 mip_slice;
 			};
 			struct Tex2DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex3D
 			{
-				uint32 mip_slice;
-				uint32 first_layer_slice;
-				uint32 layer_size;
+				u32 mip_slice;
+				u32 first_layer_slice;
+				u32 layer_size;
 			};
 		}
 
@@ -452,7 +452,7 @@ namespace luna
 				uav::Tex3D tex3d;
 			};
 
-			static UnorderedAccessViewDesc as_buffer(EResourceFormat _format, uint64 _offset, uint32 _count, uint32 _element_size, uint64 _counter_offset_in_bytes, bool _raw_view)
+			static UnorderedAccessViewDesc as_buffer(EResourceFormat _format, u64 _offset, u32 _count, u32 _element_size, u64 _counter_offset_in_bytes, bool _raw_view)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -465,7 +465,7 @@ namespace luna
 				return desc;
 			}
 
-			static UnorderedAccessViewDesc as_tex1d(EResourceFormat _format, uint32 _mip_slice)
+			static UnorderedAccessViewDesc as_tex1d(EResourceFormat _format, u32 _mip_slice)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -474,7 +474,7 @@ namespace luna
 				return desc;
 			}
 
-			static UnorderedAccessViewDesc as_tex1darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size)
+			static UnorderedAccessViewDesc as_tex1darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -485,7 +485,7 @@ namespace luna
 				return desc;
 			}
 
-			static UnorderedAccessViewDesc as_tex2d(EResourceFormat _format, uint32 _mip_slice)
+			static UnorderedAccessViewDesc as_tex2d(EResourceFormat _format, u32 _mip_slice)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -494,7 +494,7 @@ namespace luna
 				return desc;
 			}
 
-			static UnorderedAccessViewDesc as_tex2darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size)
+			static UnorderedAccessViewDesc as_tex2darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -505,7 +505,7 @@ namespace luna
 				return desc;
 			}
 
-			static UnorderedAccessViewDesc as_tex3d(EResourceFormat _format, uint32 _mip_slice, uint32 _first_layer_slice, uint32 _layer_size)
+			static UnorderedAccessViewDesc as_tex3d(EResourceFormat _format, u32 _mip_slice, u32 _first_layer_slice, u32 _layer_size)
 			{
 				UnorderedAccessViewDesc desc;
 				desc.format = _format;
@@ -521,29 +521,29 @@ namespace luna
 		{
 			struct Tex1D
 			{
-				uint32 mip_slice;
+				u32 mip_slice;
 			};
 			struct Tex1DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex2D
 			{
-				uint32 mip_slice;
+				u32 mip_slice;
 			};
 			struct Tex2DArray
 			{
-				uint32 mip_slice;
-				uint32 first_array_slice;
-				uint32 array_size;
+				u32 mip_slice;
+				u32 first_array_slice;
+				u32 array_size;
 			};
 			struct Tex2DMS {};
 			struct Tex2DMSArray
 			{
-				uint32  first_array_slice;
-				uint32  array_size;
+				u32  first_array_slice;
+				u32  array_size;
 			};
 		}
 
@@ -574,7 +574,7 @@ namespace luna
 				dsv::Tex2DMSArray tex2dmsarray;
 			};
 
-			static DepthStencilViewDesc as_tex1d(EResourceFormat _format, uint32 _mip_slice, bool _depth_read_only = false, bool _stencil_read_only = false)
+			static DepthStencilViewDesc as_tex1d(EResourceFormat _format, u32 _mip_slice, bool _depth_read_only = false, bool _stencil_read_only = false)
 			{
 				DepthStencilViewDesc desc;
 				desc.format = _format;
@@ -585,7 +585,7 @@ namespace luna
 				return desc;
 			}
 
-			static DepthStencilViewDesc as_tex1darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
+			static DepthStencilViewDesc as_tex1darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
 			{
 				DepthStencilViewDesc desc;
 				desc.format = _format;
@@ -598,7 +598,7 @@ namespace luna
 				return desc;
 			}
 
-			static DepthStencilViewDesc as_tex2d(EResourceFormat _format, uint32 _mip_slice, bool _depth_read_only = false, bool _stencil_read_only = false)
+			static DepthStencilViewDesc as_tex2d(EResourceFormat _format, u32 _mip_slice, bool _depth_read_only = false, bool _stencil_read_only = false)
 			{
 				DepthStencilViewDesc desc;
 				desc.format = _format;
@@ -609,7 +609,7 @@ namespace luna
 				return desc;
 			}
 
-			static DepthStencilViewDesc as_tex2darray(EResourceFormat _format, uint32 _mip_slice, uint32 _first_array_slice, uint32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
+			static DepthStencilViewDesc as_tex2darray(EResourceFormat _format, u32 _mip_slice, u32 _first_array_slice, u32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
 			{
 				DepthStencilViewDesc desc;
 				desc.format = _format;
@@ -632,7 +632,7 @@ namespace luna
 				return desc;
 			}
 
-			static DepthStencilViewDesc as_tex2dmsarray(EResourceFormat _format, uint32 _first_array_slice, uint32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
+			static DepthStencilViewDesc as_tex2dmsarray(EResourceFormat _format, u32 _first_array_slice, u32 _array_size, bool _depth_read_only = false, bool _stencil_read_only = false)
 			{
 				DepthStencilViewDesc desc;
 				desc.format = _format;
@@ -651,17 +651,17 @@ namespace luna
 		{
 			IResource* resource;
 			//! The offset of the buffer from resource start in bytes.
-			uint64 offset_in_bytes;
+			u64 offset_in_bytes;
 			//! The size of the resource in bytes.
-			uint32 size_in_bytes;
+			u32 size_in_bytes;
 			//! The size of one element in the buffer in bytes.
-			uint32 stride_in_bytes;
+			u32 stride_in_bytes;
 
 			VertexBufferViewDesc() = default;
 			VertexBufferViewDesc(IResource* _resource,
-				uint64 _offset_in_bytes,
-				uint32 _size_in_bytes,
-				uint32 _stride_in_bytes) :
+				u64 _offset_in_bytes,
+				u32 _size_in_bytes,
+				u32 _stride_in_bytes) :
 				resource(_resource),
 				offset_in_bytes(_offset_in_bytes),
 				size_in_bytes(_size_in_bytes),
@@ -670,15 +670,15 @@ namespace luna
 
 		struct ConstantBufferViewDesc
 		{
-			uint64 offset;
-			uint32 size;
+			u64 offset;
+			u32 size;
 
 			ConstantBufferViewDesc() = default;
-			ConstantBufferViewDesc(uint64 _offset, uint32 _size) :
+			ConstantBufferViewDesc(u64 _offset, u32 _size) :
 				offset(_offset), size(_size) {}
 		};
 
-		enum class EFilter : uint32
+		enum class EFilter : u32
 		{
 			min_mag_mip_point,
 			min_mag_point_mip_linear,
@@ -718,7 +718,7 @@ namespace luna
 			maximum_anisotropic
 		};
 
-		enum class ETextureAddressMode : uint32
+		enum class ETextureAddressMode : u32
 		{
 			warp,
 			mirror,
@@ -733,24 +733,24 @@ namespace luna
 			ETextureAddressMode address_u;
 			ETextureAddressMode address_v;
 			ETextureAddressMode address_w;
-			float32 mip_lod_bias;
-			uint32 max_anisotropy;
+			f32 mip_lod_bias;
+			u32 max_anisotropy;
 			EComparisonFunc comparison_func;
-			float32 border_color[4];
-			float32 min_lod;
-			float32 max_lod;
+			f32 border_color[4];
+			f32 min_lod;
+			f32 max_lod;
 
 			SamplerDesc() = default;
 			SamplerDesc(EFilter _filter,
 				ETextureAddressMode _address_u,
 				ETextureAddressMode _address_v,
 				ETextureAddressMode _address_w,
-				float32 _mip_lod_bias = 0.0f,
-				uint32 _max_anisotropy = 1,
+				f32 _mip_lod_bias = 0.0f,
+				u32 _max_anisotropy = 1,
 				EComparisonFunc _comparison_func = EComparisonFunc::always,
-				float32 _border_color[4] = nullptr,
-				float32 _min_lod = 0.0f,
-				float32 _max_lod = FLT_MAX) :
+				f32 _border_color[4] = nullptr,
+				f32 _min_lod = 0.0f,
+				f32 _max_lod = FLT_MAX) :
 				filter(_filter),
 				address_u(_address_u),
 				address_v(_address_v),
@@ -789,10 +789,10 @@ namespace luna
 		struct StreamOutputBufferView
 		{
 			IResource* soresource;
-			uint64 offset_in_bytes;
-			uint64 size_in_bytes;
+			u64 offset_in_bytes;
+			u64 size_in_bytes;
 			IResource* buffer_filled_size_resource;
-			uint64 buffer_filled_size_offset;
+			u64 buffer_filled_size_offset;
 		};
 	}
 }

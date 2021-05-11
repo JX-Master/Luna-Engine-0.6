@@ -8,9 +8,9 @@
 #include <Core/Core.hpp>
 #include <Asset/Asset.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
 		struct IEntity;
 		struct IComponentType;

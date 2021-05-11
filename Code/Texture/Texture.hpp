@@ -13,12 +13,10 @@
 #define LUNA_TEXTURE_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace texture
+	namespace Texture
 	{
-		LUNA_TEXTURE_API void init();
-
 		//! Creates a new texture object with no data loaded. This is the same as 
 		//! `asset::new_asset` with type "Texture".
 		LUNA_TEXTURE_API RP<ITexture> new_texture();

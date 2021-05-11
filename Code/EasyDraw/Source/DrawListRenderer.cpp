@@ -7,11 +7,11 @@
 #include "DrawListRenderer.hpp"
 #include <math.h>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		using namespace gfx;
+		using namespace Gfx;
 		RV DrawListRenderer::init()
 		{
 			lutry
@@ -40,8 +40,8 @@ namespace luna
 				
 				GraphicsPipelineStateDesc psd(
 					il,
-					ShaderBytecode(g_vs->data(), g_vs->size()),
-					ShaderBytecode(g_ps->data(), g_ps->size()),
+					ShaderBytecode(g_vs.data(), g_vs.size()),
+					ShaderBytecode(g_ps.data(), g_ps.size()),
 					ShaderBytecode(Default()),
 					ShaderBytecode(Default()),
 					ShaderBytecode(Default()),
@@ -55,42 +55,42 @@ namespace luna
 					0xffffffff, 0
 				);
 				luset(m_pso, m_rp->get_device()->new_graphics_pipeline_state(m_slayout, m_rp, psd));
-				psd.ps.code = g_ps_no_tex->data();
-				psd.ps.length = g_ps_no_tex->size();
+				psd.ps.code = g_ps_no_tex.data();
+				psd.ps.length = g_ps_no_tex.size();
 				luset(m_pso_no_tex, m_rp->get_device()->new_graphics_pipeline_state(m_slayout_no_tex, m_rp, psd));
 
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
-		RV DrawListRenderer::render(gfx::ICommandBuffer* target_cmd_buffer, gfx::IResource* rt, uint32 width, uint32 height)
+		RV DrawListRenderer::render(Gfx::ICommandBuffer* target_cmd_buffer, Gfx::IResource* rt, u32 width, u32 height)
 		{
 			lutry
 			{
-				uint32 cb_align;
+				u32 cb_align;
 				m_rp->get_device()->check_feature_support(EDeviceFeature::buffer_data_alignment, &cb_align);
-				size_t cb_size = align_upper(sizeof(Float4x4), cb_align);
+				usize cb_size = align_upper(sizeof(Float4x4), cb_align);
 				// prepare buffer.
 				{
 					// collect sizes.
-					size_t vb_sz = 0;
-					size_t ib_sz = 0;
-					size_t cb_sz = 0;
-					size_t num_dcs = 0;
+					usize vb_sz = 0;
+					usize ib_sz = 0;
+					usize cb_sz = 0;
+					usize num_dcs = 0;
 					for (auto& i : m_dcs)
 					{
-						for (uint32 j = 0; j < i.m_count; ++j)
+						for (u32 j = 0; j < i.m_count; ++j)
 						{
 							DrawCall dc;
 							i.m_list->enum_draw_call(j, dc);
 							vb_sz += dc.num_vertices * sizeof(PrimitiveVertex);
-							ib_sz += dc.num_indices * sizeof(uint32);
+							ib_sz += dc.num_indices * sizeof(u32);
 							cb_sz += cb_size;
 							++num_dcs;
 						}
 					}
 					m_vb_count = vb_sz / sizeof(PrimitiveVertex);
-					m_ib_count = ib_sz / sizeof(uint32);
+					m_ib_count = ib_sz / sizeof(u32);
 					m_cb_count = num_dcs;
 					if (!m_vb_res || m_vb_size < vb_sz)
 					{
@@ -110,32 +110,32 @@ namespace luna
 				}
 				// Copy resources.
 				{
-					size_t ib_off = 0;
-					size_t vb_off = 0;
-					size_t cb_off = 0;
+					usize ib_off = 0;
+					usize vb_off = 0;
+					usize cb_off = 0;
 					lulet(vb_data, m_vb_res->map_subresource(0, false, 1, 0));
 					lulet(ib_data, m_ib_res->map_subresource(0, false, 1, 0));
 					lulet(cb_data, m_cb_res->map_subresource(0, false, 1, 0));
 					PrimitiveVertex* verts = (PrimitiveVertex*)vb_data;
-					uint32* indices = (uint32*)ib_data;
+					u32* indices = (u32*)ib_data;
 					for (auto& i : m_dcs)
 					{
-						for (uint32 j = 0; j < i.m_count; ++j)
+						for (u32 j = 0; j < i.m_count; ++j)
 						{
 							DrawCall dc;
 							i.m_list->enum_draw_call(j, dc);
 							memcpy(verts + vb_off, dc.vertices, sizeof(PrimitiveVertex) * dc.num_vertices);
-							memcpy(indices + ib_off, dc.indices, sizeof(uint32) * dc.num_indices);
-							float32 rad = deg_to_rad(dc.rotation);
-							float32 sinr = sinf(rad);
-							float32 cosr = cosf(rad);
+							memcpy(indices + ib_off, dc.indices, sizeof(u32) * dc.num_indices);
+							f32 rad = deg_to_rad(dc.rotation);
+							f32 sinr = sinf(rad);
+							f32 cosr = cosf(rad);
 							Float4x4 mvp(
 								2.0f * cosr / width, -2.0f * sinr / height, 0.0f, 0.0f,
 								-2.0f * sinr / width, -2.0f * cosr / height, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, 0.0f,
 								2.0f * dc.origin_x / width - 1.0f, 1.0f - 2.0f * dc.origin_y / height, 0.0f, 1.0f
 							);
-							Float4U* cb_dest = (Float4U*)((size_t)cb_data + cb_off);
+							Float4U* cb_dest = (Float4U*)((usize)cb_data + cb_off);
 							memcpy(cb_dest, mvp.m, sizeof(Float4x4));
 							vb_off += dc.num_vertices;
 							ib_off += dc.num_indices;
@@ -161,18 +161,18 @@ namespace luna
 					target_cmd_buffer->resource_barriers(4, barriers);
 					target_cmd_buffer->begin_render_pass(m_rp, fbo, 0, nullptr, 1.0f, 0xff);
 					target_cmd_buffer->set_primitive_topology(EPrimitiveTopology::triangle_list);
-					target_cmd_buffer->set_vertex_buffers(0, 1, &VertexBufferViewDesc(m_vb_res, 0, (uint32)m_vb_size, (uint32)sizeof(PrimitiveVertex)));
-					target_cmd_buffer->set_index_buffer(m_ib_res, 0, (uint32)m_ib_size, EResourceFormat::r32_uint);
+					target_cmd_buffer->set_vertex_buffers(0, 1, &VertexBufferViewDesc(m_vb_res, 0, (u32)m_vb_size, (u32)sizeof(PrimitiveVertex)));
+					target_cmd_buffer->set_index_buffer(m_ib_res, 0, (u32)m_ib_size, EResourceFormat::r32_uint);
 					ResourceDesc d = rt->desc();
-					target_cmd_buffer->set_viewports(1, &Viewport(0.0f, 0.0f, (float32)d.width, (float32)d.height, 0.0f, 1.0f));
+					target_cmd_buffer->set_viewports(1, &Viewport(0.0f, 0.0f, (f32)d.width, (f32)d.height, 0.0f, 1.0f));
 
 					// VB & IB offsets.
-					size_t vb_off = 0;
-					size_t ib_off = 0;
-					size_t cb_off = 0;
+					usize vb_off = 0;
+					usize ib_off = 0;
+					usize cb_off = 0;
 					for (auto& i : m_dcs)
 					{
-						for (uint32 j = 0; j < i.m_count; ++j)
+						for (u32 j = 0; j < i.m_count; ++j)
 						{
 							DrawCall dc;
 							i.m_list->enum_draw_call(j, dc);
@@ -183,7 +183,7 @@ namespace luna
 								target_cmd_buffer->set_pipeline_state(m_pso);
 								target_cmd_buffer->set_graphic_shader_input_layout(m_slayout);
 								luset(view_set, m_rp->get_device()->new_view_set(m_slayout, ViewSetDesc(1, 1, 0, 1)));
-								view_set->set_cbv(0, m_cb_res, ConstantBufferViewDesc((uint32)cb_off, (uint32)cb_size));
+								view_set->set_cbv(0, m_cb_res, ConstantBufferViewDesc((u32)cb_off, (u32)cb_size));
 								cb_off += cb_size;
 								view_set->set_srv(0, dc.texture, nullptr);
 								view_set->set_sampler(0, dc.sampler);
@@ -194,25 +194,25 @@ namespace luna
 								target_cmd_buffer->set_pipeline_state(m_pso_no_tex);
 								target_cmd_buffer->set_graphic_shader_input_layout(m_slayout_no_tex);
 								luset(view_set, m_rp->get_device()->new_view_set(m_slayout_no_tex, ViewSetDesc(1, 0, 0, 0)));
-								view_set->set_cbv(0, m_cb_res, ConstantBufferViewDesc((uint32)cb_off, (uint32)cb_size));
+								view_set->set_cbv(0, m_cb_res, ConstantBufferViewDesc((u32)cb_off, (u32)cb_size));
 								cb_off += cb_size;
 							}
 							target_cmd_buffer->attach_graphic_object(view_set);
 							target_cmd_buffer->set_graphic_view_set(view_set);
 							if (dc.clip_rect == RectI(0, 0, 0, 0))
 							{
-								target_cmd_buffer->set_scissor_rects(1, &RectI(0, 0, (int32)d.width, d.height));
+								target_cmd_buffer->set_scissor_rects(1, &RectI(0, 0, (i32)d.width, d.height));
 							}
 							else
 							{
-								float32 width_ratio = (float32)d.width / (float32)width;
-								float32 height_ratio = (float32)d.height / (float32)height;
+								f32 width_ratio = (f32)d.width / (f32)width;
+								f32 height_ratio = (f32)d.height / (f32)height;
 								RectI& r = dc.clip_rect;
-								RectI scaled((int32)((r.left + (int32)dc.origin_x) * width_ratio), (int32)((r.top + (int32)dc.origin_y) * height_ratio),
-									(int32)((r.right + (int32)dc.origin_x) * width_ratio), (int32)((r.bottom + (int32)dc.origin_y) * height_ratio));
+								RectI scaled((i32)((r.left + (i32)dc.origin_x) * width_ratio), (i32)((r.top + (i32)dc.origin_y) * height_ratio),
+									(i32)((r.right + (i32)dc.origin_x) * width_ratio), (i32)((r.bottom + (i32)dc.origin_y) * height_ratio));
 								target_cmd_buffer->set_scissor_rects(1, &scaled);
 							}
-							target_cmd_buffer->draw_indexed((uint32)dc.num_indices, (uint32)ib_off, (uint32)vb_off);
+							target_cmd_buffer->draw_indexed((u32)dc.num_indices, (u32)ib_off, (u32)vb_off);
 							vb_off += dc.num_vertices;
 							ib_off += dc.num_indices;
 						}
@@ -222,7 +222,7 @@ namespace luna
 				m_dcs.clear();
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 	}
 }

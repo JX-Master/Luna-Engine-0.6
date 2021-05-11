@@ -5,33 +5,22 @@
 * @date 2020/3/9
 */
 #pragma once
-
+#include <Runtime/Runtime.hpp>
 #include <Core/Core.hpp>
 #include <Gfx/Gfx.hpp>
 #include <Input/Input.hpp>
 #include <Renderer/Renderer.hpp>
 
-namespace luna
+namespace Luna
 {
-	extern P<ILogger> g_logger;
-	extern P<gfx::ICommandBuffer> g_cb;
+	extern P<Gfx::ICommandBuffer> g_cb;
 
-	extern P<gfx::IWindow> g_window;
-	extern P<gfx::ISwapChain> g_swap_chain;
+	extern P<Gfx::IWindow> g_window;
+	extern P<Gfx::ISwapChain> g_swap_chain;
 
-	extern P<gfx::IResource> g_rt;
+	extern P<Gfx::IResource> g_rt;
 
-	inline IAllocator* get_module_allocator()
-	{
-		return get_global_heap();
-	}
-
-	inline ILogger* get_logger()
-	{
-		return g_logger.get();
-	}
-
-	enum class ERendererTestCase : uint32
+	enum class ERendererTestCase : u32
 	{
 		// Renders a blue screen.
 		none = 0,

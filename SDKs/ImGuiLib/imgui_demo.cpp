@@ -1704,8 +1704,8 @@ static void ShowDemoWindowWidgets()
         if (item_type == 2) { ImGui::PushButtonRepeat(true); ret = ImGui::Button("ITEM: Button"); ImGui::PopButtonRepeat(); } // Testing button (with repeater)
         if (item_type == 3) { ret = ImGui::Checkbox("ITEM: Checkbox", &b); }                            // Testing checkbox
         if (item_type == 4) { ret = ImGui::SliderFloat("ITEM: SliderFloat", &col4f[0], 0.0f, 1.0f); }   // Testing basic item
-        if (item_type == 5) { ret = ImGui::InputText("ITEM: InputText", &str[0], IM_ARRAYSIZE(str)); }  // Testing input text (which handles tabbing)
-        if (item_type == 6) { ret = ImGui::InputFloat("ITEM: InputFloat", col4f, 1.0f); }               // Testing +/- buttons on scalar input
+        if (item_type == 5) { ret = ImGui::InputText("ITEM: InputText", &str[0], IM_ARRAYSIZE(str)); }  // Testing Input text (which handles tabbing)
+        if (item_type == 6) { ret = ImGui::InputFloat("ITEM: InputFloat", col4f, 1.0f); }               // Testing +/- buttons on scalar Input
         if (item_type == 7) { ret = ImGui::InputFloat3("ITEM: InputFloat3", col4f); }                   // Testing multi-component items (IsItemXXX flags are reported merged)
         if (item_type == 8) { ret = ImGui::ColorEdit4("ITEM: ColorEdit4", col4f); }                     // Testing multi-component items (IsItemXXX flags are reported merged)
         if (item_type == 9) { ret = ImGui::MenuItem("ITEM: MenuItem"); }                                // Testing menu item (they use ImGuiButtonFlags_PressedOnRelease button policy)
@@ -2714,7 +2714,7 @@ static void ShowDemoWindowPopups()
                 ImGui::OpenPopup("Stacked 2");
 
             // Also demonstrate passing a bool* to BeginPopupModal(), this will create a regular close button which will close the popup.
-            // Note that the visibility state of popups is owned by imgui, so the input value of the bool actually doesn't matter here.
+            // Note that the visibility state of popups is owned by imgui, so the Input value of the bool actually doesn't matter here.
             bool dummy_open = true;
             if (ImGui::BeginPopupModal("Stacked 2", &dummy_open))
             {
@@ -3826,7 +3826,7 @@ struct ExampleAppConsole
         Filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
         ImGui::Separator();
 
-        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
+        const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 Input text
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar); // Leave room for 1 separator + 1 InputText
         if (ImGui::BeginPopupContextWindow())
         {
@@ -3930,7 +3930,7 @@ struct ExampleAppConsole
             AddLog("Unknown command: '%s'\n", command_line);
         }
 
-        // On commad input, we scroll to bottom even if AutoScroll==false
+        // On commad Input, we scroll to bottom even if AutoScroll==false
         ScrollToBottom = true;
     }
 
@@ -4028,7 +4028,7 @@ struct ExampleAppConsole
                             HistoryPos = -1;
                 }
 
-                // A better implementation would preserve the data on the current input line along with cursor position.
+                // A better implementation would preserve the data on the current Input line along with cursor position.
                 if (prev_history_pos != HistoryPos)
                 {
                     const char* history_str = (HistoryPos >= 0) ? History[HistoryPos] : "";

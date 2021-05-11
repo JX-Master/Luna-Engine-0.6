@@ -5,26 +5,14 @@
 * @date 2020/4/20
 */
 #include "StudioHeader.hpp"
+#include <Runtime/Runtime.hpp>
 #include "ProjectSelector.hpp"
 #include "MainEditor.hpp"
 
-using namespace luna;
+using namespace Luna;
 
 void run_editor()
 {
-	input::init();
-	gfx::init();
-	renderer::init();
-	rpack::init();
-	image::init();
-	font::init();
-	imgui::init();
-	asset::init();
-	texture::init();
-	obj_loader::init();
-	scene::init();
-	e3d::init();
-
 	// Run project selector.
 	auto project = select_project();
 	if (failed(project))
@@ -38,10 +26,18 @@ void run_editor()
 	return;
 }
 
+void set_current_dir_to_process_path()
+{
+	Path p = get_process_path();
+	p.pop_back();
+	luassert_always(succeeded(set_current_dir(p.encode().c_str())));
+}
+
 int main()
 {
-	luna::init();
+	luassert_always(succeeded(Luna::init()));
+	set_current_dir_to_process_path();
 	run_editor();
-	luna::shutdown();
+	Luna::close();
 	return 0;
 }

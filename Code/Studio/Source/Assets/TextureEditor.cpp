@@ -6,11 +6,11 @@
 */
 #include "TextureEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
-		void TextureEditor::on_render(imgui::IContext* ctx)
+		void TextureEditor::on_render(ImGui::IContext* ctx)
 		{
 			auto tex = m_tex.lock();
 			if (!tex)
@@ -20,15 +20,15 @@ namespace luna
 			}
 
 			char name[32];
-			sprintf_s(name, "Texture###%d", (uint32)this);
+			sprintf_s(name, "Texture###%d", (u32)(usize)this);
 			
-			ctx->begin(name, &m_open, imgui::EWindowFlag::no_collapse);
+			ctx->begin(name, &m_open, ImGui::EWindowFlag::no_collapse);
 
 			lutry
 			{
 				lulet(res, tex->texture());
 				auto desc = res->desc();
-				ctx->image(res, Float2((float32)desc.width, (float32)desc.height));
+				ctx->image(res, Float2((f32)desc.width, (f32)desc.height));
 			}
 			lucatch
 			{

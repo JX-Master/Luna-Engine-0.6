@@ -12,11 +12,11 @@
 #include <d3d12.h>
 #include "../Windows/CommonInclude.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			inline D3D12_RESOURCE_STATES encode_resource_state(EResourceState s)
 			{
@@ -207,11 +207,11 @@ namespace luna
 			//{
 			//	switch (t)
 			//	{
-			//	case luna::gfx::ECommandListType::graphic:
+			//	case Luna::gfx::ECommandListType::graphic:
 			//		return D3D12_COMMAND_LIST_TYPE_DIRECT;
-			//	case luna::gfx::ECommandListType::compute:
+			//	case Luna::gfx::ECommandListType::compute:
 			//		return D3D12_COMMAND_LIST_TYPE_COMPUTE;
-			//	case luna::gfx::ECommandListType::copy:
+			//	case Luna::gfx::ECommandListType::copy:
 			//		return D3D12_COMMAND_LIST_TYPE_COPY;
 			//	default:
 			//		lupanic();

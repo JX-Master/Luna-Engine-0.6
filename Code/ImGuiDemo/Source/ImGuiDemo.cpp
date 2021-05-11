@@ -11,44 +11,39 @@
 #include <RectPack/RectPack.hpp>
 #include <Image/Image.hpp>
 #include <Font/Font.hpp>
+#include <Runtime/Runtime.hpp>
+#include <Runtime/Platform.hpp>
 
-using namespace luna;
+using namespace Luna;
 
 int main()
 {
-	using namespace gfx;
+	using namespace Gfx;
 	// Start modules.
-	luna::init();
-	input::init();
-	gfx::init();
-	renderer::init();
-	rpack::init();
-	image::init();
-	font::init();
-	imgui::init();
-	P<IGraphicDevice> dev = renderer::device();
+	Luna::init();
+	P<IGraphicDevice> dev = Renderer::device();
 
-	P<gfx::IWindow> window = gfx::new_window("ImGui Demo").get();
-	P<gfx::ISwapChain> swap_chain = gfx::new_swap_chain(renderer::main_graphic_queue(), window, SwapChainDesc(0, 0, EResourceFormat::rgba8_unorm, 2, true)).get();
+	P<Gfx::IWindow> window = Gfx::new_window("ImGui Demo").get();
+	P<Gfx::ISwapChain> swap_chain = Gfx::new_swap_chain(Renderer::main_graphic_queue(), window, SwapChainDesc(0, 0, EResourceFormat::rgba8_unorm, 2, true)).get();
 
-	P<ICommandBuffer> cmdbuf = renderer::main_graphic_queue()->new_command_buffer().get();
+	P<ICommandBuffer> cmdbuf = Renderer::main_graphic_queue()->new_command_buffer().get();
 
 	// Create back buffer.
-	P<gfx::IResource> back_buffer;
-	uint32 w = 0, h = 0;
+	P<Gfx::IResource> back_buffer;
+	u32 w = 0, h = 0;
 
 	// Create ImGui context.
-	P<imgui::IContext> ctx = imgui::new_context(renderer::device(), cmdbuf).get();
+	P<ImGui::IContext> ctx = ImGui::new_context(Renderer::device(), cmdbuf).get();
 	ctx->attach_system_window(window);
 
-	P<gfx::IRenderPass> rp = renderer::device()->new_render_pass(gfx::RenderPassDesc({ gfx::AttachmentDesc(EResourceFormat::rgba8_unorm, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::store) },
+	P<Gfx::IRenderPass> rp = Renderer::device()->new_render_pass(Gfx::RenderPassDesc({ Gfx::AttachmentDesc(EResourceFormat::rgba8_unorm, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::store) },
 		EResourceFormat::unknown, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, false)).get();
-	P<gfx::IFrameBuffer> back_buffer_fbo;
+	P<Gfx::IFrameBuffer> back_buffer_fbo;
 
 	while (true)
 	{
 		new_frame();
-		input::update();
+		Input::update();
 
 		if (window->closed())
 		{
@@ -62,12 +57,12 @@ int main()
 		if (!back_buffer || ww != w || wh != h)
 		{
 			swap_chain->resize_buffers(2, ww, wh, EResourceFormat::unknown);
-			float32 clear_color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			back_buffer = renderer::device()->new_resource(ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::render_target, ww, wh, 1, 1), 
+			f32 clear_color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			back_buffer = Renderer::device()->new_resource(ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::render_target, ww, wh, 1, 1), 
 				&ClearValue::as_color(EResourceFormat::rgba8_unorm, clear_color)).get();
 			w = ww;
 			h = wh;
-			back_buffer_fbo = renderer::device()->new_frame_buffer(rp, 1, back_buffer.get_address_of(), nullptr, nullptr, nullptr).get();
+			back_buffer_fbo = Renderer::device()->new_frame_buffer(rp, 1, back_buffer.get_address_of(), nullptr, nullptr, nullptr).get();
 		}
 
 		ctx->new_frame();
@@ -95,6 +90,6 @@ int main()
 	window = nullptr;
 	cmdbuf = nullptr;
 	dev = nullptr;
-	luna::shutdown();
+	Luna::close();
 	return 0;
 }

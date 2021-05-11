@@ -5,8 +5,9 @@
 * @date 2020/5/12
 */
 #include "ObjLoaderHeader.hpp"
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
 	namespace obj_loader
 	{
@@ -19,9 +20,7 @@ namespace luna
 			Attributes m_attributes;
 			Vector<Shape> m_shapes;
 
-			ObjFile(IAllocator* alloc) :
-				luibind(alloc),
-				m_shapes(alloc) {}
+			ObjFile() {}
 
 			virtual Attributes& attributes() override
 			{

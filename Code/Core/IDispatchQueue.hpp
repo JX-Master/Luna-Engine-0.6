@@ -5,8 +5,8 @@
 * @date 2020/3/8
 */
 #pragma once
-#include <Core/IRunnable.hpp>
-namespace luna
+#include "IRunnable.hpp"
+namespace Luna
 {
 	//! @interface IDispatchQueue
 	//! @threadsafe
@@ -39,7 +39,7 @@ namespace luna
 
 		//! Gets the concurrency limit value for this queue.
 		//! 0 means no limit.
-		virtual uint32 concurrency_limit() = 0;
+		virtual u32 concurrency_limit() = 0;
 
 		//! Enqueues one task to this dispatch queue, waiting to be processed by
 		//! one of the worker threads.
@@ -49,16 +49,16 @@ namespace luna
 
 		//! Gets the number of tasks being enqueued to this dispatch queue.
 		//! The counter number increases by 1 each time one task is enqueued by calling `dispatch`.
-		virtual uint64 enqueue_count() = 0;
+		virtual u64 enqueue_count() = 0;
 
 		//! Gets the number of tasks being dequeued and started executing.
 		//! The counter number increases by 1 each time one task is dequeued from the dispatch queue
 		//! and starts execution by one worker thread.
-		virtual uint64 execution_count() = 0;
+		virtual u64 execution_count() = 0;
 
 		//! Gets the number of tasks being finished executing.
 		//! The counter number increases by 1 each time one task is finished executing by the worker thread.
-		virtual uint64 completion_count() = 0;
+		virtual u64 completion_count() = 0;
 
 	};
 }

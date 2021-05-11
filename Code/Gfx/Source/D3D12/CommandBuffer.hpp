@@ -9,8 +9,8 @@
 
 #ifdef LUNA_GFX_D3D12
 #include "CommandQueue.hpp"
-#include <Base/TSAssert.hpp>
-#include <Base/HashMap.hpp>
+#include <Runtime/TSAssert.hpp>
+#include <Runtime/HashMap.hpp>
 #include "Resource.hpp"
 #include "RenderPass.hpp"
 #include "FrameBuffer.hpp"
@@ -18,16 +18,16 @@
 #include "PipelineState.hpp"
 #include "ShaderInputLayout.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			struct ResourceKey
 			{
 				Resource* m_res;
-				uint32 m_subres;
+				u32 m_subres;
 			};
 
 			inline bool operator==(const ResourceKey& lhs, const ResourceKey& rhs)
@@ -39,17 +39,17 @@ namespace luna
 	}
 
 	template<>
-	struct Hash<gfx::d3d12::ResourceKey>
+	struct hash<Gfx::D3D12::ResourceKey>
 	{
-		size_t operator()(const gfx::d3d12::ResourceKey& key)
+		usize operator()(const Gfx::D3D12::ResourceKey& key)
 		{
-			return memhash<size_t>(&key, sizeof(gfx::d3d12::ResourceKey));
+			return memhash<usize>(&key, sizeof(Gfx::D3D12::ResourceKey));
 		}
 	};
 
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			// Only for Non-Simultaneous-Access Textures.
 			inline bool is_texture_decayable_to_common(EResourceState s)
@@ -76,14 +76,11 @@ namespace luna
 
 				Vector<D3D12_RESOURCE_BARRIER> m_barriers;
 
-				ResourceStateTrackingSystem(IAllocator* alloc) :
-					m_unresloved(alloc),
-					m_current(alloc),
-					m_barriers(alloc){}
+				ResourceStateTrackingSystem() {}
 
 			private:
 				//! Translates one transition into the D3D12 transition barrier, and ignores the implicit promotion and decay.
-				void append_transition(Resource* res, uint32 subresource, EResourceState before, EResourceState after, EResourceBarrierFlag flags);
+				void append_transition(Resource* res, u32 subresource, EResourceState before, EResourceState after, EResourceBarrierFlag flags);
 
 			public:
 
@@ -98,7 +95,7 @@ namespace luna
 					m_barriers.clear();
 				}
 
-				R<EResourceState> get_state(Resource* res, uint32 subresource)
+				R<EResourceState> get_state(Resource* res, u32 subresource)
 				{
 					ResourceKey k;
 					k.m_res = res;
@@ -106,7 +103,7 @@ namespace luna
 					auto iter = m_current.find(k);
 					if (iter == m_current.end())
 					{
-						return e_item_not_exist;
+						return BasicError::not_found();
 					}
 					return iter->second;
 				}
@@ -120,7 +117,7 @@ namespace luna
 				//! 2. If the specified subresource has been resolved by previous states, both `begin_only` and `end_only`
 				//!	   calls will be recorded, but the changes will only be applied to the tracking system when `end_only`
 				//!	   is called.
-				void pack_transition(Resource* res, uint32 subresource, EResourceState after, EResourceBarrierFlag flags);
+				void pack_transition(Resource* res, u32 subresource, EResourceState after, EResourceBarrierFlag flags);
 
 				//! Appends any barrier.
 				void pack_barrier(const ResourceBarrierDesc& desc)
@@ -196,7 +193,7 @@ namespace luna
 				//! The event used for wait from CPU.
 				HANDLE m_event;
 				//! The next value to wait for by CPU/GPU.
-				uint64 m_wait_value;
+				u64 m_wait_value;
 
 				//! Checks if the command list is closed.
 				bool m_cmdlist_closed;
@@ -226,11 +223,7 @@ namespace luna
 				Vector<P<IGraphicDeviceChild>> m_objs;
 
 				CommandBuffer() :
-					luibind(get_module_allocator()),
-					m_objs(get_module_allocator()),
 					m_event(NULL),
-					m_tracking_system(get_module_allocator()),
-					m_vbs(get_module_allocator()),
 					m_cmdlist_closed(false) {}
 
 				~CommandBuffer()
@@ -257,13 +250,13 @@ namespace luna
 					DWORD res = ::WaitForSingleObject(m_event, 0);
 					if (res == WAIT_OBJECT_0)
 					{
-						return s_ok;
+						return RV();
 					}
 					if (res == WAIT_TIMEOUT)
 					{
-						return e_pending;
+						return BasicError::timeout();
 					}
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				virtual IGraphicDevice* get_device() override
@@ -281,51 +274,51 @@ namespace luna
 				{
 					m_objs.push_back(obj);
 				}
-				virtual void begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, uint32 num_rt_clear_values, const Float4U* clear_values,
-					float32 depth_clear_value, uint8 stencil_clear_value) override;
+				virtual void begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, u32 num_rt_clear_values, const Float4U* clear_values,
+					f32 depth_clear_value, u8 stencil_clear_value) override;
 				virtual void set_pipeline_state(IPipelineState* pso) override;
 				virtual void set_graphic_shader_input_layout(IShaderInputLayout* shader_input_layout) override;
-				virtual void set_vertex_buffers(uint32 start_slot, uint32 num_views, const VertexBufferViewDesc* views) override;
-				virtual void set_index_buffer(IResource* buffer, uint32 offset_in_bytes, uint32 size_in_bytes, EResourceFormat format) override;
+				virtual void set_vertex_buffers(u32 start_slot, u32 num_views, const VertexBufferViewDesc* views) override;
+				virtual void set_index_buffer(IResource* buffer, u32 offset_in_bytes, u32 size_in_bytes, EResourceFormat format) override;
 				virtual void set_graphic_view_set(IViewSet* view_set) override;
 				virtual void set_primitive_topology(EPrimitiveTopology primitive_topology) override;
-				virtual void set_stream_output_targets(uint32 start_slot, uint32 num_views, const StreamOutputBufferView* views) override;
+				virtual void set_stream_output_targets(u32 start_slot, u32 num_views, const StreamOutputBufferView* views) override;
 				virtual void set_viewport(const Viewport& viewport) override
 				{
 					set_viewports(1, &viewport);
 				}
-				virtual void set_viewports(uint32 num_viewports, const Viewport* viewports) override;
+				virtual void set_viewports(u32 num_viewports, const Viewport* viewports) override;
 				virtual void set_scissor_rect(const RectI& rects) override
 				{
 					return set_scissor_rects(1, &rects);
 				}
-				virtual void set_scissor_rects(uint32 num_rects, const RectI* rects) override;
-				virtual void set_blend_factor(const float32 blend_factor[4]) override;
-				virtual void set_stencil_ref(uint32 stencil_ref) override;
-				virtual void draw(uint32 vertex_count, uint32 start_vertex_location) override
+				virtual void set_scissor_rects(u32 num_rects, const RectI* rects) override;
+				virtual void set_blend_factor(const f32 blend_factor[4]) override;
+				virtual void set_stencil_ref(u32 stencil_ref) override;
+				virtual void draw(u32 vertex_count, u32 start_vertex_location) override
 				{
 					draw_instanced(vertex_count, 1, start_vertex_location, 0);
 				}
-				virtual void draw_indexed(uint32 index_count, uint32 start_index_location, int32 base_vertex_location) override
+				virtual void draw_indexed(u32 index_count, u32 start_index_location, i32 base_vertex_location) override
 				{
 					draw_indexed_instanced(index_count, 1, start_index_location, base_vertex_location, 0);
 				}
-				virtual void draw_indexed_instanced(uint32 index_count_per_instance, uint32 instance_count, uint32 start_index_location,
-					int32 base_vertex_location, uint32 start_instance_location) override;
-				virtual void draw_instanced(uint32 vertex_count_per_instance, uint32 instance_count, uint32 start_vertex_location,
-					uint32 start_instance_location) override;
-				virtual void clear_depth_stencil_view(EClearFlag clear_flags, float32 depth, uint8 stencil, uint32 num_rects, const RectI* rects) override;
-				virtual void clear_render_target_view(uint32 index, const float32 color_rgba[4], uint32 num_rects, const RectI* rects) override;
+				virtual void draw_indexed_instanced(u32 index_count_per_instance, u32 instance_count, u32 start_index_location,
+					i32 base_vertex_location, u32 start_instance_location) override;
+				virtual void draw_instanced(u32 vertex_count_per_instance, u32 instance_count, u32 start_vertex_location,
+					u32 start_instance_location) override;
+				virtual void clear_depth_stencil_view(EClearFlag clear_flags, f32 depth, u8 stencil, u32 num_rects, const RectI* rects) override;
+				virtual void clear_render_target_view(u32 index, const f32 color_rgba[4], u32 num_rects, const RectI* rects) override;
 				virtual void end_render_pass() override;
 				virtual void copy_resource(IResource* dest, IResource* src) override;
-				virtual void copy_buffer_region(IResource* dest, uint64 dest_offset, IResource* src, uint64 src_offset, uint64 num_bytes) override;
-				virtual void copy_texture_region(const TextureCopyLocation& dst, uint32 dst_x, uint32 dst_y, uint32 dst_z,
+				virtual void copy_buffer_region(IResource* dest, u64 dest_offset, IResource* src, u64 src_offset, u64 num_bytes) override;
+				virtual void copy_texture_region(const TextureCopyLocation& dst, u32 dst_x, u32 dst_y, u32 dst_z,
 					const TextureCopyLocation& src, const BoxU* src_box = nullptr) override;
 				virtual void set_compute_shader_input_layout(IShaderInputLayout* shader_input_layout) override;
 				virtual void set_compute_view_set(IViewSet* view_set) override;
 				virtual void resource_barrier(const ResourceBarrierDesc& barrier) override;
-				virtual void resource_barriers(uint32 num_barriers, const ResourceBarrierDesc* barriers) override;
-				virtual void dispatch(uint32 thread_group_count_x, uint32 thread_group_count_y, uint32 thread_group_count_z) override;
+				virtual void resource_barriers(u32 num_barriers, const ResourceBarrierDesc* barriers) override;
+				virtual void dispatch(u32 thread_group_count_x, u32 thread_group_count_y, u32 thread_group_count_z) override;
 				virtual RV submit() override;
 			};
 		}

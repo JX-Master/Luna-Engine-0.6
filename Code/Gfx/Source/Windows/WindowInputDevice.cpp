@@ -11,11 +11,11 @@
 #include "Window.hpp"
 #include <Windowsx.h>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			void WindowInputDevice::remove_invalid_listeners()
 			{
@@ -76,10 +76,10 @@ namespace luna
 					if (*iter == listener)
 					{
 						m_listeners.erase(iter);
-						return s_ok;
+						return RV();
 					}
 				}
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 
 			Unconstructed<WindowInputDevice> g_window_input;
@@ -87,10 +87,10 @@ namespace luna
 	}
 }
 
-using namespace luna;
-using namespace luna::gfx;
-using namespace luna::gfx::win;
-using namespace luna::input;
+using namespace Luna;
+using namespace Luna::Gfx;
+using namespace Luna::Gfx::Win;
+using namespace Luna::Input;
 
 static EMouseKey encode_down_keys(WPARAM wParam)
 {
@@ -151,8 +151,8 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 		}
 		else
 		{
-			uint16 width = (uint16)LOWORD(lParam);
-			uint16 height = (uint16)HIWORD(lParam);
+			u16 width = (u16)LOWORD(lParam);
+			u16 height = (u16)HIWORD(lParam);
 			EWindowDisplayMode mode;
 			switch (wParam)
 			{
@@ -181,8 +181,8 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 		break;
 	case WM_MOVE:
 	{
-		int16 x = (int16)LOWORD(lParam);   // horizontal position 
-		int16 y = (int16)HIWORD(lParam);   // vertical position 
+		i16 x = (i16)LOWORD(lParam);   // horizontal position 
+		i16 y = (i16)HIWORD(lParam);   // vertical position 
 		WindowMove move;
 		move.pos.x = x;
 		move.pos.y = y;
@@ -221,8 +221,8 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 			dblclk = true;
 		}
 		EMouseKey down_keys = encode_down_keys(wParam);
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
 		EMouseKey dk;
 		if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONDBLCLK)
 		{
@@ -252,10 +252,10 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	case WM_XBUTTONDBLCLK:
 	{
 		bool dblclk = (msg == WM_XBUTTONDOWN) ? false : true;
-		uint32 button = (uint32)GET_XBUTTON_WPARAM(wParam);
+		u32 button = (u32)GET_XBUTTON_WPARAM(wParam);
 		EMouseKey down_keys = encode_down_keys(GET_KEYSTATE_WPARAM(wParam));
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
 		EMouseKey dk;
 		if (button & XBUTTON1)
 		{
@@ -286,8 +286,8 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	case WM_MBUTTONUP:
 	{
 		EMouseKey down_keys = encode_down_keys(wParam);
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
 		EMouseKey dk;
 		if (msg == WM_LBUTTONUP)
 		{
@@ -315,9 +315,9 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	case WM_XBUTTONUP:
 	{
 		EMouseKey down_keys = encode_down_keys(GET_KEYSTATE_WPARAM(wParam));
-		uint32 button = (uint32)GET_XBUTTON_WPARAM(wParam);
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
+		u32 button = (u32)GET_XBUTTON_WPARAM(wParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
 		EMouseKey dk;
 		if (button & XBUTTON1)
 		{
@@ -345,8 +345,8 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	case WM_MOUSEMOVE:
 	{
 		EMouseKey down_keys = encode_down_keys(wParam);
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
 		WindowMove mv;
 		mv.down_keys = down_keys;
 		mv.pos.x = x;
@@ -361,10 +361,10 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	case WM_MOUSEWHEEL:
 	{
 		EMouseKey down_keys = encode_down_keys(GET_KEYSTATE_WPARAM(wParam));
-		int16 delta = GET_WHEEL_DELTA_WPARAM(wParam);
-		int32 x = GET_X_LPARAM(lParam);
-		int32 y = GET_Y_LPARAM(lParam);
-		float32 fd = (float32)delta / (float32)WHEEL_DELTA;
+		i16 delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		i32 x = GET_X_LPARAM(lParam);
+		i32 y = GET_Y_LPARAM(lParam);
+		f32 fd = (f32)delta / (f32)WHEEL_DELTA;
 		EWindowEvent e;
 		if (msg == WM_MOUSEWHEEL)
 		{
@@ -387,7 +387,7 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	break;
 	case WM_KEYDOWN:
 	{
-		input::EKeyCode key = (input::EKeyCode)wParam;
+		Input::EKeyCode key = (Input::EKeyCode)wParam;
 		if (in.dispatch_event(pw, EWindowEvent::key_down, &key))
 		{
 			return 0;
@@ -396,7 +396,7 @@ LRESULT CALLBACK luna_gfx_win_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 	break;
 	case WM_KEYUP:
 	{
-		input::EKeyCode key = (input::EKeyCode)wParam;
+		Input::EKeyCode key = (Input::EKeyCode)wParam;
 		if (in.dispatch_event(pw, EWindowEvent::key_up, &key))
 		{
 			return 0;

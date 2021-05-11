@@ -1738,8 +1738,8 @@ ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
 }
 
 // Default font TTF is compressed with stb_compress then base85 encoded (see misc/fonts/binary_to_compressed_c.cpp for encoder)
-static unsigned int stb_decompress_length(const unsigned char *input);
-static unsigned int stb_decompress(unsigned char *output, const unsigned char *input, unsigned int length);
+static unsigned int stb_decompress_length(const unsigned char *Input);
+static unsigned int stb_decompress(unsigned char *output, const unsigned char *Input, unsigned int length);
 static const char*  GetDefaultCompressedFontDataTTFBase85();
 static unsigned int Decode85Byte(char c)                                    { return c >= '\\' ? c-36 : c-35; }
 static void         Decode85(const unsigned char* src, unsigned char* dst)
@@ -2169,7 +2169,7 @@ bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
             continue;
 
         ImFontConfig& cfg = atlas->ConfigData[src_i];
-        ImFont* dst_font = cfg.DstFont; // We can have multiple input fonts writing into a same destination font (when using MergeMode=true)
+        ImFont* dst_font = cfg.DstFont; // We can have multiple Input fonts writing into a same destination font (when using MergeMode=true)
 
         const float font_scale = stbtt_ScaleForPixelHeight(&src_tmp.FontInfo, cfg.SizePixels);
         int unscaled_ascent, unscaled_descent, unscaled_line_gap;
@@ -3410,9 +3410,9 @@ void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p
 // Decompression from stb.h (public domain) by Sean Barrett https://github.com/nothings/stb/blob/master/stb.h
 //-----------------------------------------------------------------------------
 
-static unsigned int stb_decompress_length(const unsigned char *input)
+static unsigned int stb_decompress_length(const unsigned char *Input)
 {
-    return (input[8] << 24) + (input[9] << 16) + (input[10] << 8) + input[11];
+    return (Input[8] << 24) + (Input[9] << 16) + (Input[10] << 8) + Input[11];
 }
 
 static unsigned char *stb__barrier_out_e, *stb__barrier_out_b;

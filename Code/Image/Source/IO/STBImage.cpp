@@ -8,18 +8,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "STBImage.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
-		IAllocator* stbi_alloc;
 		stbi_io_callbacks stbi_iocb;
 		int stbi_read(void *user, char *data, int size)
 		{
 			IStream* stream = reinterpret_cast<IStream*>(user);
-			size_t read_bytes;
-			result_t r = stream->read(data, size, &read_bytes);
-			if (failed(r))
+			usize read_bytes;
+			RV r = stream->read(data, size, &read_bytes);
+			if (!r.valid())
 			{
 				return 0;
 			}
@@ -35,12 +34,11 @@ namespace luna
 		int stbi_eof(void *user)
 		{
 			IStream* stream = reinterpret_cast<IStream*>(user);
-			return (stream->tell() >= stream->size());
+			return (stream->tell().get() >= stream->size());
 		}
 
 		void stbi_init()
 		{
-			stbi_alloc = get_module_allocator();
 			stbi_iocb.eof = stbi_eof;
 			stbi_iocb.read = stbi_read;
 			stbi_iocb.skip = stbi_skip;

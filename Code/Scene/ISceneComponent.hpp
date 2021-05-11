@@ -7,9 +7,9 @@
 #pragma once
 #include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
 		struct ISceneComponentType;
 		//! @interface ISceneComponent

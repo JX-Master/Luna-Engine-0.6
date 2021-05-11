@@ -6,55 +6,54 @@
 */
 #pragma once
 #include "3DEngineHeader.hpp"
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		class ModelRenderer : public IModelRenderer
 		{
 		public:
 			lucid("{6c2d4c3a-1d81-4ff2-9a24-dfcf6a439e6c}");
-			luiimpl(ModelRenderer, IModelRenderer, scene::IComponent, ISerializable, IObject);
+			luiimpl(ModelRenderer, IModelRenderer, Scene::IComponent, ISerializable, IObject);
 
-			WP<scene::IEntity> m_belonging_entity;
-			asset::PAsset<IModel> m_model;
+			WP<Scene::IEntity> m_belonging_entity;
+			Asset::PAsset<IModel> m_model;
 
-			ModelRenderer(IAllocator* alloc) :
-				luibind(alloc) {}
+			ModelRenderer() {}
 
-			virtual RP<IVariant> serialize() override;
-			virtual RV deserialize(IVariant* obj) override;
-			virtual scene::IComponentType* type_object() override;
-			virtual P<scene::IEntity> belonging_entity() override;
+			virtual R<Variant> serialize() override;
+			virtual RV deserialize(const Variant& obj) override;
+			virtual Scene::IComponentType* type_object() override;
+			virtual P<Scene::IEntity> belonging_entity() override;
 			virtual Vector<Guid> referred_assets() override;
-			virtual asset::PAsset<IModel> model() override;
-			virtual void set_model(asset::PAsset<IModel> model) override;
+			virtual Asset::PAsset<IModel> model() override;
+			virtual void set_model(Asset::PAsset<IModel> model) override;
 		};
 
-		class ModelRendererType : public scene::IComponentType
+		class ModelRendererType : public Scene::IComponentType
 		{
 		public:
 			lucid("{929d2a2f-2c22-474e-a677-d4169a85a8d4}");
-			luiimpl_static(ModelRendererType, scene::IComponentType, IObject);
+			luiimpl_static(ModelRendererType, Scene::IComponentType, IObject);
 
-			P<IName> m_name;
+			Name m_name;
 
 			ModelRendererType() :
-				m_name(intern_name("Model Renderer")) {}
+				m_name(Name("Model Renderer")) {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_name;
 			}
-			virtual RP<scene::IComponent> new_component(scene::IEntity* belonging_entity) override
+			virtual RP<Scene::IComponent> new_component(Scene::IEntity* belonging_entity) override
 			{
-				auto r = box_ptr(new_obj<ModelRenderer>(get_module_allocator()));
+				auto r = newobj<ModelRenderer>();
 				r->m_belonging_entity = belonging_entity;
 				return r;
 			}
-			virtual void on_dependency_data_load(scene::IComponent* component, asset::IAsset* dependency_asset) override {}
-			virtual void on_dependency_data_unload(scene::IComponent* component, asset::IAsset* dependency_asset) override {}
-			virtual void on_dependency_replace(scene::IComponent* component, const Guid& before, const Guid& after) override;
+			virtual void on_dependency_data_load(Scene::IComponent* component, Asset::IAsset* dependency_asset) override {}
+			virtual void on_dependency_data_unload(Scene::IComponent* component, Asset::IAsset* dependency_asset) override {}
+			virtual void on_dependency_replace(Scene::IComponent* component, const Guid& before, const Guid& after) override;
 		};
 
 		extern Unconstructed<ModelRendererType> g_model_renderer_type;

@@ -5,39 +5,36 @@
 * @date 2020/3/6
 */
 #pragma once
-#include <Base/Assert.hpp>
+#include <Runtime/Assert.hpp>
 #define STBI_ASSERT(x) luassert(x)
-
-#include <Base/IAllocator.hpp>
+#include <Runtime/Memory.hpp>
 #include "../ImageHeader.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
-		// The global allocator being used by STB.
-		extern IAllocator* stbi_alloc;
 
-		inline void* stbi_malloc(size_t sz)
+		inline void* stbi_malloc(usize sz)
 		{
-			return stbi_alloc->allocate(sz);
+			return memalloc(sz);
 		}
 
 		inline void stbi_free(void* p)
 		{
-			stbi_alloc->free(p);
+			memfree(p);
 		}
 
-		inline void* stbi_realloc(void* p, size_t newsz)
+		inline void* stbi_realloc(void* p, usize newsz)
 		{
-			return stbi_alloc->reallocate(p, newsz);
+			return memrealloc(p, newsz);
 		}
 	}
 }
 
-#define STBI_MALLOC(sz)			luna::image::stbi_malloc(sz)
-#define STBI_REALLOC(p,newsz)	luna::image::stbi_realloc(p,newsz)
-#define STBI_FREE(p)			luna::image::stbi_free(p)
+#define STBI_MALLOC(sz)			Luna::Image::stbi_malloc(sz)
+#define STBI_REALLOC(p,newsz)	Luna::Image::stbi_realloc(p,newsz)
+#define STBI_FREE(p)			Luna::Image::stbi_free(p)
 
 #ifdef LUNA_PLATFORM_WINDOWS
 #define STBI_WINDOWS_UTF8
@@ -47,9 +44,9 @@ namespace luna
 
 #include <Stb/stb_image.h>
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		extern stbi_io_callbacks stbi_iocb;
 

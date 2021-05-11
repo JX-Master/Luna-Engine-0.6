@@ -13,11 +13,11 @@
 #include "d3d12.h"
 #include "GraphicSystem.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class ResourceHeap;
 			class ViewTableHeap;
@@ -44,13 +44,12 @@ namespace luna
 
 				bool m_swap_chain_initialized;
 
-				P<IBlob> m_swap_chain_vs;
-				P<IBlob> m_swap_chain_ps;
+				Blob m_swap_chain_vs;
+				Blob m_swap_chain_ps;
 				ComPtr<ID3D12Resource> m_swap_chain_vert_buf;
 				ComPtr<ID3DBlob> m_swap_chain_root_signature_data;
 
 				GraphicDevice() :
-					luibind(get_module_allocator()),
 					m_swap_chain_initialized(false) {}
 				~GraphicDevice();
 
@@ -68,10 +67,10 @@ namespace luna
 				virtual RP<IPipelineState> new_compute_pipline_state(IShaderInputLayout* shader_input_layout, const ComputePipelineStateDesc& desc) override;
 				virtual RP<ICommandQueue> new_command_queue(const CommandQueueDesc& desc) override;
 				virtual RP<IRenderPass> new_render_pass(const RenderPassDesc& desc) override;
-				virtual RP<IFrameBuffer> new_frame_buffer(IRenderPass* render_pass, uint32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv) override;
+				virtual RP<IFrameBuffer> new_frame_buffer(IRenderPass* render_pass, u32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv) override;
 				virtual RP<IViewSet> new_view_set(IShaderInputLayout* shader_input_layout, const ViewSetDesc& desc) override;
-				virtual void calc_texture_subresource_buffer_placement(uint32 width, uint32 height, uint32 depth, EResourceFormat format,
-					size_t* row_pitch, size_t* slice_pitch, size_t* res_pitch) override;
+				virtual void calc_texture_subresource_buffer_placement(u32 width, u32 height, u32 depth, EResourceFormat format,
+					usize* row_pitch, usize* slice_pitch, usize* res_pitch) override;
 			};
 		}
 	}

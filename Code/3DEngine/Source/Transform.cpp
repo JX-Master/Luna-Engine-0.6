@@ -7,38 +7,38 @@
 #pragma once
 #include "Transform.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		Unconstructed<TransformComponentType> g_transform_type;
 
-		RP<IVariant> Transform::serialize()
+		R<Variant> Transform::serialize()
 		{
 			lutsassert();
-			P<IVariant> data = new_var(EVariantType::table);
-			auto pos = new_var1(EVariantType::f32, 3);
-			auto pos_data = pos->f32_buf();
+			Variant data = Variant(EVariantType::table);
+			auto pos = Variant(EVariantType::f32, 3);
+			auto pos_data = pos.to_f32_buf();
 			pos_data[0] = m_transform.position.x;
 			pos_data[1] = m_transform.position.y;
 			pos_data[2] = m_transform.position.z;
-			auto rot = new_var1(EVariantType::f32, 4);
-			auto rot_data = rot->f32_buf();
+			auto rot = Variant(EVariantType::f32, 4);
+			auto rot_data = rot.to_f32_buf();
 			rot_data[0] = m_transform.rotation.x;
 			rot_data[1] = m_transform.rotation.y;
 			rot_data[2] = m_transform.rotation.z;
 			rot_data[3] = m_transform.rotation.w;
-			auto scale = new_var1(EVariantType::f32, 3);
-			auto scale_data = scale->f32_buf();
+			auto scale = Variant(EVariantType::f32, 3);
+			auto scale_data = scale.to_f32_buf();
 			scale_data[0] = m_transform.scale.x;
 			scale_data[1] = m_transform.scale.y;
 			scale_data[2] = m_transform.scale.z;
-			data->set_field(0, intern_name("position"), pos);
-			data->set_field(0, intern_name("rotation"), rot);
-			data->set_field(0, intern_name("scale"), scale);
+			data.set_field(0, Name("position"), pos);
+			data.set_field(0, Name("rotation"), rot);
+			data.set_field(0, Name("scale"), scale);
 
 			// Only save children.
-			Vector<P<scene::IEntity>> es;
+			Vector<P<Scene::IEntity>> es;
 			for (auto& i : m_children)
 			{
 				auto t = i.lock();
@@ -50,28 +50,28 @@ namespace luna
 			}
 			if (!es.empty())
 			{
-				auto child_ents = new_var1(EVariantType::name, es.size());
-				auto ents_data = child_ents->name_buf();
-				for (size_t i = 0; i < es.size(); ++i)
+				auto child_ents = Variant(EVariantType::name, es.size());
+				auto ents_data = child_ents.to_name_buf();
+				for (usize i = 0; i < es.size(); ++i)
 				{
 					ents_data[i] = es[i]->name();
 				}
-				data->set_field(0, intern_name("children"), child_ents);
+				data.set_field(0, Name("children"), child_ents);
 			}
 			return data;
 		}
 
-		RV Transform::deserialize(IVariant* obj)
+		RV Transform::deserialize(const Variant& obj)
 		{
 			lutsassert();
 			lutry
 			{
-				lulet(pos, obj->field(0, intern_name("position")));
-				lulet(rot, obj->field(0, intern_name("rotation")));
-				lulet(scale, obj->field(0, intern_name("scale")));
-				lulet(pos_data, pos->check_f32_buf());
-				lulet(rot_data, rot->check_f32_buf());
-				lulet(scale_data, scale->check_f32_buf());
+				auto& pos = obj.field(0, "position");
+				auto& rot = obj.field(0, "rotation");
+				auto& scale = obj.field(0, "scale");
+				lulet(pos_data, pos.check_f32_buf());
+				lulet(rot_data, rot.check_f32_buf());
+				lulet(scale_data, scale.check_f32_buf());
 				m_transform.position.x = pos_data[0];
 				m_transform.position.y = pos_data[1];
 				m_transform.position.z = pos_data[2];
@@ -83,22 +83,21 @@ namespace luna
 				m_transform.scale.y = scale_data[1];
 				m_transform.scale.z = scale_data[2];
 
-				auto _child_ents = obj->field(0, intern_name("children"));
-				if (succeeded(_child_ents))
+				auto e = m_entity.lock();
+				auto s = e->belonging_scene();
+				auto& child_ents = obj.field(0, "children");
+				if (child_ents.type() != EVariantType::null)
 				{
-					auto e = m_entity.lock();
-					auto s = e->belonging_scene();
-					auto child_ents = _child_ents.get();
-					size_t num_children = child_ents->length(1);
-					lulet(enames, child_ents->check_name_buf());
-					for (size_t i = 0; i < num_children; ++i)
+					usize num_children = child_ents.length(1);
+					lulet(enames, child_ents.check_name_buf());
+					for (usize i = 0; i < num_children; ++i)
 					{
 						auto childe = s->find_entity(enames[i]);
 						if (failed(childe))
 						{
 							continue;
 						}
-						auto childt = childe.get()->get_component(intern_name("Transform"));
+						auto childt = childe.get()->get_component("Transform");
 						if (failed(childt))
 						{
 							continue;
@@ -110,15 +109,15 @@ namespace luna
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
-		scene::IComponentType* Transform::type_object()
+		Scene::IComponentType* Transform::type_object()
 		{
 			return &g_transform_type.get();
 		}
 
-		P<scene::IEntity> Transform::belonging_entity()
+		P<Scene::IEntity> Transform::belonging_entity()
 		{
 			return m_entity.lock();
 		}
@@ -160,11 +159,11 @@ namespace luna
 				{
 					t.as<Transform>()->set_parent(nullptr);
 					m_children.erase(iter);
-					return s_ok;
+					return RV();
 				}
 				++iter;
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 
 		void Transform::remove_all_children()

@@ -6,13 +6,13 @@
 */
 #pragma once
 #include "RectPackHeader.hpp"
-#include <Base/Vector.hpp>
+#include <Runtime/Vector.hpp>
 #include <Stb/stb_rect_pack.h>
-#include <Base/Interface.hpp>
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace rpack
+	namespace RectPack
 	{
 		class RectPackContext : public IRectPackContext
 		{
@@ -23,12 +23,10 @@ namespace luna
 			Vector<stbrp_node> m_nodes;
 			stbrp_context m_ctx;
 
-			RectPackContext(IAllocator* alloc) :
-				luibind(alloc),
-				m_nodes(alloc) {}
+			RectPackContext() {}
 
-			virtual void reset(uint32 width, uint32 height) override;
-			virtual RV pack_rects(PackRect* rects, uint32 num_rects) override;
+			virtual void reset(u32 width, u32 height) override;
+			virtual RV pack_rects(PackRect* rects, u32 num_rects) override;
 		};
 	}
 }

@@ -8,12 +8,12 @@
 #include "GraphicDefines.hpp"
 #include "ICommandBuffer.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 
-		enum class ECommandQueuePriority : uint32
+		enum class ECommandQueuePriority : u32
 		{
 			normal,
 			high,

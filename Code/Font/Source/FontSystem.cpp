@@ -8,30 +8,37 @@
 #include "FontFileTTF.hpp"
 #include "FontAtlas.hpp"
 #include "DefaultFont.hpp"
-namespace luna
+#include <Runtime/Module.hpp>
+namespace Luna
 {
-	namespace font
+	namespace Font
 	{
 		P<IFontFile> g_default_font;
 		void deinit()
 		{
 			g_default_font = nullptr;
 		}
-		void init()
+		RV init()
 		{
-			g_default_font = load_font_file(new_blob(opensans_regular_ttf, opensans_regular_ttf_size), EFontFileFormat::ttf).get();
-			add_module("Font", deinit);
+			auto r = load_font_file(Blob(opensans_regular_ttf, opensans_regular_ttf_size), EFontFileFormat::ttf);
+			if (failed(r))
+			{
+				return r.errcode();
+			}
+			g_default_font = r.get();
+			return RV();
 		}
-		RP<IFontFile> load_font_file(IBlob* data, EFontFileFormat format)
+		StaticRegisterModule m("Font", "Core;Gfx;Image;RectPack", init, deinit);
+		RP<IFontFile> load_font_file(const Blob& data, EFontFileFormat format)
 		{
 			switch (format)
 			{
 			case EFontFileFormat::ttf:
 			{
-				P<FontFileTTF> f = box_ptr(new_obj<FontFileTTF>(get_module_allocator()));
+				P<FontFileTTF> f = newobj<FontFileTTF>();
 				lutry
 				{
-					luexp(f->init(data));
+					luexp(f->init(Blob(data)));
 				}
 				lucatchret;
 				return f;
@@ -40,14 +47,14 @@ namespace luna
 				lupanic();
 				break;
 			}
-			return e_failure;
+			return BasicError::not_supported();
 		}
-		RP<IFontAtlas> new_font_atlas(font::IFontFile* fontfile, uint32 font_index, float32 char_height)
+		RP<IFontAtlas> new_font_atlas(Font::IFontFile* fontfile, u32 font_index, f32 char_height)
 		{
-			P<FontAtlas> atlas = box_ptr(new_obj<FontAtlas>(get_module_allocator()));
+			P<FontAtlas> atlas = newobj<FontAtlas>();
 			if (!atlas->init(fontfile, font_index, char_height))
 			{
-				return e_failure;
+				return BasicError::failure();
 			}
 			return atlas;
 		}

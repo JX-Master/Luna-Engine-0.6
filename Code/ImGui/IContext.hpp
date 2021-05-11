@@ -5,15 +5,15 @@
 * @date 2020/4/3
 */
 #pragma once
-#include <Base/IObject.hpp>
+#include <Core/IObject.hpp>
 #include <Gfx/Gfx.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace imgui
+	namespace ImGui
 	{
 		//! Flags for ImGui::Begin()
-		enum class EWindowFlag : uint32
+		enum class EWindowFlag : u32
 		{
 			none = 0,
 			no_title_bar = 1 << 0,   // Disable title-bar
@@ -21,7 +21,7 @@ namespace luna
 			no_move = 1 << 2,   // Disable user moving the window
 			no_scrollbar = 1 << 3,   // Disable scrollbars (window can still scroll with mouse or programmatically)
 			no_scroll_with_mouse = 1 << 4,   // Disable user vertically scrolling with mouse wheel. On child window, mouse wheel will be forwarded to the parent unless NoScrollbar is also set.
-			no_collapse = 1 << 5,   // Disable user collapsing window by float64-clicking on it
+			no_collapse = 1 << 5,   // Disable user collapsing window by f64-clicking on it
 			always_auto_resize = 1 << 6,   // Resize every window to its content every frame
 			no_background = 1 << 7,   // Disable drawing background color (WindowBg, etc.) and outside border. Similar as using SetNextWindowBgAlpha(0.0f).
 			no_saved_settings = 1 << 8,   // Never load/save settings in .ini file
@@ -42,7 +42,7 @@ namespace luna
 			no_inputs = no_mouse_inputs | no_nav_inputs | no_nav_focus,
 		};
 
-		enum class EFocusedFlag : uint32
+		enum class EFocusedFlag : u32
 		{
 			none = 0,
 			child_windows = 1 << 0,   // is_window_focused(): Return true if any children of the window is focused
@@ -52,7 +52,7 @@ namespace luna
 		};
 
 		//! Flags for ImGui::TreeNodeEx(), ImGui::CollapsingHeader*()
-		enum class TreeNodeFlag : uint32
+		enum class TreeNodeFlag : u32
 		{
 			none = 0,
 			selected = 1 << 0,   // Draw as selected
@@ -61,8 +61,8 @@ namespace luna
 			no_tree_push_on_open = 1 << 3,   // Don't do a TreePush() when open (e.g. for CollapsingHeader) = no extra indent nor pushing on ID stack
 			no_auto_open_on_log = 1 << 4,   // Don't automatically and temporarily open node when Logging is active (by default logging will automatically open tree nodes)
 			default_open = 1 << 5,   // Default node to be open
-			open_on_float64_click = 1 << 6,   // Need float64-click to open node
-			open_on_arrow = 1 << 7,   // Only open when clicking on the arrow part. If OpenOnDoubleClick is also set, single-click arrow or float64-click all box to open.
+			open_on_float64_click = 1 << 6,   // Need f64-click to open node
+			open_on_arrow = 1 << 7,   // Only open when clicking on the arrow part. If OpenOnDoubleClick is also set, single-click arrow or f64-click all box to open.
 			leaf = 1 << 8,   // No collapsing, no arrow (use as a convenience for leaf nodes).
 			bullet = 1 << 9,   // Display a bullet instead of arrow
 			frame_padding = 1 << 10,  // Use FramePadding (even for an unframed text node) to vertically align text baseline to regular widget height. Equivalent to calling AlignTextToFramePadding().
@@ -74,18 +74,18 @@ namespace luna
 		};
 
 		// Flags for ImGui::Selectable()
-		enum class ESelectableFlag : uint32
+		enum class ESelectableFlag : u32
 		{
 			none = 0,
 			dont_close_popups = 1 << 0,   // Clicking this don't close parent popup window
 			span_all_columns = 1 << 1,   // Selectable frame can span all columns (text will still fit in current column)
-			allow_float64_click = 1 << 2,   // Generate press events on float64 clicks too
+			allow_float64_click = 1 << 2,   // Generate press events on f64 clicks too
 			disabled = 1 << 3,   // Cannot be selected, display grayed out text
 			allow_item_overlap = 1 << 4    // (WIP) Hit testing to allow subsequent widgets to overlap this one
 		};
 
 		// Flags for ImGui::BeginCombo()
-		enum class EComboFlag : uint32
+		enum class EComboFlag : u32
 		{
 			none = 0,
 			popup_align_left = 1 << 0,   // Align the popup toward the left by default
@@ -98,7 +98,7 @@ namespace luna
 		};
 
 		// Flags for ImGui::BeginTabBar()
-		enum class ETabBarFlag : uint32
+		enum class ETabBarFlag : u32
 		{
 			none = 0,
 			reorderable = 1 << 0,   // Allow manually dragging tabs to re-order them + New tabs are appended at the end of list
@@ -112,7 +112,7 @@ namespace luna
 		};
 
 		// Flags for ImGui::BeginTabItem()
-		enum class ETabItemFlag : uint32
+		enum class ETabItemFlag : u32
 		{
 			none = 0,
 			unsaved_document = 1 << 0,   // Append '*' to title without affecting the ID, as a convenience to avoid using the ### operator. Also: tab is selected on closure and closure is deferred by one frame to allow code to undo it without flicker.
@@ -122,7 +122,7 @@ namespace luna
 		};
 
 		// Flags for ImGui::IsWindowFocused()
-		enum class EFocusedFlags : uint32
+		enum class EFocusedFlags : u32
 		{
 			none = 0,
 			child_windows = 1 << 0,   // IsWindowFocused(): Return true if any children of the window is focused
@@ -134,7 +134,7 @@ namespace luna
 		// Flags for ImGui::IsItemHovered(), ImGui::IsWindowHovered()
 		// Note: if you are trying to check whether your mouse should be dispatched to imgui or to your app, you should use the 'io.WantCaptureMouse' boolean for that. Please read the FAQ!
 		// Note: windows with the ImGuiWindowFlags_NoInputs flag are ignored by IsWindowHovered() calls.
-		enum class EHoveredFlag : uint32
+		enum class EHoveredFlag : u32
 		{
 			none = 0,        // Return true if directly over the item/window, not obstructed by another window, not obstructed by an active popup or modal blocking inputs under them.
 			child_windows = 1 << 0,   // IsWindowHovered() only: Return true if any children of the window is hovered
@@ -150,7 +150,7 @@ namespace luna
 		};
 
 		// Flags for ImGui::BeginDragDropSource(), ImGui::AcceptDragDropPayload()
-		enum class EDragDropFlag : uint32
+		enum class EDragDropFlag : u32
 		{
 			none = 0,
 			// BeginDragDropSource() flags
@@ -168,34 +168,34 @@ namespace luna
 		};
 
 
-		enum class EStyle : uint32
+		enum class EStyle : u32
 		{
-			alpha,					// float32   Alpha
+			alpha,					// f32   Alpha
 			window_padding,			// Float2    WindowPadding
-			window_rounding,		// float32   WindowRounding
-			window_border_size,		// float32   WindowBorderSize
+			window_rounding,		// f32   WindowRounding
+			window_border_size,		// f32   WindowBorderSize
 			window_min_size,		// Float2    WindowMinSize
 			window_title_align,		// Float2    WindowTitleAlign
-			child_rounding,			// float32   ChildRounding
-			child_border_size,		// float32   ChildBorderSize
-			popup_rounding,			// float32   PopupRounding
-			popup_border_size,		// float32   PopupBorderSize
+			child_rounding,			// f32   ChildRounding
+			child_border_size,		// f32   ChildBorderSize
+			popup_rounding,			// f32   PopupRounding
+			popup_border_size,		// f32   PopupBorderSize
 			frame_padding,			// Float2    FramePadding
-			frame_rounding,			// float32   FrameRounding
-			frame_border_size,		// float32   FrameBorderSize
+			frame_rounding,			// f32   FrameRounding
+			frame_border_size,		// f32   FrameBorderSize
 			item_spacing,			// Float2    ItemSpacing
 			item_inner_spacing,		// Float2    ItemInnerSpacing
-			indent_spacing,			// float32   IndentSpacing
-			scrollbar_size,			// float32   ScrollbarSize
-			scrollbar_rounding,		// float32   ScrollbarRounding
-			grab_min_size,			// float32   GrabMinSize
-			grab_rounding,			// float32   GrabRounding
-			tab_rounding,			// float32   TabRounding
+			indent_spacing,			// f32   IndentSpacing
+			scrollbar_size,			// f32   ScrollbarSize
+			scrollbar_rounding,		// f32   ScrollbarRounding
+			grab_min_size,			// f32   GrabMinSize
+			grab_rounding,			// f32   GrabRounding
+			tab_rounding,			// f32   TabRounding
 			button_text_align,		// Float2    ButtonTextAlign
 			selectable_text_align,	// Float2    SelectableTextAlign
 		};
 
-		enum class EColor : uint32
+		enum class EColor : u32
 		{
 			text,
 			text_disabled,
@@ -250,7 +250,7 @@ namespace luna
 			count
 		};
 
-		enum class ECondition : uint32
+		enum class ECondition : u32
 		{
 			none = 0,
 			always = 1 << 0,   // Set the variable
@@ -259,7 +259,7 @@ namespace luna
 			appearing = 1 << 3    // Set the variable if the object/window is appearing after being hidden/inactive (or the first time)
 		};
 
-		enum class EDirection : int32
+		enum class EDirection : i32
 		{
 			none = -1,
 			left = 0,
@@ -268,7 +268,7 @@ namespace luna
 			down = 3,
 		};
 
-		enum class EDataType : uint32
+		enum class EDataType : u32
 		{
 			s8,       
 			u8,      
@@ -282,7 +282,7 @@ namespace luna
 			f64,  
 		};
 
-		enum class EInputTextFlag : uint32
+		enum class EInputTextFlag : u32
 		{
 			none = 0,
 			chars_decimal = 1 << 0,   // Allow 0123456789.+-*/
@@ -306,7 +306,7 @@ namespace luna
 			callback_resize = 1 << 18,  // Callback on buffer capacity changes request (beyond 'buf_size' parameter value), allowing the string to grow. Notify when the string wants to be resized (for string types which hold a cache of their Size). You will be provided a new BufSize in the callback and NEED to honor it. (see misc/cpp/imgui_stdlib.h for an example of using this)
 		};
 
-		enum class EDrawCornerFlag : uint32
+		enum class EDrawCornerFlag : u32
 		{
 			none = 0,
 			top_left = 1 << 0, // 0x1
@@ -320,7 +320,7 @@ namespace luna
 			all = 0xF     // In your function calls you may use ~0 (= all bits sets) instead of All, as a convenience
 		};
 
-		enum class EDockNodeFlag : uint32
+		enum class EDockNodeFlag : u32
 		{
 			none							= 0,
 			keep_alive_only					= 1 << 0,   // Shared       // Don't display the dockspace node but keep it alive. Windows docked into this dockspace node won't be undocked.
@@ -331,7 +331,7 @@ namespace luna
 			auto_hide_tab_bar				= 1 << 6    // Shared/Local // Tab bar will automatically hide when there is a single window in the dock node.
 		};
 
-		enum class EGizmoOperation : uint32
+		enum class EGizmoOperation : u32
 		{
 			translate = 0,
 			rotate = 1,
@@ -339,7 +339,7 @@ namespace luna
 			bounds = 3,
 		};
 
-		enum class EGizmoMode : uint32
+		enum class EGizmoMode : u32
 		{
 			local = 0,
 			world = 1,
@@ -372,44 +372,44 @@ namespace luna
 
 		struct Style
 		{
-			float32       Alpha;                      // Global alpha applies to everything in Dear ImGui.
+			f32       Alpha;                      // Global alpha applies to everything in Dear ImGui.
 			Float2U      WindowPadding;              // Padding within a window.
-			float32       WindowRounding;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows.
-			float32       WindowBorderSize;           // Thickness of border around windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
+			f32       WindowRounding;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows.
+			f32       WindowBorderSize;           // Thickness of border around windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
 			Float2U      WindowMinSize;              // Minimum window size. This is a global setting. If you want to constraint individual windows, use SetNextWindowSizeConstraints().
 			Float2U      WindowTitleAlign;           // Alignment for title bar text. Defaults to (0.0f,0.5f) for left-aligned,vertically centered.
 			EDirection    WindowMenuButtonPosition;   // Side of the collapsing/docking button in the title bar (None/Left/Right). Defaults to ImGuiDir_Left.
-			float32       ChildRounding;              // Radius of child window corners rounding. Set to 0.0f to have rectangular windows.
-			float32       ChildBorderSize;            // Thickness of border around child windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
-			float32       PopupRounding;              // Radius of popup window corners rounding. (Note that tooltip windows use WindowRounding)
-			float32       PopupBorderSize;            // Thickness of border around popup/tooltip windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
+			f32       ChildRounding;              // Radius of child window corners rounding. Set to 0.0f to have rectangular windows.
+			f32       ChildBorderSize;            // Thickness of border around child windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
+			f32       PopupRounding;              // Radius of popup window corners rounding. (Note that tooltip windows use WindowRounding)
+			f32       PopupBorderSize;            // Thickness of border around popup/tooltip windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
 			Float2U      FramePadding;               // Padding within a framed rectangle (used by most widgets).
-			float32       FrameRounding;              // Radius of frame corners rounding. Set to 0.0f to have rectangular frame (used by most widgets).
-			float32       FrameBorderSize;            // Thickness of border around frames. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
+			f32       FrameRounding;              // Radius of frame corners rounding. Set to 0.0f to have rectangular frame (used by most widgets).
+			f32       FrameBorderSize;            // Thickness of border around frames. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
 			Float2U      ItemSpacing;                // Horizontal and vertical spacing between widgets/lines.
 			Float2U      ItemInnerSpacing;           // Horizontal and vertical spacing between within elements of a composed widget (e.g. a slider and its label).
 			Float2U      TouchExtraPadding;          // Expand reactive bounding box for touch-based system where touch position is not accurate enough. Unfortunately we don't sort widgets so priority on overlap will always be given to the first widget. So don't grow this too much!
-			float32       IndentSpacing;              // Horizontal indentation when e.g. entering a tree node. Generally == (FontSize + FramePadding.x*2).
-			float32       ColumnsMinSpacing;          // Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1).
-			float32       ScrollbarSize;              // Width of the vertical scrollbar, Height of the horizontal scrollbar.
-			float32       ScrollbarRounding;          // Radius of grab corners for scrollbar.
-			float32       GrabMinSize;                // Minimum width/height of a grab box for slider/scrollbar.
-			float32       GrabRounding;               // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
-			float32       TabRounding;                // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
-			float32       TabBorderSize;              // Thickness of border around tabs.
+			f32       IndentSpacing;              // Horizontal indentation when e.g. entering a tree node. Generally == (FontSize + FramePadding.x*2).
+			f32       ColumnsMinSpacing;          // Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1).
+			f32       ScrollbarSize;              // Width of the vertical scrollbar, Height of the horizontal scrollbar.
+			f32       ScrollbarRounding;          // Radius of grab corners for scrollbar.
+			f32       GrabMinSize;                // Minimum width/height of a grab box for slider/scrollbar.
+			f32       GrabRounding;               // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
+			f32       TabRounding;                // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
+			f32       TabBorderSize;              // Thickness of border around tabs.
 			EDirection    ColorButtonPosition;        // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
 			Float2U      ButtonTextAlign;            // Alignment of button text when button is larger than text. Defaults to (0.5f, 0.5f) (centered).
 			Float2U      SelectableTextAlign;        // Alignment of selectable text when selectable is larger than text. Defaults to (0.0f, 0.0f) (top-left aligned).
 			Float2U      DisplayWindowPadding;       // Window position are clamped to be visible within the display area by at least this amount. Only applies to regular windows.
 			Float2U      DisplaySafeAreaPadding;     // If you cannot see the edges of your screen (e.g. on a TV) increase the safe area padding. Apply to popups/tooltips as well regular windows. NB: Prefer configuring your TV sets correctly!
-			float32       MouseCursorScale;           // Scale software rendered mouse cursor (when io.MouseDrawCursor is enabled). May be removed later.
+			f32       MouseCursorScale;           // Scale software rendered mouse cursor (when io.MouseDrawCursor is enabled). May be removed later.
 			bool        AntiAliasedLines;           // Enable anti-aliasing on lines/borders. Disable if you are really tight on CPU/GPU.
 			bool        AntiAliasedFill;            // Enable anti-aliasing on filled shapes (rounded rectangles, circles, etc.)
-			float32       CurveTessellationTol;       // Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
-			float32       CircleSegmentMaxError;      // Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry.
-			Float4U      Colors[(uint32)EColor::count];
+			f32       CurveTessellationTol;       // Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
+			f32       CircleSegmentMaxError;      // Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry.
+			Float4U      Colors[(u32)EColor::count];
 
-			void ScaleAllSizes(float32 scale_factor)
+			void ScaleAllSizes(f32 scale_factor)
 			{
 				WindowPadding.x = floorf(WindowPadding.x * scale_factor);
 				WindowPadding.y = floorf(WindowPadding.y * scale_factor);
@@ -444,7 +444,7 @@ namespace luna
 
 		using input_text_callback_t = int(InputTextCallbackData* data);
 
-		enum class EColorEditFlag : uint32
+		enum class EColorEditFlag : u32
 		{
 			none = 0,
 			no_alpha = 1 << 1,   //              // ColorEdit, ColorPicker, ColorButton: ignore Alpha component (will only read 3 components from the input pointer).
@@ -473,7 +473,7 @@ namespace luna
 			input_hsv = 1 << 28,  // [Input]      // ColorEdit, ColorPicker: input and output data in HSV format.
 		};
 
-		enum class ETreeNodeFlag : uint32
+		enum class ETreeNodeFlag : u32
 		{
 			none = 0,
 			selected = 1 << 0,   // Draw as selected
@@ -526,7 +526,7 @@ namespace luna
 			luiid("{51298ea0-14cc-40ae-8b45-585af5062652}");
 
 			//! Attaches this context to a system window so that is interacts with the window.
-			virtual RV attach_system_window(gfx::IWindow* window) = 0;
+			virtual RV attach_system_window(Gfx::IWindow* window) = 0;
 
 			//! Detaches the attached system window.
 			virtual void detach_system_window() = 0;
@@ -545,7 +545,7 @@ namespace luna
 
 			//! Renders commands into the provided command buffer to draw the content. This must be called after `end_frame` for every 
 			//! frame.
-			virtual RV render(gfx::ICommandBuffer* cmd_buffer, gfx::IResource* render_target) = 0;
+			virtual RV render(Gfx::ICommandBuffer* cmd_buffer, Gfx::IResource* render_target) = 0;
 
 			// Demo, Debug, Information
 			virtual void          show_demo_window(bool* p_open = nullptr) = 0;        // create Demo window (previously called ShowTestWindow). demonstrate most ImGui features. call this to learn about the library! try to make it always available in your application!
@@ -582,7 +582,7 @@ namespace luna
 			// - BeginChild() returns false to indicate the window is collapsed or fully clipped, so you may early out and omit submitting anything to the window.
 			//   Always call a matching EndChild() for each BeginChild() call, regardless of its return value [as with Begin: this is due to legacy reason and inconsistent with most BeginXXX functions apart from the regular Begin() which behaves like BeginChild().]
 			virtual bool begin_child(const char* str_id, const Float2& size = Float2(0.0f, 0.0f), bool border = false, EWindowFlag flags = EWindowFlag::none) = 0;
-			virtual bool begin_child(int32 id, const Float2& size = Float2(0.0f, 0.0f), bool border = false, EWindowFlag flags = EWindowFlag::none) = 0;
+			virtual bool begin_child(i32 id, const Float2& size = Float2(0.0f, 0.0f), bool border = false, EWindowFlag flags = EWindowFlag::none) = 0;
 			virtual void end_child() = 0;
 
 			// Windows Utilities
@@ -594,8 +594,8 @@ namespace luna
 			virtual h_draw_list_t	  get_window_draw_list() = 0;						// get draw list associated to the current window, to append your own drawing primitives. (Using draw list APIs to append).
 			virtual Float2        get_window_pos() = 0;                             // get current window position in screen space (useful if you want to do your own drawing via the DrawList API)
 			virtual Float2        get_window_size() = 0;                            // get current window size
-			virtual float32       get_window_width() = 0;                           // get current window width (shortcut for GetWindowSize().x)
-			virtual float32       get_window_height() = 0;                          // get current window height (shortcut for GetWindowSize().y)
+			virtual f32       get_window_width() = 0;                           // get current window width (shortcut for GetWindowSize().x)
+			virtual f32       get_window_height() = 0;                          // get current window height (shortcut for GetWindowSize().y)
 
 			// Prefer using SetNextXXX functions (before Begin) rather that SetXXX functions (after Begin).
 			virtual void          set_next_window_pos(const Float2& pos, ECondition cond = ECondition::none, const Float2& pivot = Float2(0, 0)) = 0; // set next window position. call before Begin(). use pivot=(0.5f,0.5f) to center on given point, etc.
@@ -604,12 +604,12 @@ namespace luna
 			virtual void          set_next_window_content_size(const Float2& size) = 0;                               // set next window content size (~ scrollable client area, which enforce the range of scrollbars). Not including window decorations (title bar, menu bar, etc.) nor WindowPadding. set an axis to 0.0f to leave it automatic. call before Begin()
 			virtual void          set_next_window_collapsed(bool collapsed, ECondition cond = ECondition::none) = 0;                 // set next window collapsed state. call before Begin()
 			virtual void          set_next_window_focus() = 0;                                                       // set next window to be focused / top-most. call before Begin()
-			virtual void          set_next_window_bg_alpha(float32 alpha) = 0;                                          // set next window background color alpha. helper to easily override the Alpha component of ImGuiCol_WindowBg/ChildBg/PopupBg. you may also use ImGuiWindowFlags_NoBackground.
+			virtual void          set_next_window_bg_alpha(f32 alpha) = 0;                                          // set next window background color alpha. helper to easily override the Alpha component of ImGuiCol_WindowBg/ChildBg/PopupBg. you may also use ImGuiWindowFlags_NoBackground.
 			virtual void          set_window_pos(const Float2& pos, ECondition cond = ECondition::none) = 0;                        // (not recommended) set current window position - call within Begin()/End(). prefer using SetNextWindowPos(), as this may incur tearing and side-effects.
 			virtual void          set_window_size(const Float2& size, ECondition cond = ECondition::none) = 0;                      // (not recommended) set current window size - call within Begin()/End(). set to Float2(0,0) to force an auto-fit. prefer using SetNextWindowSize(), as this may incur tearing and minor side-effects.
 			virtual void          set_window_collapsed(bool collapsed, ECondition cond = ECondition::none) = 0;                     // (not recommended) set current window collapsed state. prefer using SetNextWindowCollapsed().
 			virtual void          set_window_focus() = 0;                                                           // (not recommended) set current window to be focused / top-most. prefer using SetNextWindowFocus().
-			virtual void          set_window_font_scale(float32 scale) = 0;                                            // set font scale. Adjust IO.FontGlobalScale if you want to scale all windows. This is an old API! For correct scaling, prefer to reload font + rebuild ImFontAtlas + call style.ScaleAllSizes().
+			virtual void          set_window_font_scale(f32 scale) = 0;                                            // set font scale. Adjust IO.FontGlobalScale if you want to scale all windows. This is an old API! For correct scaling, prefer to reload font + rebuild ImFontAtlas + call style.ScaleAllSizes().
 			virtual void          set_window_pos(const char* name, const Float2& pos, ECondition cond = ECondition::none) = 0;      // set named window position.
 			virtual void          set_window_size(const char* name, const Float2& size, ECondition cond = ECondition::none) = 0;    // set named window size. set axis to 0.0f to force an auto-fit on this axis.
 			virtual void          set_window_collapsed(const char* name, bool collapsed, ECondition cond = ECondition::none) = 0;   // set named window collapsed state
@@ -621,41 +621,41 @@ namespace luna
 			virtual Float2        get_content_region_avail() = 0;                                        // == GetContentRegionMax() - GetCursorPos()
 			virtual Float2        get_window_content_region_min() = 0;                                    // content boundaries min (roughly (0,0)-Scroll), in window coordinates
 			virtual Float2        get_window_content_region_max() = 0;                                    // content boundaries max (roughly (0,0)+Size-Scroll) where Size can be override with SetNextWindowContentSize(), in window coordinates
-			virtual float32       get_window_content_region_width() = 0;                                  //
+			virtual f32       get_window_content_region_width() = 0;                                  //
 
 			// Windows Scrolling
-			virtual float32       get_scroll_x() = 0;                                                   // get scrolling amount [0..GetScrollMaxX()]
-			virtual float32       get_scroll_y() = 0;                                                   // get scrolling amount [0..GetScrollMaxY()]
-			virtual float32       get_scroll_max_x() = 0;                                                // get maximum scrolling amount ~~ ContentSize.X - WindowSize.X
-			virtual float32       get_scroll_max_y() = 0;                                                // get maximum scrolling amount ~~ ContentSize.Y - WindowSize.Y
-			virtual void          set_scroll_x(float32 scroll_x) = 0;                                     // set scrolling amount [0..GetScrollMaxX()]
-			virtual void          set_scroll_y(float32 scroll_y) = 0;                                     // set scrolling amount [0..GetScrollMaxY()]
-			virtual void          set_scroll_here_x(float32 center_x_ratio = 0.5f) = 0;                    // adjust scrolling amount to make current cursor position visible. center_x_ratio=0.0: left, 0.5: center, 1.0: right. When using to make a "default/current item" visible, consider using SetItemDefaultFocus() instead.
-			virtual void          set_scroll_here_y(float32 center_y_ratio = 0.5f) = 0;                    // adjust scrolling amount to make current cursor position visible. center_y_ratio=0.0: top, 0.5: center, 1.0: bottom. When using to make a "default/current item" visible, consider using SetItemDefaultFocus() instead.
-			virtual void          set_scroll_from_pos_x(float32 local_x, float32 center_x_ratio = 0.5f) = 0;  // adjust scrolling amount to make given position visible. Generally GetCursorStartPos() + offset to compute a valid position.
-			virtual void          set_scroll_from_pos_y(float32 local_y, float32 center_y_ratio = 0.5f) = 0;  // adjust scrolling amount to make given position visible. Generally GetCursorStartPos() + offset to compute a valid position.
+			virtual f32       get_scroll_x() = 0;                                                   // get scrolling amount [0..GetScrollMaxX()]
+			virtual f32       get_scroll_y() = 0;                                                   // get scrolling amount [0..GetScrollMaxY()]
+			virtual f32       get_scroll_max_x() = 0;                                                // get maximum scrolling amount ~~ ContentSize.X - WindowSize.X
+			virtual f32       get_scroll_max_y() = 0;                                                // get maximum scrolling amount ~~ ContentSize.Y - WindowSize.Y
+			virtual void          set_scroll_x(f32 scroll_x) = 0;                                     // set scrolling amount [0..GetScrollMaxX()]
+			virtual void          set_scroll_y(f32 scroll_y) = 0;                                     // set scrolling amount [0..GetScrollMaxY()]
+			virtual void          set_scroll_here_x(f32 center_x_ratio = 0.5f) = 0;                    // adjust scrolling amount to make current cursor position visible. center_x_ratio=0.0: left, 0.5: center, 1.0: right. When using to make a "default/current item" visible, consider using SetItemDefaultFocus() instead.
+			virtual void          set_scroll_here_y(f32 center_y_ratio = 0.5f) = 0;                    // adjust scrolling amount to make current cursor position visible. center_y_ratio=0.0: top, 0.5: center, 1.0: bottom. When using to make a "default/current item" visible, consider using SetItemDefaultFocus() instead.
+			virtual void          set_scroll_from_pos_x(f32 local_x, f32 center_x_ratio = 0.5f) = 0;  // adjust scrolling amount to make given position visible. Generally GetCursorStartPos() + offset to compute a valid position.
+			virtual void          set_scroll_from_pos_y(f32 local_y, f32 center_y_ratio = 0.5f) = 0;  // adjust scrolling amount to make given position visible. Generally GetCursorStartPos() + offset to compute a valid position.
 
 			// Parameters stacks (shared)
 			virtual void          pop_font() = 0;
-			virtual void          push_style_color(EColor idx, uint32 col) = 0;
-			virtual void          push_style_color(EColor idx, const Color& col) = 0;
-			virtual void          pop_style_color(int32 count = 1) = 0;
-			virtual void          push_style_var(EStyle idx, float32 val) = 0;
+			virtual void          push_style_color(EColor idx, u32 col) = 0;
+			virtual void          push_style_color(EColor idx, const Float4& col) = 0;
+			virtual void          pop_style_color(i32 count = 1) = 0;
+			virtual void          push_style_var(EStyle idx, f32 val) = 0;
 			virtual void          push_style_var(EStyle idx, const Float2& val) = 0;
-			virtual void          pop_style_var(int32 count = 1) = 0;
+			virtual void          pop_style_var(i32 count = 1) = 0;
 			virtual Float4		  get_style_color_vec4(EColor idx) = 0;                                // retrieve style color as stored in ImGuiStyle structure. use to feed back into PushStyleColor(), otherwise use GetColorU32() to get style color with style alpha baked in.
-			virtual float32       get_font_size() = 0;                                                  // get current font size (= height in pixels) of current font with current scale applied
+			virtual f32       get_font_size() = 0;                                                  // get current font size (= height in pixels) of current font with current scale applied
 			virtual Float2        get_font_tex_uv_white_pixel() = 0;                                       // get UV coordinate for a while pixel, useful to draw custom shapes via the ImDrawList API
-			virtual uint32        get_color_u32(EColor idx, float32 alpha_mul = 1.0f) = 0;              // retrieve given style color with style alpha applied and optional extra alpha multiplier
-			virtual uint32        get_color_u32(const Float4& col) = 0;                                 // retrieve given color with style alpha applied
-			virtual uint32        get_color_u32(uint32 col) = 0;                                         // retrieve given color with style alpha applied
+			virtual u32        get_color_u32(EColor idx, f32 alpha_mul = 1.0f) = 0;              // retrieve given style color with style alpha applied and optional extra alpha multiplier
+			virtual u32        get_color_u32(const Float4& col) = 0;                                 // retrieve given color with style alpha applied
+			virtual u32        get_color_u32(u32 col) = 0;                                         // retrieve given color with style alpha applied
 
 			// Parameters stacks (current window)
-			virtual void          push_item_width(float32 item_width) = 0;                                // set width of items for common large "item+label" widgets. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -1.0f always align width to the right side). 0.0f = default to ~2/3 of windows width,
+			virtual void          push_item_width(f32 item_width) = 0;                                // set width of items for common large "item+label" widgets. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -1.0f always align width to the right side). 0.0f = default to ~2/3 of windows width,
 			virtual void          pop_item_width() = 0;
-			virtual void          set_next_item_width(float32 item_width) = 0;                             // set width of the _next_ common large "item+label" widget. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -1.0f always align width to the right side)
-			virtual float32       calc_item_width() = 0;                                                // width of item given pushed settings and current cursor position. NOT necessarily the width of last item unlike most 'Item' functions.
-			virtual void          push_text_wrap_pos(float32 wrap_local_pos_x = 0.0f) = 0;                 // word-wrapping for Text*() commands. < 0.0f: no wrapping; 0.0f: wrap to end of window (or column); > 0.0f: wrap at 'wrap_pos_x' position in window local space
+			virtual void          set_next_item_width(f32 item_width) = 0;                             // set width of the _next_ common large "item+label" widget. >0.0f: width in pixels, <0.0f align xx pixels to the right of window (so -1.0f always align width to the right side)
+			virtual f32       calc_item_width() = 0;                                                // width of item given pushed settings and current cursor position. NOT necessarily the width of last item unlike most 'Item' functions.
+			virtual void          push_text_wrap_pos(f32 wrap_local_pos_x = 0.0f) = 0;                 // word-wrapping for Text*() commands. < 0.0f: no wrapping; 0.0f: wrap to end of window (or column); > 0.0f: wrap at 'wrap_pos_x' position in window local space
 			virtual void          pop_text_wrap_pos() = 0;
 			virtual void          push_allow_keyboard_focus(bool allow_keyboard_focus) = 0;              // allow focusing using TAB/Shift-TAB, enabled by default but you can disable it for certain widgets
 			virtual void          pop_allow_keyboard_focus() = 0;
@@ -667,28 +667,28 @@ namespace luna
 			// - The typical widget behavior is to output themselves at the current cursor position, then move the cursor one line down.
 			// - You can call SameLine() between widgets to undo the last carriage return and output at the right of the preceeding widget.
 			virtual void          separator() = 0;                                                    // separator, generally horizontal. inside a menu bar or in horizontal layout mode, this becomes a vertical separator.
-			virtual void          same_line(float32 offset_from_start_x = 0.0f, float32 spacing = -1.0f) = 0;  // call between widgets or groups to layout them horizontally. X position given in window coordinates.
+			virtual void          same_line(f32 offset_from_start_x = 0.0f, f32 spacing = -1.0f) = 0;  // call between widgets or groups to layout them horizontally. X position given in window coordinates.
 			virtual void          new_line() = 0;                                                      // undo a SameLine() or force a new line when in an horizontal-layout context.
 			virtual void          spacing() = 0;                                                      // add vertical spacing.
 			virtual void          dummy(const Float2& size) = 0;                                      // add a dummy item of given size. unlike InvisibleButton(), Dummy() won't take the mouse click or be navigable into.
-			virtual void          indent(float32 indent_w = 0.0f) = 0;                                  // move content position toward the right, by style.IndentSpacing or indent_w if != 0
-			virtual void          unindent(float32 indent_w = 0.0f) = 0;                                // move content position back to the left, by style.IndentSpacing or indent_w if != 0
+			virtual void          indent(f32 indent_w = 0.0f) = 0;                                  // move content position toward the right, by style.IndentSpacing or indent_w if != 0
+			virtual void          unindent(f32 indent_w = 0.0f) = 0;                                // move content position back to the left, by style.IndentSpacing or indent_w if != 0
 			virtual void          begin_group() = 0;                                                   // lock horizontal starting position
 			virtual void          end_group() = 0;                                                     // unlock horizontal starting position + capture the whole group bounding box into one "item" (so you can use IsItemHovered() or layout primitives such as SameLine() on whole group, etc.)
 			virtual Float2        get_cursor_pos() = 0;                                                 // cursor position in window coordinates (relative to window position)
-			virtual float32       get_cursor_pos_x() = 0;                                                //   (some functions are using window-relative coordinates, such as: GetCursorPos, GetCursorStartPos, GetContentRegionMax, GetWindowContentRegion* etc.
-			virtual float32       get_cursor_pos_y() = 0;                                                //    other functions such as GetCursorScreenPos or everything in ImDrawList::
+			virtual f32       get_cursor_pos_x() = 0;                                                //   (some functions are using window-relative coordinates, such as: GetCursorPos, GetCursorStartPos, GetContentRegionMax, GetWindowContentRegion* etc.
+			virtual f32       get_cursor_pos_y() = 0;                                                //    other functions such as GetCursorScreenPos or everything in ImDrawList::
 			virtual void          set_cursor_pos(const Float2& local_pos) = 0;                          //    are using the main, absolute coordinate system.
-			virtual void          set_cursor_pos_x(float32 local_x) = 0;                                   //    GetWindowPos() + GetCursorPos() == GetCursorScreenPos() etc.)
-			virtual void          set_cursor_pos_y(float32 local_y) = 0;                                   //
+			virtual void          set_cursor_pos_x(f32 local_x) = 0;                                   //    GetWindowPos() + GetCursorPos() == GetCursorScreenPos() etc.)
+			virtual void          set_cursor_pos_y(f32 local_y) = 0;                                   //
 			virtual Float2        get_cursor_start_pos() = 0;                                            // initial cursor position in window coordinates
 			virtual Float2        get_cursor_screen_pos() = 0;                                           // cursor position in absolute screen coordinates [0..io.DisplaySize] (useful to work with ImDrawList API)
 			virtual void          set_cursor_screen_pos(const Float2& pos) = 0;                          // cursor position in absolute screen coordinates [0..io.DisplaySize]
 			virtual void          align_text_to_frame_padding() = 0;                                      // vertically align upcoming text baseline to FramePadding.y so that it will align properly to regularly framed items (call if you have text on a line before a framed item)
-			virtual float32       get_text_line_height() = 0;                                            // ~ FontSize
-			virtual float32       get_text_line_height_with_spacing() = 0;                                 // ~ FontSize + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of text)
-			virtual float32       get_frame_height() = 0;                                               // ~ FontSize + style.FramePadding.y * 2
-			virtual float32       get_frame_height_with_spacing() = 0;                                    // ~ FontSize + style.FramePadding.y * 2 + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of framed widgets)
+			virtual f32       get_text_line_height() = 0;                                            // ~ FontSize
+			virtual f32       get_text_line_height_with_spacing() = 0;                                 // ~ FontSize + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of text)
+			virtual f32       get_frame_height() = 0;                                               // ~ FontSize + style.FramePadding.y * 2
+			virtual f32       get_frame_height_with_spacing() = 0;                                    // ~ FontSize + style.FramePadding.y * 2 + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of framed widgets)
 
 			// ID stack/scopes
 			// - Read the FAQ for more details about how ID are handled in dear imgui. If you are creating widgets in a loop you most
@@ -700,11 +700,11 @@ namespace luna
 			virtual void          push_id(const char* str_id) = 0;                                     // push string into the ID stack (will hash string).
 			virtual void          push_id(const char* str_id_begin, const char* str_id_end) = 0;       // push string into the ID stack (will hash string).
 			virtual void          push_id(const void* ptr_id) = 0;                                     // push pointer into the ID stack (will hash pointer).
-			virtual void          push_id(int32 int_id) = 0;                                             // push integer into the ID stack (will hash integer).
+			virtual void          push_id(i32 int_id) = 0;                                             // push integer into the ID stack (will hash integer).
 			virtual void          pop_id() = 0;                                                        // pop from the ID stack.
-			virtual uint32        get_id(const char* str_id) = 0;                                      // calculate unique ID (hash of whole ID stack + given parameter). e.g. if you want to query into ImGuiStorage yourself
-			virtual uint32        get_id(const char* str_id_begin, const char* str_id_end) = 0;
-			virtual uint32        get_id(const void* ptr_id) = 0;
+			virtual u32        get_id(const char* str_id) = 0;                                      // calculate unique ID (hash of whole ID stack + given parameter). e.g. if you want to query into ImGuiStorage yourself
+			virtual u32        get_id(const char* str_id_begin, const char* str_id_end) = 0;
+			virtual u32        get_id(const void* ptr_id) = 0;
 
 			// Widgets: Text
 			virtual void          text_unformatted(const char* text, const char* text_end = nullptr) = 0;	// raw text without formatting. Roughly equivalent to Text("%s", text) but: A) doesn't require null terminated string if 'text_end' is specified, B) it's faster, no memory copy is done, no buffer size limits, recommended for long chunks of text.
@@ -728,13 +728,13 @@ namespace luna
 			virtual bool          small_button(const char* label) = 0;                                 // button with FramePadding=(0,0) to easily embed within text
 			virtual bool          invisible_button(const char* str_id, const Float2& size) = 0;        // button behavior without the visuals, frequently useful to build custom behaviors using the public api (along with IsItemActive, IsItemHovered, etc.)
 			virtual bool          arrow_button(const char* str_id, EDirection dir) = 0;                  // square button with an arrow shape
-			virtual void          image(gfx::IResource* user_texture_id, const Float2& size, const Float2& uv0 = Float2(0, 0), const Float2& uv1 = Float2(1, 1), const Color& tint_col = color::white, const Color& border_col = color::white) = 0;
-			virtual bool          image_button(gfx::IResource* user_texture_id, const Float2& size, const Float2& uv0 = Float2(0, 0), const Float2& uv1 = Float2(1, 1), int32 frame_padding = -1, const Color& bg_col = Float4(0, 0, 0, 0), const Color& tint_col = color::white) = 0;    // <0 frame_padding uses default frame padding settings. 0 for no padding
+			virtual void          image(Gfx::IResource* user_texture_id, const Float2& size, const Float2& uv0 = Float2(0, 0), const Float2& uv1 = Float2(1, 1), const Float4& tint_col = Color::white, const Float4& border_col = Color::white) = 0;
+			virtual bool          image_button(Gfx::IResource* user_texture_id, const Float2& size, const Float2& uv0 = Float2(0, 0), const Float2& uv1 = Float2(1, 1), i32 frame_padding = -1, const Float4& bg_col = Float4(0, 0, 0, 0), const Float4& tint_col = Color::white) = 0;    // <0 frame_padding uses default frame padding settings. 0 for no padding
 			virtual bool          checkbox(const char* label, bool* v) = 0;
-			virtual bool          checkbox_flags(const char* label, uint32* flags, uint32 flags_value) = 0;
+			virtual bool          checkbox_flags(const char* label, u32* flags, u32 flags_value) = 0;
 			virtual bool          radio_button(const char* label, bool active) = 0;                    // use with e.g. if (RadioButton("one", my_value==1)) { my_value = 1; }
-			virtual bool          radio_button(const char* label, int32* v, int32 v_button) = 0;           // shortcut to handle the above pattern when value is an integer
-			virtual void          progress_bar(float32 fraction, const Float2& size_arg = Float2(-1, 0), const char* overlay = nullptr) = 0;
+			virtual bool          radio_button(const char* label, i32* v, i32 v_button) = 0;           // shortcut to handle the above pattern when value is an integer
+			virtual void          progress_bar(f32 fraction, const Float2& size_arg = Float2(-1, 0), const char* overlay = nullptr) = 0;
 			virtual void          bullet() = 0;                                                       // draw a small circle and keep the cursor on the same line. advance cursor x position by GetTreeNodeToLabelSpacing(), same distance that TreeNode() uses
 
 			// Widgets: Combo Box
@@ -742,77 +742,77 @@ namespace luna
 			// - The old Combo() api are helpers over BeginCombo()/EndCombo() which are kept available for convenience purpose.
 			virtual bool          begin_combo(const char* label, const char* preview_value, EComboFlag flags = EComboFlag::none) = 0;
 			virtual void          end_combo() = 0; // only call EndCombo() if BeginCombo() returns true!
-			virtual bool          combo(const char* label, int32* current_item, const char* const items[], int32 items_count, int32 popup_max_height_in_items = -1) = 0;
-			virtual bool          combo(const char* label, int32* current_item, const char* items_separated_by_zeros, int32 popup_max_height_in_items = -1) = 0;      // Separate items with \0 within a string, end item-list with \0\0. e.g. "One\0Two\0Three\0"
-			virtual bool          combo(const char* label, int32* current_item, bool(*items_getter)(void* data, int32 idx, const char** out_text), void* data, int32 items_count, int32 popup_max_height_in_items = -1) = 0;
+			virtual bool          combo(const char* label, i32* current_item, const char* const items[], i32 items_count, i32 popup_max_height_in_items = -1) = 0;
+			virtual bool          combo(const char* label, i32* current_item, const char* items_separated_by_zeros, i32 popup_max_height_in_items = -1) = 0;      // Separate items with \0 within a string, end item-list with \0\0. e.g. "One\0Two\0Three\0"
+			virtual bool          combo(const char* label, i32* current_item, bool(*items_getter)(void* data, i32 idx, const char** out_text), void* data, i32 items_count, i32 popup_max_height_in_items = -1) = 0;
 
 			// Widgets: Drags
 			// - CTRL+Click on any drag box to turn them into an input box. Manually input values aren't clamped and can go off-bounds.
-			// - For all the Float2/Float3/Float4/Int2/Int3/Int4 versions of every functions, note that a 'float32 v[X]' function argument is the same as 'float* v', the array syntax is just a way to document the number of elements that are expected to be accessible. You can pass address of your first element out of a contiguous set, e.g. &myvector.x
+			// - For all the Float2/Float3/Float4/Int2/Int3/Int4 versions of every functions, note that a 'f32 v[X]' function argument is the same as 'float* v', the array syntax is just a way to document the number of elements that are expected to be accessible. You can pass address of your first element out of a contiguous set, e.g. &myvector.x
 			// - Adjust format string to decorate the value with a prefix, a suffix, or adapt the editing and display precision e.g. "%.3f" -> 1.234; "%5.2f secs" -> 01.23 secs; "Biscuit: %.0f" -> Biscuit: 1; etc.
 			// - Speed are per-pixel of mouse movement (v_speed=0.2f: mouse needs to move by 5 pixels to increase value by 1). For gamepad/keyboard navigation, minimum speed is Max(v_speed, minimum_step_at_given_precision).
 			// - Use v_min < v_max to clamp edits to given limits. Note that CTRL+Click manual input can override those limits.
 			// - Use v_max = FLT_MAX / INT_MAX etc to avoid clamping to a maximum, same with v_min = -FLT_MAX / INT_MIN to avoid clamping to a minimum.
 			// - Use v_min > v_max to lock edits.
-			virtual bool          drag_float(const char* label, float32* v, float32 v_speed = 1.0f, float32 v_min = 0.0f, float32 v_max = 0.0f, const char* format = "%.3f", float32 power = 1.0f) = 0;     // If v_min >= v_max we have no bound
-			virtual bool          drag_float2(const char* label, float32 v[2], float32 v_speed = 1.0f, float32 v_min = 0.0f, float32 v_max = 0.0f, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          drag_float3(const char* label, float32 v[3], float32 v_speed = 1.0f, float32 v_min = 0.0f, float32 v_max = 0.0f, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          drag_float4(const char* label, float32 v[4], float32 v_speed = 1.0f, float32 v_min = 0.0f, float32 v_max = 0.0f, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          drag_float_range2(const char* label, float32* v_current_min, float32* v_current_max, float32 v_speed = 1.0f, float32 v_min = 0.0f, float32 v_max = 0.0f, const char* format = "%.3f", const char* format_max = nullptr, float32 power = 1.0f) = 0;
-			virtual bool          drag_int(const char* label, int32* v, float32 v_speed = 1.0f, int32 v_min = 0, int32 v_max = 0, const char* format = "%d") = 0;                                       // If v_min >= v_max we have no bound
-			virtual bool          drag_int2(const char* label, int32 v[2], float32 v_speed = 1.0f, int32 v_min = 0, int32 v_max = 0, const char* format = "%d") = 0;
-			virtual bool          drag_int3(const char* label, int32 v[3], float32 v_speed = 1.0f, int32 v_min = 0, int32 v_max = 0, const char* format = "%d") = 0;
-			virtual bool          drag_int4(const char* label, int32 v[4], float32 v_speed = 1.0f, int32 v_min = 0, int32 v_max = 0, const char* format = "%d") = 0;
-			virtual bool          drag_int_range2(const char* label, int32* v_current_min, int32* v_current_max, float32 v_speed = 1.0f, int32 v_min = 0, int32 v_max = 0, const char* format = "%d", const char* format_max = nullptr) = 0;
-			virtual bool          drag_scalar(const char* label, EDataType data_type, void* p_data, float32 v_speed, const void* p_min = nullptr, const void* p_max = nullptr, const char* format = nullptr, float32 power = 1.0f) = 0;
-			virtual bool          drag_scalar_n(const char* label, EDataType data_type, void* p_data, int32 components, float32 v_speed, const void* p_min = nullptr, const void* p_max = nullptr, const char* format = nullptr, float32 power = 1.0f) = 0;
+			virtual bool          drag_float(const char* label, f32* v, f32 v_speed = 1.0f, f32 v_min = 0.0f, f32 v_max = 0.0f, const char* format = "%.3f", f32 power = 1.0f) = 0;     // If v_min >= v_max we have no bound
+			virtual bool          drag_float2(const char* label, f32 v[2], f32 v_speed = 1.0f, f32 v_min = 0.0f, f32 v_max = 0.0f, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          drag_float3(const char* label, f32 v[3], f32 v_speed = 1.0f, f32 v_min = 0.0f, f32 v_max = 0.0f, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          drag_float4(const char* label, f32 v[4], f32 v_speed = 1.0f, f32 v_min = 0.0f, f32 v_max = 0.0f, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          drag_float_range2(const char* label, f32* v_current_min, f32* v_current_max, f32 v_speed = 1.0f, f32 v_min = 0.0f, f32 v_max = 0.0f, const char* format = "%.3f", const char* format_max = nullptr, f32 power = 1.0f) = 0;
+			virtual bool          drag_int(const char* label, i32* v, f32 v_speed = 1.0f, i32 v_min = 0, i32 v_max = 0, const char* format = "%d") = 0;                                       // If v_min >= v_max we have no bound
+			virtual bool          drag_int2(const char* label, i32 v[2], f32 v_speed = 1.0f, i32 v_min = 0, i32 v_max = 0, const char* format = "%d") = 0;
+			virtual bool          drag_int3(const char* label, i32 v[3], f32 v_speed = 1.0f, i32 v_min = 0, i32 v_max = 0, const char* format = "%d") = 0;
+			virtual bool          drag_int4(const char* label, i32 v[4], f32 v_speed = 1.0f, i32 v_min = 0, i32 v_max = 0, const char* format = "%d") = 0;
+			virtual bool          drag_int_range2(const char* label, i32* v_current_min, i32* v_current_max, f32 v_speed = 1.0f, i32 v_min = 0, i32 v_max = 0, const char* format = "%d", const char* format_max = nullptr) = 0;
+			virtual bool          drag_scalar(const char* label, EDataType data_type, void* p_data, f32 v_speed, const void* p_min = nullptr, const void* p_max = nullptr, const char* format = nullptr, f32 power = 1.0f) = 0;
+			virtual bool          drag_scalar_n(const char* label, EDataType data_type, void* p_data, i32 components, f32 v_speed, const void* p_min = nullptr, const void* p_max = nullptr, const char* format = nullptr, f32 power = 1.0f) = 0;
 
 			// Widgets: Sliders
 			// - CTRL+Click on any slider to turn them into an input box. Manually input values aren't clamped and can go off-bounds.
 			// - Adjust format string to decorate the value with a prefix, a suffix, or adapt the editing and display precision e.g. "%.3f" -> 1.234; "%5.2f secs" -> 01.23 secs; "Biscuit: %.0f" -> Biscuit: 1; etc.
-			virtual bool          slider_float(const char* label, float32* v, float32 v_min, float32 v_max, const char* format = "%.3f", float32 power = 1.0f) = 0;     // adjust format to decorate the value with a prefix or a suffix for in-slider labels or unit display. Use power!=1.0 for power curve sliders
-			virtual bool          slider_float2(const char* label, float32 v[2], float32 v_min, float32 v_max, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          slider_float3(const char* label, float32 v[3], float32 v_min, float32 v_max, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          slider_float4(const char* label, float32 v[4], float32 v_min, float32 v_max, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          slider_angle(const char* label, float32* v_rad, float32 v_degrees_min = -360.0f, float32 v_degrees_max = +360.0f, const char* format = "%.0f deg") = 0;
-			virtual bool          slider_int(const char* label, int32* v, int32 v_min, int32 v_max, const char* format = "%d") = 0;
-			virtual bool          slider_int2(const char* label, int32 v[2], int32 v_min, int32 v_max, const char* format = "%d") = 0;
-			virtual bool          slider_int3(const char* label, int32 v[3], int32 v_min, int32 v_max, const char* format = "%d") = 0;
-			virtual bool          slider_int4(const char* label, int32 v[4], int32 v_min, int32 v_max, const char* format = "%d") = 0;
-			virtual bool          slider_scalar(const char* label, EDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format = nullptr, float32 power = 1.0f) = 0;
-			virtual bool          slider_scalar_n(const char* label, EDataType data_type, void* p_data, int32 components, const void* p_min, const void* p_max, const char* format = nullptr, float32 power = 1.0f) = 0;
-			virtual bool          vslider_float(const char* label, const Float2& size, float32* v, float32 v_min, float32 v_max, const char* format = "%.3f", float32 power = 1.0f) = 0;
-			virtual bool          vslider_int(const char* label, const Float2& size, int32* v, int32 v_min, int32 v_max, const char* format = "%d") = 0;
-			virtual bool          vslider_scalar(const char* label, const Float2& size, EDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format = nullptr, float32 power = 1.0f) = 0;
+			virtual bool          slider_float(const char* label, f32* v, f32 v_min, f32 v_max, const char* format = "%.3f", f32 power = 1.0f) = 0;     // adjust format to decorate the value with a prefix or a suffix for in-slider labels or unit display. Use power!=1.0 for power curve sliders
+			virtual bool          slider_float2(const char* label, f32 v[2], f32 v_min, f32 v_max, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          slider_float3(const char* label, f32 v[3], f32 v_min, f32 v_max, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          slider_float4(const char* label, f32 v[4], f32 v_min, f32 v_max, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          slider_angle(const char* label, f32* v_rad, f32 v_degrees_min = -360.0f, f32 v_degrees_max = +360.0f, const char* format = "%.0f deg") = 0;
+			virtual bool          slider_int(const char* label, i32* v, i32 v_min, i32 v_max, const char* format = "%d") = 0;
+			virtual bool          slider_int2(const char* label, i32 v[2], i32 v_min, i32 v_max, const char* format = "%d") = 0;
+			virtual bool          slider_int3(const char* label, i32 v[3], i32 v_min, i32 v_max, const char* format = "%d") = 0;
+			virtual bool          slider_int4(const char* label, i32 v[4], i32 v_min, i32 v_max, const char* format = "%d") = 0;
+			virtual bool          slider_scalar(const char* label, EDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format = nullptr, f32 power = 1.0f) = 0;
+			virtual bool          slider_scalar_n(const char* label, EDataType data_type, void* p_data, i32 components, const void* p_min, const void* p_max, const char* format = nullptr, f32 power = 1.0f) = 0;
+			virtual bool          vslider_float(const char* label, const Float2& size, f32* v, f32 v_min, f32 v_max, const char* format = "%.3f", f32 power = 1.0f) = 0;
+			virtual bool          vslider_int(const char* label, const Float2& size, i32* v, i32 v_min, i32 v_max, const char* format = "%d") = 0;
+			virtual bool          vslider_scalar(const char* label, const Float2& size, EDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format = nullptr, f32 power = 1.0f) = 0;
 
 			// Widgets: Input with Keyboard
 			// - If you want to use InputText() with std::string or any custom dynamic string type, see misc/cpp/imgui_stdlib.h and comments in imgui_demo.cpp.
 			// - Most of the ImGuiInputTextFlags flags are only useful for InputText() and not for InputFloatX, InputIntX, InputDouble etc.
-			virtual bool          input_text(const char* label, char* buf, size_t buf_size, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_text_multiline(const char* label, char* buf, size_t buf_size, const Float2& size = Float2(0, 0), EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_text_with_hint(const char* label, const char* hint, char* buf, size_t buf_size, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_text(const char* label, IStringBuffer* buf, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_text_multiline(const char* label, IStringBuffer* buf, const Float2& size = Float2(0, 0), EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_text_with_hint(const char* label, const char* hint, IStringBuffer* buf, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
-			virtual bool          input_float(const char* label, float32* v, float32 step = 0.0f, float32 step_fast = 0.0f, const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_float2(const char* label, float32 v[2], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_float3(const char* label, float32 v[3], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_float4(const char* label, float32 v[4], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_int(const char* label, int32* v, int32 step = 1, int32 step_fast = 100, EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_int2(const char* label, int32 v[2], EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_int3(const char* label, int32 v[3], EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_int4(const char* label, int32 v[4], EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_double(const char* label, float64* v, float64 step = 0.0, float64 step_fast = 0.0, const char* format = "%.6f", EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_text(const char* label, char* buf, usize buf_size, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_text_multiline(const char* label, char* buf, usize buf_size, const Float2& size = Float2(0, 0), EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_text_with_hint(const char* label, const char* hint, char* buf, usize buf_size, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_text(const char* label, String& buf, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_text_multiline(const char* label, String& buf, const Float2& size = Float2(0, 0), EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_text_with_hint(const char* label, const char* hint, String& buf, EInputTextFlag flags = EInputTextFlag::none, input_text_callback_t* callback = nullptr, void* user_data = nullptr) = 0;
+			virtual bool          input_float(const char* label, f32* v, f32 step = 0.0f, f32 step_fast = 0.0f, const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_float2(const char* label, f32 v[2], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_float3(const char* label, f32 v[3], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_float4(const char* label, f32 v[4], const char* format = "%.3f", EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_int(const char* label, i32* v, i32 step = 1, i32 step_fast = 100, EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_int2(const char* label, i32 v[2], EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_int3(const char* label, i32 v[3], EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_int4(const char* label, i32 v[4], EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_double(const char* label, f64* v, f64 step = 0.0, f64 step_fast = 0.0, const char* format = "%.6f", EInputTextFlag flags = EInputTextFlag::none) = 0;
 			virtual bool          input_scalar(const char* label, EDataType data_type, void* p_data, const void* p_step = nullptr, const void* p_step_fast = nullptr, const char* format = nullptr, EInputTextFlag flags = EInputTextFlag::none) = 0;
-			virtual bool          input_scalar_n(const char* label, EDataType data_type, void* p_data, int32 components, const void* p_step = nullptr, const void* p_step_fast = nullptr, const char* format = nullptr, EInputTextFlag flags = EInputTextFlag::none) = 0;
+			virtual bool          input_scalar_n(const char* label, EDataType data_type, void* p_data, i32 components, const void* p_step = nullptr, const void* p_step_fast = nullptr, const char* format = nullptr, EInputTextFlag flags = EInputTextFlag::none) = 0;
 
 			// Widgets: Color Editor/Picker (tip: the ColorEdit* functions have a little colored preview square that can be left-clicked to open a picker, and right-clicked to open an option menu.)
-			// - Note that in C++ a 'float32 v[X]' function argument is the _same_ as 'float* v', the array syntax is just a way to document the number of elements that are expected to be accessible.
-			// - You can pass the address of a first float32 element out of a contiguous structure, e.g. &myvector.x
-			virtual bool          color_edit3(const char* label, float32 col[3], EColorEditFlag flags = EColorEditFlag::none) = 0;
-			virtual bool          color_edit4(const char* label, float32 col[4], EColorEditFlag flags = EColorEditFlag::none) = 0;
-			virtual bool          color_picker3(const char* label, float32 col[3], EColorEditFlag flags = EColorEditFlag::none) = 0;
-			virtual bool          color_picker4(const char* label, float32 col[4], EColorEditFlag flags = EColorEditFlag::none, const float32* ref_col = nullptr) = 0;
+			// - Note that in C++ a 'f32 v[X]' function argument is the _same_ as 'float* v', the array syntax is just a way to document the number of elements that are expected to be accessible.
+			// - You can pass the address of a first f32 element out of a contiguous structure, e.g. &myvector.x
+			virtual bool          color_edit3(const char* label, f32 col[3], EColorEditFlag flags = EColorEditFlag::none) = 0;
+			virtual bool          color_edit4(const char* label, f32 col[4], EColorEditFlag flags = EColorEditFlag::none) = 0;
+			virtual bool          color_picker3(const char* label, f32 col[3], EColorEditFlag flags = EColorEditFlag::none) = 0;
+			virtual bool          color_picker4(const char* label, f32 col[4], EColorEditFlag flags = EColorEditFlag::none, const f32* ref_col = nullptr) = 0;
 			virtual bool          color_button(const char* desc_id, const Float4& col, EColorEditFlag flags = EColorEditFlag::none, const Float2& size = Float2(0, 0)) = 0;  // display a colored square/button, hover for details, return true when pressed.
 			virtual void          set_color_edit_options(EColorEditFlag flags) = 0;                     // initialize current options (generally on application startup) if you want to select a default format, picker type, etc. User will be able to change many settings, unless you pass the _NoOptions flag to your calls.
 
@@ -831,7 +831,7 @@ namespace luna
 			virtual void          tree_push(const char* str_id) = 0;                                       // ~ Indent()+PushId(). Already called by TreeNode() when returning true, but you can call TreePush/TreePop yourself if desired.
 			virtual void          tree_push(const void* ptr_id = nullptr) = 0;                                // "
 			virtual void          tree_pop() = 0;                                                          // ~ Unindent()+PopId()
-			virtual float32       get_tree_node_to_label_spacing() = 0;                                        // horizontal distance preceding label when using TreeNode*() or Bullet() == (g.FontSize + style.FramePadding.x*2) for a regular unframed TreeNode
+			virtual f32       get_tree_node_to_label_spacing() = 0;                                        // horizontal distance preceding label when using TreeNode*() or Bullet() == (g.FontSize + style.FramePadding.x*2) for a regular unframed TreeNode
 			virtual bool          collapsing_header(const char* label, ETreeNodeFlag flags = ETreeNodeFlag::none) = 0;  // if returning 'true' the header is open. doesn't indent nor push on ID stack. user doesn't have to call TreePop().
 			virtual bool          collapsing_header(const char* label, bool* p_open, ETreeNodeFlag flags = ETreeNodeFlag::none) = 0; // when 'p_open' isn't nullptr, display an additional small close button on upper right of the header
 			virtual void          set_next_item_open(bool is_open, ECondition cond = ECondition::none) = 0;                  // set next TreeNode/CollapsingHeader open state.
@@ -844,24 +844,24 @@ namespace luna
 
 			// Widgets: List Boxes
 			// - FIXME: To be consistent with all the newer API, ListBoxHeader/ListBoxFooter should in reality be called BeginListBox/EndListBox. Will rename them.
-			virtual bool          list_box(const char* label, int32* current_item, const char* const items[], int32 items_count, int32 height_in_items = -1) = 0;
-			virtual bool          list_box(const char* label, int32* current_item, bool(*items_getter)(void* data, int32 idx, const char** out_text), void* data, int32 items_count, int32 height_in_items = -1) = 0;
+			virtual bool          list_box(const char* label, i32* current_item, const char* const items[], i32 items_count, i32 height_in_items = -1) = 0;
+			virtual bool          list_box(const char* label, i32* current_item, bool(*items_getter)(void* data, i32 idx, const char** out_text), void* data, i32 items_count, i32 height_in_items = -1) = 0;
 			virtual bool          list_box_header(const char* label, const Float2& size = Float2(0, 0)) = 0; // use if you want to reimplement ListBox() will custom data or interactions. if the function return true, you can output elements then call ListBoxFooter() afterwards.
-			virtual bool          list_box_header(const char* label, int32 items_count, int32 height_in_items = -1) = 0; // "
+			virtual bool          list_box_header(const char* label, i32 items_count, i32 height_in_items = -1) = 0; // "
 			virtual void          list_box_footer() = 0;                                                    // terminate the scrolling region. only call ListBoxFooter() if ListBoxHeader() returned true!
 
 																										// Widgets: Data Plotting
-			virtual void          plot_lines(const char* label, const float32* values, int32 values_count, int32 values_offset = 0, const char* overlay_text = nullptr, float32 scale_min = FLT_MAX, float32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0), int32 stride = sizeof(float32)) = 0;
-			virtual void          plot_lines(const char* label, float32(*values_getter)(void* data, int32 idx), void* data, int32 values_count, int32 values_offset = 0, const char* overlay_text = nullptr, float32 scale_min = FLT_MAX, float32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0)) = 0;
-			virtual void          plot_histogram(const char* label, const float32* values, int32 values_count, int32 values_offset = 0, const char* overlay_text = nullptr, float32 scale_min = FLT_MAX, float32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0), int32 stride = sizeof(float32)) = 0;
-			virtual void          plot_histogram(const char* label, float32(*values_getter)(void* data, int32 idx), void* data, int32 values_count, int32 values_offset = 0, const char* overlay_text = nullptr, float32 scale_min = FLT_MAX, float32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0)) = 0;
+			virtual void          plot_lines(const char* label, const f32* values, i32 values_count, i32 values_offset = 0, const char* overlay_text = nullptr, f32 scale_min = FLT_MAX, f32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0), i32 stride = sizeof(f32)) = 0;
+			virtual void          plot_lines(const char* label, f32(*values_getter)(void* data, i32 idx), void* data, i32 values_count, i32 values_offset = 0, const char* overlay_text = nullptr, f32 scale_min = FLT_MAX, f32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0)) = 0;
+			virtual void          plot_histogram(const char* label, const f32* values, i32 values_count, i32 values_offset = 0, const char* overlay_text = nullptr, f32 scale_min = FLT_MAX, f32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0), i32 stride = sizeof(f32)) = 0;
+			virtual void          plot_histogram(const char* label, f32(*values_getter)(void* data, i32 idx), void* data, i32 values_count, i32 values_offset = 0, const char* overlay_text = nullptr, f32 scale_min = FLT_MAX, f32 scale_max = FLT_MAX, const Float2& graph_size = Float2(0, 0)) = 0;
 
 			// Widgets: Value() Helpers.
 			// - Those are merely shortcut to calling Text() with a format string. Output single value in "name: value" format (tip: freely declare more in your code to handle your types. you can add functions to the ImGui namespace)
 			virtual void          value(const char* prefix, bool b) = 0;
-			virtual void          value(const char* prefix, int32 v) = 0;
-			virtual void          value(const char* prefix, uint32 v) = 0;
-			virtual void          value(const char* prefix, float32 v, const char* float_format = nullptr) = 0;
+			virtual void          value(const char* prefix, i32 v) = 0;
+			virtual void          value(const char* prefix, u32 v) = 0;
+			virtual void          value(const char* prefix, f32 v, const char* float_format = nullptr) = 0;
 
 			// Widgets: Menus
 			// - Use BeginMenuBar() on a window ImGuiWindowFlags_MenuBar to append to its menu bar.
@@ -893,12 +893,12 @@ namespace luna
 			// Those three properties are connected. The library needs to hold their visibility state because it can close popups at any time.
 			virtual void          open_popup(const char* str_id) = 0;                                      // call to mark popup as open (don't call every frame!). popups are closed when user click outside, or if CloseCurrentPopup() is called within a BeginPopup()/EndPopup() block. By default, Selectable()/MenuItem() are calling CloseCurrentPopup(). Popup identifiers are relative to the current ID-stack (so OpenPopup and BeginPopup needs to be at the same level).
 			virtual bool          begin_popup(const char* str_id, EWindowFlag flags = EWindowFlag::none) = 0;                                             // return true if the popup is open, and you can start outputting to it. only call EndPopup() if BeginPopup() returns true!
-			virtual bool          begin_popup_context_item(const char* str_id = nullptr, input::EMouseKey mouse_button = input::EMouseKey::rb) = 0;                    // helper to open and begin popup when clicked on last item. if you can pass a nullptr str_id only if the previous item had an id. If you want to use that on a non-interactive item such as Text() you need to pass in an explicit ID here. read comments in .cpp!
-			virtual bool          begin_popup_context_window(const char* str_id = nullptr, input::EMouseKey mouse_button = input::EMouseKey::rb, bool also_over_items = true) = 0;  // helper to open and begin popup when clicked on current window.
-			virtual bool          begin_popup_context_void(const char* str_id = nullptr, input::EMouseKey mouse_button = input::EMouseKey::rb) = 0;                    // helper to open and begin popup when clicked in void (where there are no imgui windows).
+			virtual bool          begin_popup_context_item(const char* str_id = nullptr, Input::EMouseKey mouse_button = Input::EMouseKey::rb) = 0;                    // helper to open and begin popup when clicked on last item. if you can pass a nullptr str_id only if the previous item had an id. If you want to use that on a non-interactive item such as Text() you need to pass in an explicit ID here. read comments in .cpp!
+			virtual bool          begin_popup_context_window(const char* str_id = nullptr, Input::EMouseKey mouse_button = Input::EMouseKey::rb, bool also_over_items = true) = 0;  // helper to open and begin popup when clicked on current window.
+			virtual bool          begin_popup_context_void(const char* str_id = nullptr, Input::EMouseKey mouse_button = Input::EMouseKey::rb) = 0;                    // helper to open and begin popup when clicked in void (where there are no imgui windows).
 			virtual bool          begin_popup_modal(const char* name, bool* p_open = nullptr, EWindowFlag flags = EWindowFlag::none) = 0;                     // modal dialog (regular window with title bar, block interactions behind the modal window, can't close the modal window by clicking outside)
 			virtual void          end_popup() = 0;                                                                                             // only call EndPopup() if BeginPopupXXX() returns true!
-			virtual bool          open_popup_on_item_click(const char* str_id = nullptr, input::EMouseKey mouse_button = input::EMouseKey::rb) = 0;                     // helper to open popup when clicked on last item (note: actually triggers on the mouse _released_ event to be consistent with popup behaviors). return true when just opened.
+			virtual bool          open_popup_on_item_click(const char* str_id = nullptr, Input::EMouseKey mouse_button = Input::EMouseKey::rb) = 0;                     // helper to open popup when clicked on last item (note: actually triggers on the mouse _released_ event to be consistent with popup behaviors). return true when just opened.
 			virtual bool          is_popup_open(const char* str_id) = 0;                                    // return true if the popup is open at the current begin-ed level of the popup stack.
 			virtual void          close_current_popup() = 0;                                                // close the popup we have begin-ed into. clicking on a MenuItem or Selectable automatically close the current popup.
 
@@ -907,14 +907,14 @@ namespace luna
 			// - The columns API is work-in-progress and rather lacking (columns are arguably the worst part of dear imgui at the moment!)
 			// - There is a maximum of 64 columns.
 			// - Currently working on new 'Tables' api which will replace columns (see GitHub #2957)
-			virtual void          columns(int32 count = 1, const char* id = nullptr, bool border = true) = 0;
+			virtual void          columns(i32 count = 1, const char* id = nullptr, bool border = true) = 0;
 			virtual void          next_column() = 0;                                                       // next column, defaults to current row or next row if the current row is finished
-			virtual int32         get_column_index() = 0;                                                   // get current column index
-			virtual float32       get_column_width(int32 column_index = -1) = 0;                              // get column width (in pixels). pass -1 to use current column
-			virtual void          set_column_width(int32 column_index, float32 width) = 0;                      // set column width (in pixels). pass -1 to use current column
-			virtual float32       get_column_offset(int32 column_index = -1) = 0;                             // get position of column line (in pixels, from the left side of the contents region). pass -1 to use current column, otherwise 0..GetColumnsCount() inclusive. column 0 is typically 0.0f
-			virtual void          set_column_offset(int32 column_index, float32 offset_x) = 0;                  // set position of column line (in pixels, from the left side of the contents region). pass -1 to use current column
-			virtual int32         get_columns_count() = 0;
+			virtual i32         get_column_index() = 0;                                                   // get current column index
+			virtual f32       get_column_width(i32 column_index = -1) = 0;                              // get column width (in pixels). pass -1 to use current column
+			virtual void          set_column_width(i32 column_index, f32 width) = 0;                      // set column width (in pixels). pass -1 to use current column
+			virtual f32       get_column_offset(i32 column_index = -1) = 0;                             // get position of column line (in pixels, from the left side of the contents region). pass -1 to use current column, otherwise 0..GetColumnsCount() inclusive. column 0 is typically 0.0f
+			virtual void          set_column_offset(i32 column_index, f32 offset_x) = 0;                  // set position of column line (in pixels, from the left side of the contents region). pass -1 to use current column
+			virtual i32         get_columns_count() = 0;
 
 			// Tab Bars, Tabs
 			virtual bool          begin_tab_bar(const char* str_id, ETabBarFlag flags = ETabBarFlag::none) = 0;        // create and append into a TabBar
@@ -931,15 +931,15 @@ namespace luna
 			// About DockSpace:
 			// - Use DockSpace() to create an explicit dock node _within_ an existing window. See Docking demo for details.
 			// - DockSpace() needs to be submitted _before_ any window they can host. If you use a dockspace, submit it early in your app.
-			virtual void          dock_space(uint32 id, const Float2& size = Float2(0, 0), EDockNodeFlag flags = EDockNodeFlag::none) = 0;
-			virtual void          set_next_window_dock_id(uint32 dock_id, ECondition cond = ECondition::none) = 0;           // set next window dock id (FIXME-DOCK)
-			virtual uint32        get_window_dock_id() = 0;
+			virtual void          dock_space(u32 id, const Float2& size = Float2(0, 0), EDockNodeFlag flags = EDockNodeFlag::none) = 0;
+			virtual void          set_next_window_dock_id(u32 dock_id, ECondition cond = ECondition::none) = 0;           // set next window dock id (FIXME-DOCK)
+			virtual u32        get_window_dock_id() = 0;
 			virtual bool          is_window_docked() = 0;                                                   // is current window docked into another window?
 
 			// Drag and Drop
 			// [BETA API] API may evolve!
 			virtual bool          begin_drag_drop_source(EDragDropFlag flags = EDragDropFlag::none) = 0;                         // call when the current item is active. If this return true, you can call SetDragDropPayload() + EndDragDropSource()
-			virtual bool          set_drag_drop_payload(const char* type, const void* data, size_t sz, ECondition cond = ECondition::none) = 0;  // type is a user defined string of maximum 32 characters. Strings starting with '_' are reserved for dear imgui internal types. Data is copied and held by imgui.
+			virtual bool          set_drag_drop_payload(const char* type, const void* data, usize sz, ECondition cond = ECondition::none) = 0;  // type is a user defined string of maximum 32 characters. Strings starting with '_' are reserved for dear imgui internal types. Data is copied and held by imgui.
 			virtual void          end_drag_drop_source() = 0;                                                                    // only call EndDragDropSource() if BeginDragDropSource() returns true!
 			virtual bool             begin_drag_drop_target() = 0;                                                          // call after submitting an item that may receive a payload. If this returns true, you can call AcceptDragDropPayload() + EndDragDropTarget()
 			virtual const Payload*   accept_drag_drop_payload(const char* type, EDragDropFlag flags = EDragDropFlag::none) = 0;          // accept contents of a given type. If ImGuiDragDropFlags_AcceptBeforeDelivery is set you can peek into the payload before the mouse button is released.
@@ -953,7 +953,7 @@ namespace luna
 			// Focus, Activation
 			// - Prefer using "SetItemDefaultFocus()" over "if (IsWindowAppearing()) SetScrollHereY()" when applicable to signify "this is the default item"
 			virtual void          set_item_default_focus() = 0;                                              // make last item the default focused item of a window.
-			virtual void          set_keyboard_focus_here(int32 offset = 0) = 0;                               // focus keyboard on the next widget. Use positive 'offset' to access sub components of a multiple component widget. Use -1 to access previous widget.
+			virtual void          set_keyboard_focus_here(i32 offset = 0) = 0;                               // focus keyboard on the next widget. Use positive 'offset' to access sub components of a multiple component widget. Use -1 to access previous widget.
 
 			// Item/Widgets Utilities
 			// - Most of the functions are referring to the last/previous item we submitted.
@@ -961,7 +961,7 @@ namespace luna
 			virtual bool          is_item_hovered(EHoveredFlag flags = EHoveredFlag::none) = 0;             // is the last item hovered? (and usable, aka not blocked by a popup, etc.). See ImGuiHoveredFlags for more options.
 			virtual bool          is_item_active() = 0;                                                     // is the last item active? (e.g. button being held, text field being edited. This will continuously return true while holding mouse button on an item. Items that don't interact will always return false)
 			virtual bool          is_item_focused() = 0;                                                    // is the last item focused for keyboard/gamepad navigation?
-			virtual bool          is_item_clicked(input::EMouseKey mouse_button = input::EMouseKey::lb) = 0;// is the last item clicked? (e.g. button/node just clicked on) == IsMouseClicked(mouse_button) && IsItemHovered()
+			virtual bool          is_item_clicked(Input::EMouseKey mouse_button = Input::EMouseKey::lb) = 0;// is the last item clicked? (e.g. button/node just clicked on) == IsMouseClicked(mouse_button) && IsItemHovered()
 			virtual bool          is_item_visible() = 0;                                                    // is the last item visible? (items may be out of sight because of clipping/scrolling)
 			virtual bool          is_item_edited() = 0;                                                     // did the last item modify its underlying value this frame? or was pressed? This is generally the same as the "bool" return value of many widgets.
 			virtual bool          is_item_activated() = 0;                                                  // was the last item just made active (item was previously inactive).
@@ -982,18 +982,18 @@ namespace luna
 			virtual h_draw_list_t      get_background_draw_list() = 0;                                            // this draw list will be the first rendering one. Useful to quickly draw shapes/text behind dear imgui contents.
 			virtual h_draw_list_t      get_foreground_draw_list() = 0;                                            // this draw list will be the last rendered one. Useful to quickly draw shapes/text over dear imgui contents.
 			virtual const char*   get_style_color_name(EColor idx) = 0;                                    // get a string corresponding to the enum value (for display, saving, etc.).
-			virtual Float2        calc_text_size(const char* text, const char* text_end = nullptr, bool hide_text_after_double_hash = false, float32 wrap_width = -1.0f) = 0;
-			virtual void          calc_list_clipping(int32 items_count, float32 items_height, int* out_items_display_start, int* out_items_display_end) = 0;    // calculate coarse clipping for large list of evenly sized items. Prefer using the ImGuiListClipper higher-level helper if you can.
-			virtual bool          begin_child_frame(uint32 id, const Float2& size, EWindowFlag flags = EWindowFlag::none) = 0; // helper to create a child window / scrolling region that looks like a normal widget frame
+			virtual Float2        calc_text_size(const char* text, const char* text_end = nullptr, bool hide_text_after_double_hash = false, f32 wrap_width = -1.0f) = 0;
+			virtual void          calc_list_clipping(i32 items_count, f32 items_height, int* out_items_display_start, int* out_items_display_end) = 0;    // calculate coarse clipping for large list of evenly sized items. Prefer using the ImGuiListClipper higher-level helper if you can.
+			virtual bool          begin_child_frame(u32 id, const Float2& size, EWindowFlag flags = EWindowFlag::none) = 0; // helper to create a child window / scrolling region that looks like a normal widget frame
 			virtual void          end_child_frame() = 0;                                                    // always call EndChildFrame() regardless of BeginChildFrame() return values (which indicates a collapsed/clipped window)
 		
-			virtual bool		  is_mouse_clicked(input::EMouseKey key) = 0;
-			virtual bool		  is_mouse_double_clicked(input::EMouseKey key) = 0;
-			virtual bool		  is_mouse_released(input::EMouseKey key) = 0;
-			virtual float32		  mouse_down_duration(input::EMouseKey key) = 0;
+			virtual bool		  is_mouse_clicked(Input::EMouseKey key) = 0;
+			virtual bool		  is_mouse_double_clicked(Input::EMouseKey key) = 0;
+			virtual bool		  is_mouse_released(Input::EMouseKey key) = 0;
+			virtual f32		  mouse_down_duration(Input::EMouseKey key) = 0;
 
 			// Input Callback Data.
-			virtual void input_text_callback_data_delete_chars(InputTextCallbackData* data, int32 pos, int32 bytes_count) = 0;
+			virtual void input_text_callback_data_delete_chars(InputTextCallbackData* data, i32 pos, i32 bytes_count) = 0;
 			virtual void input_text_callback_data_insert_chars(InputTextCallbackData* data, int pos, const char* text, const char* text_end = nullptr) = 0;
 
 			// Extension: ImGuizmo
@@ -1018,7 +1018,7 @@ namespace luna
 				const RectF& viewport_rect,
 				EGizmoOperation operation,
 				EGizmoMode mode,
-				float32 snap = 0.0f,
+				f32 snap = 0.0f,
 				bool enabled = true,
 				bool orthographic = false,
 				Float4x4* delta_matrix = nullptr,

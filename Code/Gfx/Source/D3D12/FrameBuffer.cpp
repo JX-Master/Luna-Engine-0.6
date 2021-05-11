@@ -8,23 +8,23 @@
 #include "FrameBuffer.hpp"
 
 #ifdef LUNA_GFX_D3D12
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			R<RenderTargetViewDesc> get_default_rtv(Resource* res)
 			{
 				ResourceDesc d = res->desc();
 				if (d.format == EResourceFormat::unknown)
 				{
-					return e_bad_arguments;
+					return BasicError::bad_arguments();
 				}
 				switch (d.type)
 				{
 				case EResourceType::buffer:
-					return e_bad_arguments;
+					return BasicError::bad_arguments();
 				case EResourceType::texture_1d:
 					return (d.depth_or_array_size) == 1 ? 
 						RenderTargetViewDesc::as_tex1d(d.format, 0) :
@@ -44,7 +44,7 @@ namespace luna
 					lupanic();
 					break;
 				}
-				return e_failure;
+				return BasicError::failure();
 			}
 
 			R<DepthStencilViewDesc> get_default_dsv(Resource* res)
@@ -55,13 +55,13 @@ namespace luna
 					d.format != EResourceFormat::d32_float &&
 					d.format != EResourceFormat::d32_float_s8x24)
 				{
-					return e_bad_arguments;
+					return BasicError::bad_arguments();
 				}
 				switch (d.type)
 				{
 				case EResourceType::buffer:
 				case EResourceType::texture_3d:
-					return e_bad_arguments;
+					return BasicError::bad_arguments();
 				case EResourceType::texture_1d:
 					return (d.depth_or_array_size) == 1 ?
 						DepthStencilViewDesc::as_tex1d(d.format, 0) :
@@ -79,17 +79,17 @@ namespace luna
 					lupanic();
 					break;
 				}
-				return e_failure;
+				return BasicError::failure();
 			}
 
-			RV FrameBuffer::init(uint32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv)
+			RV FrameBuffer::init(u32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv)
 			{
 				lutry
 				{
 					// initialize RTVs.
 					m_rtvs.resize(num_rtvs);
 					m_rts.resize(num_rtvs);
-					for (uint32 i = 0; i < num_rtvs; ++i)
+					for (u32 i = 0; i < num_rtvs; ++i)
 					{
 						m_rts[i] = rts[i];
 						if (!rtvs)
@@ -120,14 +120,14 @@ namespace luna
 							d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 							if (FAILED(m_device->m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_rtv_heap))))
 							{
-								return e_failure;
+								return BasicError::failure();
 							}
 						}
 						// Fill heap.
 						{
 							m_rtv_size = m_device->m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 							D3D12_RENDER_TARGET_VIEW_DESC rtv;
-							for (uint32 i = 0; i < num_rtvs; ++i)
+							for (u32 i = 0; i < num_rtvs; ++i)
 							{
 								ID3D12Resource* res = m_rts[i]->m_res.Get();
 								switch (m_rtvs[i].type)
@@ -175,7 +175,7 @@ namespace luna
 									lupanic();
 								}
 								rtv.Format = encode_resource_format(m_rtvs[i].format);
-								size_t addr = m_rtv_heap->GetCPUDescriptorHandleForHeapStart().ptr + i * m_rtv_size;
+								usize addr = m_rtv_heap->GetCPUDescriptorHandleForHeapStart().ptr + i * m_rtv_size;
 								D3D12_CPU_DESCRIPTOR_HANDLE h;
 								h.ptr = addr;
 								m_device->m_device->CreateRenderTargetView(res, &rtv, h);
@@ -204,12 +204,12 @@ namespace luna
 							d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 							if (FAILED(m_device->m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_dsv_heap))))
 							{
-								return e_failure;
+								return BasicError::failure();
 							}
 						}
 						// Fill heap.
 						{
-							size_t dsv_size = m_device->m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+							usize dsv_size = m_device->m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 							D3D12_DEPTH_STENCIL_VIEW_DESC d;
 							DepthStencilViewDesc* desc = &m_dsv;
 							d.Format = encode_resource_format(desc->format);
@@ -259,7 +259,7 @@ namespace luna
 					}
 				}
 				lucatchret;
-				return s_ok;
+				return RV();
 			}
 		}
 	}

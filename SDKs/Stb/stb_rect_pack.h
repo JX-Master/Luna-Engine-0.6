@@ -111,7 +111,7 @@ struct stbrp_rect
    // reserved for your use:
    int            id;
 
-   // input:
+   // Input:
    stbrp_coord    w, h;
 
    // output:

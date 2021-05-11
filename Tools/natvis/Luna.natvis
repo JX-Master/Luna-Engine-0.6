@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="Luna::BasicString&lt;char&gt;">
+        <DisplayString Condition="m_buffer != nullptr">{m_buffer, s8}</DisplayString>
+        <DisplayString Condition="m_buffer == nullptr">{"", s8}</DisplayString>
+        <StringView Condition="m_buffer != nullptr">m_buffer, s8</StringView>
+        <StringView Condition="m_buffer == nullptr">"", s8</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="Luna::BasicString&lt;wchar&gt;">
+        <DisplayString Condition="m_buffer != nullptr">{m_buffer, su}</DisplayString>
+        <DisplayString Condition="m_buffer == nullptr">{L"", su}</DisplayString>
+        <StringView Condition="m_buffer != nullptr">m_buffer, su</StringView>
+        <StringView Condition="m_buffer == nullptr">L"", su</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="Luna::BasicString&lt;char8_t&gt;">
+        <DisplayString Condition="m_buffer != nullptr">{m_buffer, s8}</DisplayString>
+        <DisplayString Condition="m_buffer == nullptr">{u8"", s8}</DisplayString>
+        <StringView Condition="m_buffer != nullptr">m_buffer, s8</StringView>
+        <StringView Condition="m_buffer == nullptr">u8"", s8</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="Luna::BasicString&lt;char16_t&gt;">
+        <DisplayString Condition="m_buffer != nullptr">{m_buffer, su}</DisplayString>
+        <DisplayString Condition="m_buffer == nullptr">{u"", su}</DisplayString>
+        <StringView Condition="m_buffer != nullptr">m_buffer, su</StringView>
+        <StringView Condition="m_buffer == nullptr">u"", su</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="Luna::BasicString&lt;char32_t&gt;">
+        <DisplayString Condition="m_buffer != nullptr">{m_buffer, s32}</DisplayString>
+        <DisplayString Condition="m_buffer == nullptr">{U"", s32}</DisplayString>
+        <StringView Condition="m_buffer != nullptr">m_buffer, s32</StringView>
+        <StringView Condition="m_buffer == nullptr">U"", s32</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="Luna::Name">
+        <DisplayString>{m_str, s8}</DisplayString>
+        <StringView>m_str, s8</StringView>
+    </Type>
+
+    <Type Name="Luna::Vector&lt;*&gt;">
+        <DisplayString>{{Size={m_size} Capacity={m_capacity}}}</DisplayString>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">m_size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">m_alloc</Item>
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_buffer</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+</AutoVisualizer> 

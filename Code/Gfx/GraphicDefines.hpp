@@ -7,11 +7,11 @@
 */
 #pragma once
 #include <Core/Core.hpp>
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EResourceFormat : uint32
+		enum class EResourceFormat : u32
 		{
 			unknown = 0,
 			r8_unorm,
@@ -97,7 +97,7 @@ namespace luna
 		};
 
 		//! Returns the size of one pixel in the specified format, in bits.
-		inline size_t bits_per_pixel(EResourceFormat format)
+		inline u16 bits_per_pixel(EResourceFormat format)
 		{
 			switch (format)
 			{
@@ -184,7 +184,7 @@ namespace luna
 			}
 		}
 
-		enum class EResourceType : uint32
+		enum class EResourceType : u32
 		{
 			unknown = 0,
 			buffer,
@@ -193,7 +193,7 @@ namespace luna
 			texture_3d
 		};
 
-		enum class EComparisonFunc : uint32
+		enum class EComparisonFunc : u32
 		{
 			never,	// Never pass comparison
 			less,
@@ -205,7 +205,7 @@ namespace luna
 			always	// Always pass comparison
 		};
 
-		enum class EResourceState : uint32
+		enum class EResourceState : u32
 		{
 			//! The state used for passing resources between different graphic engine types (graphic/compute/copy).
 			//! This state is also required if you need to read/write data in CPU side.
@@ -256,7 +256,7 @@ namespace luna
 			// present
 		};
 
-		enum class EPrimitiveTopology : uint32
+		enum class EPrimitiveTopology : u32
 		{
 			undefined,
 			point_list,
@@ -304,21 +304,21 @@ namespace luna
 
 		struct Viewport
 		{
-			float32 top_left_x;
-			float32 top_left_y;
-			float32 width;
-			float32 height;
-			float32 min_depth;
-			float32 max_depth;
+			f32 top_left_x;
+			f32 top_left_y;
+			f32 width;
+			f32 height;
+			f32 min_depth;
+			f32 max_depth;
 
 			Viewport() = default;
 			Viewport(
-				float32 _top_left_x,
-				float32 _top_left_y,
-				float32 _width,
-				float32 _height,
-				float32 _min_depth,
-				float32 _max_depth) :
+				f32 _top_left_x,
+				f32 _top_left_y,
+				f32 _width,
+				f32 _height,
+				f32 _min_depth,
+				f32 _max_depth) :
 				top_left_x(_top_left_x),
 				top_left_y(_top_left_y),
 				width(_width),
@@ -348,7 +348,7 @@ namespace luna
 		};
 
 		//! Specify the possible usage of this resource.
-		enum class EResourceUsageFlag : uint32
+		enum class EResourceUsageFlag : u32
 		{
 			none = 0x00,
 			//! Allows this resource to be bound as shader resource by graphic pipeline.
@@ -374,11 +374,11 @@ namespace luna
 
 		struct DepthStencilValue
 		{
-			float32 depth;
-			uint8 stencil;
+			f32 depth;
+			u8 stencil;
 		};
 
-		enum class EClearValueType : uint32
+		enum class EClearValueType : u32
 		{
 			color = 1,
 			depth_stencil = 2
@@ -390,10 +390,10 @@ namespace luna
 			EClearValueType type;
 			union
 			{
-				float32 color[4];
+				f32 color[4];
 				DepthStencilValue depth_stencil;
 			};
-			static ClearValue as_color(EResourceFormat _format, float32 _color[4])
+			static ClearValue as_color(EResourceFormat _format, f32 _color[4])
 			{
 				ClearValue r;
 				r.format = _format;
@@ -404,7 +404,7 @@ namespace luna
 				r.color[3] = _color[3];
 				return r;
 			}
-			static ClearValue as_depth_stencil(EResourceFormat _format, float32 _depth, uint8 _stencil)
+			static ClearValue as_depth_stencil(EResourceFormat _format, f32 _depth, u8 _stencil)
 			{
 				ClearValue r;
 				r.type = EClearValueType::depth_stencil;

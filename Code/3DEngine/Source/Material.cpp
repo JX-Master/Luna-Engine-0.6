@@ -6,46 +6,46 @@
 */
 #include "Material.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		Unconstructed<MaterialType> g_material_type;
 
-		void Material::set_base_color(asset::PAsset<texture::ITexture> tex)
+		void Material::set_base_color(Asset::PAsset<Texture::ITexture> tex)
 		{
-			asset::notify_asset_change(m_meta, m_base_color.guid(), tex.guid());
+			Asset::notify_asset_change(m_meta, m_base_color.guid(), tex.guid());
 			m_base_color = tex;
 		}
-		void Material::set_roughness(asset::PAsset<texture::ITexture> tex)
+		void Material::set_roughness(Asset::PAsset<Texture::ITexture> tex)
 		{
-			asset::notify_asset_change(m_meta, m_roughness.guid(), tex.guid());
+			Asset::notify_asset_change(m_meta, m_roughness.guid(), tex.guid());
 			m_roughness = tex;
 		}
-		void Material::set_normal(asset::PAsset<texture::ITexture> tex)
+		void Material::set_normal(Asset::PAsset<Texture::ITexture> tex)
 		{
-			asset::notify_asset_change(m_meta, m_normal.guid(), tex.guid());
+			Asset::notify_asset_change(m_meta, m_normal.guid(), tex.guid());
 			m_normal = tex;
 		}
-		void Material::set_metallic(asset::PAsset<texture::ITexture> tex)
+		void Material::set_metallic(Asset::PAsset<Texture::ITexture> tex)
 		{
-			asset::notify_asset_change(m_meta, m_metallic.guid(), tex.guid());
+			Asset::notify_asset_change(m_meta, m_metallic.guid(), tex.guid());
 			m_metallic = tex;
 		}
-		void Material::set_emissive(asset::PAsset<texture::ITexture> tex)
+		void Material::set_emissive(Asset::PAsset<Texture::ITexture> tex)
 		{
-			asset::notify_asset_change(m_meta, m_emissive.guid(), tex.guid());
+			Asset::notify_asset_change(m_meta, m_emissive.guid(), tex.guid());
 			m_emissive = tex;
 		}
 
-		RV MaterialType::on_load_data(asset::IAsset* target_asset, IVariant* data, IVariant* params)
+		RV MaterialType::on_load_data(Asset::IAsset* target_asset, const Variant& data, const Variant& params)
 		{
 			P<Material> mat = target_asset;
 			lutry
 			{
-				lulet(type, data->field(0, intern_name("material_type")));
-				lulet(type_name, type->check_name());
-				if (type_name.get() == intern_name("lit"))
+				auto& type = data.field(0, Name("material_type"));
+				lulet(type_name, type.check_name());
+				if (type_name.get() == Name("lit"))
 				{
 					mat->m_material_type = EMeterialType::lit;
 				}
@@ -53,10 +53,10 @@ namespace luna
 				{
 					mat->m_material_type = EMeterialType::unlit;
 				}
-				auto base_color = data->field(0, intern_name("base_color"));
-				if (succeeded(base_color))
+				auto& base_color = data.field(0, Name("base_color"));
+				if (base_color.type() != EVariantType::null)
 				{
-					lulet(base_color_buf, base_color.get()->check_u64_buf());
+					lulet(base_color_buf, base_color.check_u64_buf());
 					mat->m_base_color = Guid(base_color_buf[0], base_color_buf[1]);
 				}
 				else
@@ -64,10 +64,10 @@ namespace luna
 					mat->m_base_color = Guid(0, 0);
 				}
 
-				auto roughness = data->field(0, intern_name("roughness"));
-				if (succeeded(roughness))
+				auto& roughness = data.field(0, Name("roughness"));
+				if (roughness.type() != EVariantType::null)
 				{
-					lulet(roughness_buf, roughness.get()->check_u64_buf());
+					lulet(roughness_buf, roughness.check_u64_buf());
 					mat->m_roughness = Guid(roughness_buf[0], roughness_buf[1]);
 				}
 				else
@@ -75,10 +75,10 @@ namespace luna
 					mat->m_roughness = Guid(0, 0);
 				}
 
-				auto normal = data->field(0, intern_name("normal"));
-				if (succeeded(normal))
+				auto& normal = data.field(0, Name("normal"));
+				if (normal.type() != EVariantType::null)
 				{
-					lulet(normal_buf, normal.get()->check_u64_buf());
+					lulet(normal_buf, normal.check_u64_buf());
 					mat->m_normal = Guid(normal_buf[0], normal_buf[1]);
 				}
 				else
@@ -86,10 +86,10 @@ namespace luna
 					mat->m_normal = Guid(0, 0);
 				}
 
-				auto metallic = data->field(0, intern_name("metallic"));
-				if (succeeded(metallic))
+				auto& metallic = data.field(0, Name("metallic"));
+				if (metallic.type() != EVariantType::null)
 				{
-					lulet(metallic_buf, metallic.get()->check_u64_buf());
+					lulet(metallic_buf, metallic.check_u64_buf());
 					mat->m_metallic = Guid(metallic_buf[0], metallic_buf[1]);
 				}
 				else
@@ -97,10 +97,10 @@ namespace luna
 					mat->m_metallic = Guid(0, 0);
 				}
 
-				auto emissive = data->field(0, intern_name("emissive"));
-				if (succeeded(emissive))
+				auto& emissive = data.field(0, Name("emissive"));
+				if (emissive.type() != EVariantType::null)
 				{
-					lulet(emissive_buf, emissive.get()->check_u64_buf());
+					lulet(emissive_buf, emissive.check_u64_buf());
 					mat->m_emissive = Guid(emissive_buf[0], emissive_buf[1]);
 				}
 				else
@@ -110,10 +110,10 @@ namespace luna
 			}
 			lucatchret;
 
-			return s_ok;
+			return RV();
 		}
 
-		RV MaterialType::on_load_procedural_data(asset::IAsset* target_asset, IVariant* params)
+		RV MaterialType::on_load_procedural_data(Asset::IAsset* target_asset, const Variant& params)
 		{
 			// Resets dependencies.
 			P<Material> mat = target_asset;
@@ -125,15 +125,15 @@ namespace luna
 			mat->m_normal = Guid(0, 0);
 			mat->m_metallic = Guid(0, 0);
 			mat->m_emissive = Guid(0, 0);
-			if (!params)
+			if (params.type() == EVariantType::null)
 			{
-				return s_ok;
+				return RV();
 			}
 			lutry
 			{
-				lulet(type, params->field(0, intern_name("material_type")));
-				lulet(type_name, type->check_name());
-				if (type_name.get() == intern_name("lit"))
+				auto& type = params.field(0, Name("material_type"));
+				lulet(type_name, type.check_name());
+				if (type_name.get() == Name("lit"))
 				{
 					mat->m_material_type = EMeterialType::lit;
 				}
@@ -141,47 +141,47 @@ namespace luna
 				{
 					mat->m_material_type = EMeterialType::unlit;
 				}
-				auto base_color = params->field(0, intern_name("base_color"));
-				if (succeeded(base_color))
+				auto& base_color = params.field(0, Name("base_color"));
+				if (base_color.type() != EVariantType::null)
 				{
-					lulet(base_color_buf, base_color.get()->check_u64_buf());
+					lulet(base_color_buf, base_color.check_u64_buf());
 					mat->set_base_color(Guid(base_color_buf[0], base_color_buf[1]));
 				}
 
-				auto roughness = params->field(0, intern_name("roughness"));
-				if (succeeded(roughness))
+				auto& roughness = params.field(0, Name("roughness"));
+				if (roughness.type() != EVariantType::null)
 				{
-					lulet(roughness_buf, roughness.get()->check_u64_buf());
+					lulet(roughness_buf, roughness.check_u64_buf());
 					mat->set_roughness(Guid(roughness_buf[0], roughness_buf[1]));
 				}
 
-				auto normal = params->field(0, intern_name("normal"));
-				if (succeeded(normal))
+				auto& normal = params.field(0, Name("normal"));
+				if (normal.type() != EVariantType::null)
 				{
-					lulet(normal_buf, normal.get()->check_u64_buf());
+					lulet(normal_buf, normal.check_u64_buf());
 					mat->set_normal(Guid(normal_buf[0], normal_buf[1]));
 				}
 
-				auto metallic = params->field(0, intern_name("metallic"));
-				if (succeeded(metallic))
+				auto& metallic = params.field(0, Name("metallic"));
+				if (metallic.type() != EVariantType::null)
 				{
-					lulet(metallic_buf, metallic.get()->check_u64_buf());
+					lulet(metallic_buf, metallic.check_u64_buf());
 					mat->set_metallic(Guid(metallic_buf[0], metallic_buf[1]));
 				}
 
-				auto emissive = params->field(0, intern_name("emissive"));
-				if (succeeded(emissive))
+				auto& emissive = params.field(0, Name("emissive"));
+				if (emissive.type() != EVariantType::null)
 				{
-					lulet(emissive_buf, emissive.get()->check_u64_buf());
+					lulet(emissive_buf, emissive.check_u64_buf());
 					mat->set_emissive(Guid(emissive_buf[0], emissive_buf[1]));
 				}
 			}
 			lucatchret;
 
-			return s_ok;
+			return RV();
 		}
 
-		void MaterialType::on_unload_data(asset::IAsset* target_asset)
+		void MaterialType::on_unload_data(Asset::IAsset* target_asset)
 		{
 			P<Material> mat = target_asset;
 			mat->m_base_color = Guid(0, 0);
@@ -191,77 +191,77 @@ namespace luna
 			mat->m_emissive = Guid(0, 0);
 		}
 
-		RP<IVariant> MaterialType::on_save_data(asset::IAsset* target_asset, IVariant* params)
+		R<Variant> MaterialType::on_save_data(Asset::IAsset* target_asset, const Variant& params)
 		{
 			P<Material> mat = target_asset;
-			auto var = new_var(EVariantType::table);
-			auto type = new_var(EVariantType::name);
+			auto var = Variant(EVariantType::table);
+			auto type = Variant(EVariantType::name);
 			if (mat->material_type() == EMeterialType::lit)
 			{
-				type->name() = intern_name("lit");
+				type.to_name() = Name("lit");
 			}
 			else
 			{
-				type->name() = intern_name("unlit");
+				type.to_name() = Name("unlit");
 			}
-			var->set_field(0, intern_name("material_type"), type);
+			var.set_field(0, Name("material_type"), type);
 
 			Guid tex_guid;
 
 			tex_guid = mat->m_base_color.guid();
 			if (tex_guid != Guid(0, 0))
 			{
-				auto tex = new_var1(EVariantType::u64, 2);
-				auto buf = tex->u64_buf();
+				auto tex = Variant(EVariantType::u64, 2);
+				auto buf = tex.to_u64_buf();
 				buf[0] = tex_guid.high;
 				buf[1] = tex_guid.low;
-				var->set_field(0, intern_name("base_color"), tex);
+				var.set_field(0, Name("base_color"), tex);
 			}
 
 			tex_guid = mat->m_roughness.guid();
 			if (tex_guid != Guid(0, 0))
 			{
-				auto tex = new_var1(EVariantType::u64, 2);
-				auto buf = tex->u64_buf();
+				auto tex = Variant(EVariantType::u64, 2);
+				auto buf = tex.to_u64_buf();
 				buf[0] = tex_guid.high;
 				buf[1] = tex_guid.low;
-				var->set_field(0, intern_name("roughness"), tex);
+				var.set_field(0, Name("roughness"), tex);
 			}
 
 			tex_guid = mat->m_normal.guid();
 			if (tex_guid != Guid(0, 0))
 			{
-				auto tex = new_var1(EVariantType::u64, 2);
-				auto buf = tex->u64_buf();
+				auto tex = Variant(EVariantType::u64, 2);
+				auto buf = tex.to_u64_buf();
 				buf[0] = tex_guid.high;
 				buf[1] = tex_guid.low;
-				var->set_field(0, intern_name("normal"), tex);
+				var.set_field(0, Name("normal"), tex);
 			}
 
 			tex_guid = mat->m_metallic.guid();
 			if (tex_guid != Guid(0, 0))
 			{
-				auto tex = new_var1(EVariantType::u64, 2);
-				auto buf = tex->u64_buf();
+				auto tex = Variant(EVariantType::u64, 2);
+				auto buf = tex.to_u64_buf();
 				buf[0] = tex_guid.high;
 				buf[1] = tex_guid.low;
-				var->set_field(0, intern_name("metallic"), tex);
+				var.set_field(0, Name("metallic"), tex);
 			}
 
 			tex_guid = mat->m_emissive.guid();
 			if (tex_guid != Guid(0, 0))
 			{
-				auto tex = new_var1(EVariantType::u64, 2);
-				auto buf = tex->u64_buf();
+				auto tex = Variant(EVariantType::u64, 2);
+				auto buf = tex.to_u64_buf();
 				buf[0] = tex_guid.high;
 				buf[1] = tex_guid.low;
-				var->set_field(0, intern_name("emissive"), tex);
+				var.set_field(0, Name("emissive"), tex);
 			}
 
 			return var;
 		}
 
-		void MaterialType::on_dependency_replace(asset::IAsset* current_asset, const Guid& before, const Guid& after)
+		void MaterialType::on_dependency_replace(Asset::IAsset* current_asset, const Guid& before, const Guid& after)
 		{
 			P<Material> mat = current_asset;
 			if (mat->m_base_color.guid() == before)

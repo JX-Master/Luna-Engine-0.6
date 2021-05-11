@@ -7,64 +7,34 @@
 #include "ImageSystem.hpp"
 #include "Image.hpp"
 #include "IO/STBImage.hpp"
-namespace luna
+#include <Runtime/Module.hpp>
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		void deinit() {}
 
-		void init()
+		RV init()
 		{
 			stbi_init();
-			add_module("Image", deinit);
+			return RV();
 		}
+
+		StaticRegisterModule m("Image", "Core;Gfx", init, deinit);
 
 		P<IImage> new_image(const ImageDesc& desc)
 		{
-			P<Image> img = box_ptr(new_obj<Image>(get_module_allocator()));
+			P<Image> img = newobj<Image>();
 			img->init(desc);
 			return img;
 		}
-
-		//RP<IImage> load_image(IStream* stream, EImageSourceFormat format)
-		//{
-		//	luassert_usr(stream);
-		//	P<Image> img;
-		//	lutry
-		//	{
-		//		if (format == EImageSourceFormat::dds)
-		//		{
-		//			// To be implemented later.
-		//			return e_not_available;
-		//		}
-		//		img = box_ptr(new_obj<Image>(get_module_allocator()));
-		//		if (!img)
-		//		{
-		//			return e_bad_memory_alloc;
-		//		}
-		//		lulet(subimg, load_subimage(stream, format));
-		//		img->m_subimages.resize(1);
-		//		ImageDesc& d = img->m_desc;
-		//		SubimageDesc& sd = img->m_subimages[0]->m_desc;
-		//		d.array_size = 1;
-		//		d.depth = 1;
-		//		d.flags = EImageDescFlag::none;
-		//		d.format = sd.format;
-		//		d.height = sd.height;
-		//		d.mip_levels = 1;
-		//		d.type = gfx::EResourceType::texture_2d;
-		//		d.width = sd.width;
-		//	}
-		//	lucatchret;
-		//	return img;
-		//}
 
 		static ImageDesc stbi_make_subimage_desc(int w, int h, int comp, int is_hdr, int is_16bit)
 		{
 			luassert(comp >= 1 && comp <= 4);
 			ImageDesc d;
-			d.width = (uint32)w;
-			d.height = (uint32)h;
+			d.width = (u32)w;
+			d.height = (u32)h;
 			if (is_hdr)
 			{
 				switch (comp)
@@ -103,18 +73,19 @@ namespace luna
 
 		R<ImageDesc> load_image_desc(IStream* stream)
 		{
-			uint64 pos = stream->tell();
 			int x, y, comp;
-			if (!stbi_info_from_callbacks(&stbi_iocb, (void*)stream, &x, &y, &comp))
-			{
-				// data corrupted.
-				auto _ = stream->seek(pos, ESeekMode::begin);
-				set_err(e_bad_arguments, "Failed to load image description info: Data corrupted.");
-				return e_user_failure;
-			}
 			int is_16_bit, is_hdr;
 			lutry
 			{
+				lulet(pos, stream->tell());
+				
+				if (!stbi_info_from_callbacks(&stbi_iocb, (void*)stream, &x, &y, &comp))
+				{
+					// data corrupted.
+					auto _ = stream->seek(pos, ESeekMode::begin);
+					get_error_object() = Error(BasicError::bad_arguments(), "Failed to load image description info: Data corrupted.");
+					return BasicError::error_object();
+				}
 				luexp(stream->seek(pos, ESeekMode::begin));
 				is_16_bit = stbi_is_16_bit_from_callbacks(&stbi_iocb, (void*)stream);
 				luexp(stream->seek(pos, ESeekMode::begin));
@@ -181,18 +152,17 @@ namespace luna
 
 		RP<IImage> load_image(IStream* stream, EImagePixelFormat* desired_format)
 		{
-			luassert_usr(stream);
+			lucheck(stream);
 			P<Image> img;
 
-			img = box_ptr(new_obj<Image>(stbi_alloc));
-
-			uint64 pos = stream->tell();
+			img = newobj<Image>();
 
 			// Use stb_image library to load image.
 
 			// Prefetch the data info.
 			lutry
 			{
+				lulet(pos, stream->tell());
 				lulet(desc, load_image_desc(stream));
 				luexp(stream->seek(pos, ESeekMode::begin));
 				if (desired_format)
@@ -218,14 +188,23 @@ namespace luna
 				if (!data)
 				{
 					auto _ = stream->seek(pos, ESeekMode::begin);
-					return e_failure;
+					return ImageError::file_parse_error();
 				}
-				img->m_buffer = data;
+				img->m_blob.resize(desc.width * desc.height * size_per_pixel(desc.format));
+				memcpy(img->m_blob.data(), data, img->m_blob.size());
 				img->m_desc = desc;
-				img->m_buffer_size = desc.width * desc.height * size_per_pixel(desc.format);
 			}
 			lucatchret;
 			return img;
+		}
+
+		namespace ImageError
+		{
+			LUNA_IMAGE_API errcode_t file_parse_error()
+			{
+				static errcode_t e = get_error_code_by_name(u8"file_parse_error");
+				return e;
+			}
 		}
 	}
 }

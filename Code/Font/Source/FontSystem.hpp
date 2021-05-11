@@ -6,11 +6,11 @@
 */
 #pragma once
 #include "FontHeader.hpp"
-#include <Base/Interface.hpp>
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace font
+	namespace Font
 	{
 		extern P<IFontFile> g_default_font;
 

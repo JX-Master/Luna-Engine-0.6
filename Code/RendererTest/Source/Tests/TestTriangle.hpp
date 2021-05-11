@@ -6,7 +6,7 @@
 */
 #include "../TestHeader.hpp"
 
-namespace luna
+namespace Luna
 {
 	//! This test case that draws a triangle on the screen.
 	class TestTriangle : public ITestCase
@@ -15,15 +15,14 @@ namespace luna
 		lucid("{4527652f-8467-4ba2-aed8-5aeb7a4514f1}");
 		luiimpl(TestTriangle, ITestCase, IObject);
 
-		TestTriangle(IAllocator* alloc) :
-			luibind(alloc) {}
+		TestTriangle() {}
 
-		P<gfx::IRenderPass> m_render_pass;
-		P<gfx::IFrameBuffer> m_fbo;
-		P<gfx::IShaderInputLayout> m_shader_input_layout;
-		P<gfx::IPipelineState> m_pso;
+		P<Gfx::IRenderPass> m_render_pass;
+		P<Gfx::IFrameBuffer> m_fbo;
+		P<Gfx::IShaderInputLayout> m_shader_input_layout;
+		P<Gfx::IPipelineState> m_pso;
 
-		P<gfx::IResource> m_vb;
+		P<Gfx::IResource> m_vb;
 
 		virtual RV init() override;
 		virtual void update() override;

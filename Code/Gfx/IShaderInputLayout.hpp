@@ -7,11 +7,11 @@
 #pragma once
 #include "IGraphicDeviceChild.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EShaderInputGroupType : uint32
+		enum class EShaderInputGroupType : u32
 		{
 			srv,
 			uav,
@@ -19,7 +19,7 @@ namespace luna
 			sampler
 		};
 
-		enum class EShaderVisibility : uint32
+		enum class EShaderVisibility : u32
 		{
 			all = 0,
 			vertex = 1,
@@ -34,15 +34,15 @@ namespace luna
 		struct ShaderInputGroupDesc
 		{
 			EShaderInputGroupType type;
-			uint32 base_shader_register;
-			uint32 num_views;
+			u32 base_shader_register;
+			u32 num_views;
 			EShaderVisibility shader_visibility;
 
 			ShaderInputGroupDesc() = default;
 			ShaderInputGroupDesc(
 				EShaderInputGroupType _type,
-				uint32 _base_shader_register,
-				uint32 _num_views,
+				u32 _base_shader_register,
+				u32 _num_views,
 				EShaderVisibility _shader_visibility) :
 				type(_type),
 				base_shader_register(_base_shader_register),
@@ -50,7 +50,7 @@ namespace luna
 				shader_visibility(_shader_visibility) {}
 		};
 
-		enum class EShaderInputLayoutFlag : uint32
+		enum class EShaderInputLayoutFlag : u32
 		{
 			none = 0,
 			//! Input assembler and input layout is used.
@@ -75,13 +75,13 @@ namespace luna
 		struct ShaderInputLayoutDesc
 		{
 			const ShaderInputGroupDesc* groups;
-			uint32 num_groups;
+			u32 num_groups;
 			EShaderInputLayoutFlag flags;
 
 			ShaderInputLayoutDesc() = default;
 			ShaderInputLayoutDesc(
 				const ShaderInputGroupDesc* _groups,
-				uint32 _num_groups,
+				u32 _num_groups,
 				EShaderInputLayoutFlag _flags) :
 				groups(_groups),
 				num_groups(_num_groups),

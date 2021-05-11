@@ -7,16 +7,16 @@
 #pragma once
 #include "RendererHeader.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace renderer
+	namespace Renderer
 	{
-		extern P<gfx::IGraphicDevice> m_main_device;
-		extern P<gfx::ICommandQueue> m_main_graphic_queue;
-		extern P<gfx::ICommandQueue> m_main_compute_queue;
-		extern P<gfx::ICommandQueue> m_main_copy_queue;
+		extern P<Gfx::IGraphicDevice> m_main_device;
+		extern P<Gfx::ICommandQueue> m_main_graphic_queue;
+		extern P<Gfx::ICommandQueue> m_main_compute_queue;
+		extern P<Gfx::ICommandQueue> m_main_copy_queue;
 
-		LUNA_RENDERER_API RV init(const RenderSystemStartupParams* params);
+		RV init();
 		void deinit();
 	}
 }

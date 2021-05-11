@@ -5,12 +5,11 @@
 * @date 2020/1/28
 */
 #pragma once
-#include <Base/IObject.hpp>
-#include "../Base/Result.hpp"
+#include "IObject.hpp"
 
-namespace luna
+namespace Luna
 {
-	enum class ESeekMode : uint32
+	enum class ESeekMode : u32
 	{
 		//! The offset is relative to the beginning of the stream.
 		begin = 1,
@@ -20,7 +19,7 @@ namespace luna
 		end = 3
 	};
 
-	enum class EStreamFlag : uint32
+	enum class EStreamFlag : u32
 	{
 		none = 0x00,
 		//! Set if this stream supports reading.
@@ -62,7 +61,7 @@ namespace luna
 		//! reaches the end of the stream, but this is NOT an error. Specially, if one read operation is performed when
 		//! the cursor is beyond or at the end of the stream, the read operation succeeds with 0 bytes being read. This 
 		//! can be considered as an EOF symbol in stdlib.
-		virtual RV read(void* buffer, size_t size, size_t* read_bytes = nullptr) = 0;
+		virtual RV read(void* buffer, usize size, usize* read_bytes = nullptr) = 0;
 
 		//! Writes data to the current position the cursor is pointing to and offsets the cursor back. This call returns after
 		//! all data have been written.
@@ -74,21 +73,21 @@ namespace luna
 		//! size of bytes required by the user to write. However, if an error occurs while writing data, some of the data may have 
 		//! already be written while others are not, in such case the `write_bytes` reported by system may not be equal to `size` 
 		//! specified by the user.
-		virtual RV write(const void* buffer, size_t size, size_t* write_bytes = nullptr) = 0;
+		virtual RV write(const void* buffer, usize size, usize* write_bytes = nullptr) = 0;
 
-		//! Gets the size of the stream in bytes. Returns 0 if the underlying stream buffer is invalid.
-		virtual R<uint64> size() = 0;
+		//! Gets the size of the stream in bytes. Returns 0 if the underlying stream is invalid or does not have a size.
+		virtual u64 size() = 0;
 
 		//! Sets the size of the stream in bytes.
 		//! If the current file size is smaller than the size to set and this call succeeded, the stream will be extended to the size specified
 		//! with data between the last size and current size be uninitialized. If the current file size is greater than the size to set and this 
 		//! call succeeded, the stream will be truncated and the data between the last size and current size will be discarded.
 		//! @param[in] length The size to set, in bytes.
-		virtual RV set_size(uint64 sz) = 0;
+		virtual RV set_size(u64 sz) = 0;
 
 		//! Gets the current position of the stream cursor. The position is number of bytes relative to the beginning of the 
 		//! stream.
-		virtual R<uint64> tell() = 0;
+		virtual R<u64> tell() = 0;
 
 		//! Moves the cursor to a new position.
 		//! @param[in] offset Number of bytes to move relative to the position specified by `mode`.
@@ -99,10 +98,9 @@ namespace luna
 		//! 2. All write operations extends the size of the stream before the actual write operation performed.
 		//! 
 		//! The cursor value cannot be negative, if the new cursor position goes below 0, the seek operation fails.
-		virtual RV seek(int64 offset, ESeekMode mode) = 0;
+		virtual RV seek(i64 offset, ESeekMode mode) = 0;
 
-		//! Clears all buffers for this stream and causes all buffered data to be written to the underlying device. 
-		//! This call fails with `e_not_available` if this stream is not buffered.
-		virtual RV flush() = 0;
+		//! Clears all buffers for this stream and causes all buffered data to be written to the underlying device.
+		virtual void flush() = 0;
 	};
 }

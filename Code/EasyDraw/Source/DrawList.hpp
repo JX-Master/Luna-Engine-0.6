@@ -6,12 +6,12 @@
 */
 #pragma once
 #include "EasyDrawHeader.hpp"
-#include <Base/Vector.hpp>
+#include <Runtime/Vector.hpp>
 #include "EasyDraw.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
 		class DrawList : public IDrawList
 		{
@@ -22,17 +22,15 @@ namespace luna
 			struct DrawCallBuf
 			{
 				Vector<PrimitiveVertex> m_vertices;
-				Vector<uint32> m_indices;
-				P<gfx::IResource> m_texture;
-				gfx::SamplerDesc sampler;
-				float32 rotation;
-				float32 origin_x;
-				float32 origin_y;
+				Vector<u32> m_indices;
+				P<Gfx::IResource> m_texture;
+				Gfx::SamplerDesc sampler;
+				f32 rotation;
+				f32 origin_x;
+				f32 origin_y;
 				RectI clip_rect;
 
-				DrawCallBuf(IAllocator* alloc) :
-					m_vertices(alloc),
-					m_indices(alloc) {}
+				DrawCallBuf() {}
 			};
 
 			Vector<DrawCallBuf> m_bufs;
@@ -40,16 +38,16 @@ namespace luna
 			// There is a range of draw calls that can accept new elements, which starts from m_dc_barrier_index,
 			// and end with m_bufs.size().
 			// The draw calls after this index can accept new elements.
-			uint32 m_dc_barrier_index;
+			u32 m_dc_barrier_index;
 			// The target draw call index for the current pipeline state.
-			int32 m_target_dc_index;
+			i32 m_target_dc_index;
 
 			// draw context state.
-			P<gfx::IResource> m_texture;
-			gfx::SamplerDesc m_sampler;
-			float32 m_left_offset;
-			float32 m_top_offset;
-			float32 m_rotation;
+			P<Gfx::IResource> m_texture;
+			Gfx::SamplerDesc m_sampler;
+			f32 m_left_offset;
+			f32 m_top_offset;
+			f32 m_rotation;
 			RectI m_clip_rect;
 
 			P<IDrawPath> m_path;
@@ -64,18 +62,16 @@ namespace luna
 			DrawCallBuf* get_target_drawcall();
 
 			// Tests if the specified state is equal with the current set state.
-			bool state_equal(uint32 index);
+			bool state_equal(u32 index);
 
-			DrawList(IAllocator* alloc) :
-				luibind(alloc),
-				m_bufs(alloc) {}
+			DrawList() {}
 
 			void init();
 
 			virtual void drawcall_barrier() override;
 
 			virtual void reset() override;
-			virtual void set_texture(gfx::IResource* tex) override
+			virtual void set_texture(Gfx::IResource* tex) override
 			{
 				if (tex != m_texture)
 				{
@@ -83,7 +79,7 @@ namespace luna
 					m_texture = tex;
 				}
 			}
-			virtual gfx::IResource* get_texture() override
+			virtual Gfx::IResource* get_texture() override
 			{
 				if (m_texture)
 				{
@@ -91,14 +87,14 @@ namespace luna
 				}
 				return m_texture;
 			}
-			virtual void set_sampler(const gfx::SamplerDesc* desc) override
+			virtual void set_sampler(const Gfx::SamplerDesc* desc) override
 			{
-				gfx::SamplerDesc d;
+				Gfx::SamplerDesc d;
 				if (!desc)
 				{
-					float32 c2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-					d = gfx::SamplerDesc(gfx::EFilter::min_mag_mip_linear, gfx::ETextureAddressMode::clamp, gfx::ETextureAddressMode::clamp,
-						gfx::ETextureAddressMode::clamp, 0.0f, 1, gfx::EComparisonFunc::always, c2, 0.0f, 1.0f);
+					f32 c2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+					d = Gfx::SamplerDesc(Gfx::EFilter::min_mag_mip_linear, Gfx::ETextureAddressMode::clamp, Gfx::ETextureAddressMode::clamp,
+						Gfx::ETextureAddressMode::clamp, 0.0f, 1, Gfx::EComparisonFunc::always, c2, 0.0f, 1.0f);
 				}
 				else
 				{
@@ -110,7 +106,7 @@ namespace luna
 					m_state_dirty = true;
 				}
 			}
-			virtual void get_sampler(gfx::SamplerDesc* desc) override
+			virtual void get_sampler(Gfx::SamplerDesc* desc) override
 			{
 				*desc = m_sampler;
 			}
@@ -136,7 +132,7 @@ namespace luna
 				offset.x = m_left_offset;
 				offset.y = m_top_offset;
 			}
-			virtual void set_rotation(float32 degrees) override
+			virtual void set_rotation(f32 degrees) override
 			{
 				if (m_rotation != degrees)
 				{
@@ -144,7 +140,7 @@ namespace luna
 					m_rotation = degrees;
 				}
 			}
-			virtual float32 get_rotation() override
+			virtual f32 get_rotation() override
 			{
 				return m_rotation;
 			}
@@ -161,34 +157,34 @@ namespace luna
 				clip_rect = m_clip_rect;
 			}
 			virtual void append_draw_list(IDrawList* draw_list, EDrawListAppendFlag flags = EDrawListAppendFlag::none) override;
-			virtual void draw_triangle_list(uint32 num_vertices, const PrimitiveVertex* vertices,
-				uint32 num_indices, const uint32* indices) override;
+			virtual void draw_triangle_list(u32 num_vertices, const PrimitiveVertex* vertices,
+				u32 num_indices, const u32* indices) override;
 			virtual R<TextDrawResult> draw_text(const char* text, const Float2& top_left, const Float2& region_size,
-				const Color& col = color::white, const Float2& spacing = Float2(0.0f, 0.0f)) override;
-			virtual void draw_triangle_filled(const Float2& p1, const Float2& p2, const Float2& p3, const Color& col, bool antialiased = true) override;
-			virtual void draw_triangle_bordered(const Float2& p1, const Float2& p2, const Float2& p3, const Color& col, float32 line_width, bool antialiased = true) override;
-			virtual void draw_rectangle_filled(const Float2& top_left, const Float2& size, const Color& col) override;
-			virtual void draw_rectangle_bordered(const Float2& top_left, const Float2& size, const Color& col, float32 line_width) override;
-			virtual void draw_circle_filled(const Float2& center, float32 radius, const Color& col, bool antialiased, uint32 num_segments) override;
-			virtual void draw_circle_bordered(const Float2& center, float32 radius, const Color& col, float32 line_width, bool antialiased, uint32 num_segments) override;
-			virtual void draw_rounded_rectangle_filled(const Float2& top_left, const Float2& size, const Color& col, float32 round_radius, bool antialiased) override;
-			virtual void draw_rounded_rectangle_bordered(const Float2& top_left, const Float2& size, const Color& col, float32 round_radius, float32 line_width, bool antialiased) override;
-			virtual void draw_line(const Float2& pos1, const Float2& pos2, const Color& col, float32 line_width, bool antialiased) override;
-			virtual void draw_texture(const Float2& top_left, const Float2& size, const Color& tint, gfx::IResource* tex, gfx::EResourceState state, const Float2& top_left_uv, const Float2& bottom_right_uv) override;
+				const Float4& col = Color::white, const Float2& spacing = Float2(0.0f, 0.0f)) override;
+			virtual void draw_triangle_filled(const Float2& p1, const Float2& p2, const Float2& p3, const Float4& col, bool antialiased = true) override;
+			virtual void draw_triangle_bordered(const Float2& p1, const Float2& p2, const Float2& p3, const Float4& col, f32 line_width, bool antialiased = true) override;
+			virtual void draw_rectangle_filled(const Float2& top_left, const Float2& size, const Float4& col) override;
+			virtual void draw_rectangle_bordered(const Float2& top_left, const Float2& size, const Float4& col, f32 line_width) override;
+			virtual void draw_circle_filled(const Float2& center, f32 radius, const Float4& col, bool antialiased, u32 num_segments) override;
+			virtual void draw_circle_bordered(const Float2& center, f32 radius, const Float4& col, f32 line_width, bool antialiased, u32 num_segments) override;
+			virtual void draw_rounded_rectangle_filled(const Float2& top_left, const Float2& size, const Float4& col, f32 round_radius, bool antialiased) override;
+			virtual void draw_rounded_rectangle_bordered(const Float2& top_left, const Float2& size, const Float4& col, f32 round_radius, f32 line_width, bool antialiased) override;
+			virtual void draw_line(const Float2& pos1, const Float2& pos2, const Float4& col, f32 line_width, bool antialiased) override;
+			virtual void draw_texture(const Float2& top_left, const Float2& size, const Float4& tint, Gfx::IResource* tex, Gfx::EResourceState state, const Float2& top_left_uv, const Float2& bottom_right_uv) override;
 
-			virtual uint32 count_draw_calls() override
+			virtual u32 count_draw_calls() override
 			{
-				return (uint32)m_bufs.size();
+				return (u32)m_bufs.size();
 			}
 
-			virtual void enum_draw_call(uint32 index, DrawCall& dc) override
+			virtual void enum_draw_call(u32 index, DrawCall& dc) override
 			{
 				auto& buf = m_bufs[index];
 				dc.texture = buf.m_texture;
 				dc.vertices = buf.m_vertices.data();
 				dc.indices = buf.m_indices.data();
-				dc.num_vertices = (uint32)buf.m_vertices.size();
-				dc.num_indices = (uint32)buf.m_indices.size();
+				dc.num_vertices = (u32)buf.m_vertices.size();
+				dc.num_indices = (u32)buf.m_indices.size();
 				dc.sampler = buf.sampler;
 				dc.rotation = buf.rotation;
 				dc.origin_x = buf.origin_x;

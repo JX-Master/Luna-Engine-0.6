@@ -8,17 +8,17 @@
 #include "IGraphicDeviceChild.hpp"
 #include "GraphicDefines.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		struct ShaderBytecode
 		{
 			const void* code;
-			size_t length;
+			usize length;
 
 			ShaderBytecode() = default;
-			ShaderBytecode(const void* _code, size_t _length) :
+			ShaderBytecode(const void* _code, usize _length) :
 				code(_code), length(_length) {}
 			ShaderBytecode(Default) :
 				ShaderBytecode(nullptr, 0) {}
@@ -26,20 +26,20 @@ namespace luna
 
 		struct StreamOutputDeclarationEntry
 		{
-			uint32 stream;
+			u32 stream;
 			const char* semantic_name;
-			uint32 semantic_index;
-			byte_t start_component;
-			byte_t component_count;
-			byte_t output_slot;
+			u32 semantic_index;
+			u8 start_component;
+			u8 component_count;
+			u8 output_slot;
 
 			StreamOutputDeclarationEntry() = default;
-			StreamOutputDeclarationEntry(uint32 _stream,
+			StreamOutputDeclarationEntry(u32 _stream,
 				const char* _semantic_name,
-				uint32 _semantic_index,
-				byte_t _start_component,
-				byte_t _component_count,
-				byte_t _output_slot) :
+				u32 _semantic_index,
+				u8 _start_component,
+				u8 _component_count,
+				u8 _output_slot) :
 				stream(_stream),
 				semantic_name(_semantic_name),
 				semantic_index(_semantic_index),
@@ -51,17 +51,17 @@ namespace luna
 		struct StreamOutputDesc
 		{
 			const StreamOutputDeclarationEntry* entries;
-			uint32 num_entries;
-			const uint32* buffer_strides;
-			uint32 num_strides;
-			uint32 rasterized_stream;
+			u32 num_entries;
+			const u32* buffer_strides;
+			u32 num_strides;
+			u32 rasterized_stream;
 
 			StreamOutputDesc() = default;
 			StreamOutputDesc(const StreamOutputDeclarationEntry* _entries,
-				uint32 _num_entries,
-				const uint32* _buffer_strides,
-				uint32 _num_strides,
-				uint32 _rasterized_stream) :
+				u32 _num_entries,
+				const u32* _buffer_strides,
+				u32 _num_strides,
+				u32 _rasterized_stream) :
 				entries(_entries),
 				num_entries(_num_entries),
 				buffer_strides(_buffer_strides),
@@ -71,7 +71,7 @@ namespace luna
 				StreamOutputDesc(nullptr, 0, nullptr, 0, 0) {}
 		};
 
-		enum class EBlendFactor : uint32
+		enum class EBlendFactor : u32
 		{
 			zero,
 			one,
@@ -91,7 +91,7 @@ namespace luna
 			src1_alpha,
 			inv_src1_alpha
 		};
-		enum class EBlendOp : uint32
+		enum class EBlendOp : u32
 		{
 			add,
 			subtract,
@@ -99,7 +99,7 @@ namespace luna
 			min,
 			max
 		};
-		enum class ELogicOp : uint32
+		enum class ELogicOp : u32
 		{
 			clear,
 			set,
@@ -118,7 +118,7 @@ namespace luna
 			or_reverse,
 			or_inverted
 		};
-		enum class EColorWriteMask : uint8
+		enum class EColorWriteMask : u8
 		{
 			none = 0x00,
 			red = 1,
@@ -185,7 +185,7 @@ namespace luna
 				alpha_to_coverage_enable(_alpha_to_coverage_enable),
 				independent_blend_enable(_independent_blend_enable)
 			{
-				uint32 i = 0;
+				u32 i = 0;
 				for (auto& it : _rt)
 				{
 					rt[i] = it;
@@ -201,13 +201,13 @@ namespace luna
 				BlendDesc(false, false, {}) {}
 		};
 
-		enum class EFillMode : uint32
+		enum class EFillMode : u32
 		{
 			wireframe,
 			solid
 		};
 
-		enum class ECullMode : uint32
+		enum class ECullMode : u32
 		{
 			none,
 			front,
@@ -218,10 +218,10 @@ namespace luna
 		{
 			EFillMode fill_mode;
 			ECullMode cull_mode;
-			int32 depth_bias;
-			float32 depth_bias_clamp;
-			float32 slope_scaled_depth_bias;
-			uint32 forced_sample_count;
+			i32 depth_bias;
+			f32 depth_bias_clamp;
+			f32 slope_scaled_depth_bias;
+			u32 forced_sample_count;
 			bool front_counter_clockwise;
 			bool depth_clip_enable;
 			bool multisample_enable;
@@ -232,10 +232,10 @@ namespace luna
 			RasterizerDesc(
 				EFillMode _fill_mode,
 				ECullMode _cull_mode,
-				int32 _depth_bias,
-				float32 _depth_bias_clamp,
-				float32 _slope_scaled_depth_bias,
-				uint32 _forced_sample_count,
+				i32 _depth_bias,
+				f32 _depth_bias_clamp,
+				f32 _slope_scaled_depth_bias,
+				u32 _forced_sample_count,
 				bool _front_counter_clockwise,
 				bool _depth_clip_enable,
 				bool _multisample_enable,
@@ -261,7 +261,7 @@ namespace luna
 					false, true, false, false, false) {}
 		};
 
-		enum class EStencilOp : uint32
+		enum class EStencilOp : u32
 		{
 			keep,
 			zero,
@@ -299,8 +299,8 @@ namespace luna
 					EComparisonFunc::always) {}
 		};
 
-		constexpr uint8 l_default_stencil_read_mask = 0xff;
-		constexpr uint8 l_default_stencil_write_mask = 0xff;
+		constexpr u8 l_default_stencil_read_mask = 0xff;
+		constexpr u8 l_default_stencil_write_mask = 0xff;
 
 		struct DepthStencilDesc
 		{
@@ -308,8 +308,8 @@ namespace luna
 			bool depth_write_enable;
 			EComparisonFunc depth_func;
 			bool stencil_enable;
-			uint8 stencil_read_mask;
-			uint8 stencil_write_mask;
+			u8 stencil_read_mask;
+			u8 stencil_write_mask;
 			DepthStencilOpDesc front_face;
 			DepthStencilOpDesc back_face;
 
@@ -319,8 +319,8 @@ namespace luna
 				bool _depth_write_enable,
 				EComparisonFunc _depth_func,
 				bool _stencil_enable,
-				uint8 _stencil_read_mask,
-				uint8 _stencil_write_mask,
+				u8 _stencil_read_mask,
+				u8 _stencil_write_mask,
 				const DepthStencilOpDesc& _front_face,
 				const DepthStencilOpDesc& _back_face
 			) :
@@ -344,33 +344,33 @@ namespace luna
 					DepthStencilOpDesc(Default())) {}
 		};
 
-		enum class EInputClassification : uint32
+		enum class EInputClassification : u32
 		{
 			per_vertex = 1,
 			per_instance = 2
 		};
 
-		constexpr uint32 l_append_aligned_element = 0xffffffff;
+		constexpr u32 l_append_aligned_element = 0xffffffff;
 
 		struct InputElementDesc
 		{
 			const char* semantic_name;
-			uint32 semantic_index;
+			u32 semantic_index;
 			EResourceFormat format;
-			uint32 input_slot;
-			uint32 aligned_byte_offset;
+			u32 input_slot;
+			u32 aligned_byte_offset;
 			EInputClassification input_slot_class;
-			uint32 instance_data_step_rate;
+			u32 instance_data_step_rate;
 
 			InputElementDesc() = default;
 			InputElementDesc(
 				const char* _semantic_name,
-				uint32 _semantic_index,
+				u32 _semantic_index,
 				EResourceFormat _format,
-				uint32 _input_slot = 0,
-				uint32 _aligned_byte_offset = l_append_aligned_element,
+				u32 _input_slot = 0,
+				u32 _aligned_byte_offset = l_append_aligned_element,
 				EInputClassification _input_slot_class = EInputClassification::per_vertex,
-				uint32 _instance_data_step_rate = 0
+				u32 _instance_data_step_rate = 0
 			) :
 				semantic_name(_semantic_name),
 				semantic_index(_semantic_index),
@@ -384,25 +384,25 @@ namespace luna
 		struct InputLayoutDesc
 		{
 			const InputElementDesc* input_elements;
-			uint32 num_elements;
+			u32 num_elements;
 
 			InputLayoutDesc() = default;
 			InputLayoutDesc(
-				uint32 _num_elements,
+				u32 _num_elements,
 				const InputElementDesc* _input_elements
 			) :
 				num_elements(_num_elements),
 				input_elements(_input_elements) {}
 		};
 
-		enum class EIndexBufferStripCutValue : uint32
+		enum class EIndexBufferStripCutValue : u32
 		{
 			disabled,
 			value_0xffff,
 			value_0xffffffff
 		};
 
-		enum class EPrimitiveTopologyType : uint32
+		enum class EPrimitiveTopologyType : u32
 		{
 			undefined,
 			point,
@@ -425,8 +425,8 @@ namespace luna
 			DepthStencilDesc depth_stencil_state;
 			EIndexBufferStripCutValue ib_strip_cut_value;
 			EPrimitiveTopologyType primitive_topology_type;
-			uint32 sample_mask;
-			uint32 sample_quality;
+			u32 sample_mask;
+			u32 sample_quality;
 
 			GraphicsPipelineStateDesc() = default;
 			GraphicsPipelineStateDesc(
@@ -442,8 +442,8 @@ namespace luna
 				const DepthStencilDesc& _depth_stencil_state,
 				EIndexBufferStripCutValue _ib_strip_cut_value,
 				EPrimitiveTopologyType _primitive_topology_type,
-				uint32 _sample_mask,
-				uint32 _sample_quality
+				u32 _sample_mask,
+				u32 _sample_quality
 			) :
 				input_layout(_input_layout),
 				vs(_vs),

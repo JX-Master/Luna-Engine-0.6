@@ -6,9 +6,9 @@
 */
 #pragma once
 #include "WindowEvent.hpp"
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		struct IWindow;
 		//! @interface IWindowEventListener

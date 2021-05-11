@@ -12,11 +12,11 @@
 #include "D3D12Common.hpp"
 #include "GraphicDevice.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			inline D3D12_COMMAND_LIST_TYPE encode_command_list_type(ECommandQueueType t)
 			{
@@ -52,10 +52,9 @@ namespace luna
 				P<IMutex> m_mtx;
 
 				CommandQueue(GraphicDevice* device) :
-					luibind(get_module_allocator()),
 					m_device(device) {}
 
-				result_t init(const CommandQueueDesc& desc);
+				RV init(const CommandQueueDesc& desc);
 				virtual IGraphicDevice* get_device() override
 				{
 					return m_device;

@@ -9,12 +9,12 @@
 #include "ICommandQueue.hpp"
 #include "IResource.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		//! Specify what kind of resources this heap can hold.
-		enum class EResourceHeapUsageFlag : uint32
+		enum class EResourceHeapUsageFlag : u32
 		{
 			//! This is invalid as arguments.
 			none = 0x00,
@@ -32,7 +32,7 @@ namespace luna
 		struct ResourceHeapDesc
 		{
 			//! The size of the heap.
-			uint64 size;
+			u64 size;
 			//! The intended use of the heap, that is, the resource type that you want to placed in
 			//! this heap.
 			EResourceHeapUsageFlag resource_heap_usages;
@@ -40,7 +40,7 @@ namespace luna
 			EAccessType access_type;
 
 			ResourceHeapDesc() = default;
-			ResourceHeapDesc(uint64 _size, EResourceHeapUsageFlag _resource_heap_usages, EAccessType _access_type) :
+			ResourceHeapDesc(u64 _size, EResourceHeapUsageFlag _resource_heap_usages, EAccessType _access_type) :
 				size(_size),
 				resource_heap_usages(_resource_heap_usages),
 				access_type(_access_type) {}
@@ -60,7 +60,7 @@ namespace luna
 			virtual ResourceHeapDesc desc() = 0;
 
 			//! Uses this heap to create a new resource. See documents of `IGraphicDevice::new_resource` for details.
-			virtual RP<IResource> new_resource(uint64 offset, const ResourceDesc& desc, const ClearValue* optimized_clear_value = nullptr) = 0;
+			virtual RP<IResource> new_resource(u64 offset, const ResourceDesc& desc, const ClearValue* optimized_clear_value = nullptr) = 0;
 		};
 	}
 }

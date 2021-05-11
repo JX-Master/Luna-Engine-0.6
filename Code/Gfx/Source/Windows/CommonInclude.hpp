@@ -13,9 +13,9 @@
 #include <dxgi.h>
 using Microsoft::WRL::ComPtr;
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		inline DXGI_FORMAT encode_resource_format(EResourceFormat f)
 		{

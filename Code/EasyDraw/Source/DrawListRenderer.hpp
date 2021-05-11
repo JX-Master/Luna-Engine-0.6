@@ -7,11 +7,11 @@
 #pragma once
 #include "EasyDrawHeader.hpp"
 #include "EasyDraw.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
 		class DrawListRenderer : public IDrawListRenderer
 		{
@@ -21,37 +21,35 @@ namespace luna
 			lutsassert_lock();
 
 			//! One-time resources.
-			P<gfx::IRenderPass> m_rp;
-			P<gfx::IShaderInputLayout> m_slayout;
-			P<gfx::IShaderInputLayout> m_slayout_no_tex;
-			P<gfx::IPipelineState> m_pso;
-			P<gfx::IPipelineState> m_pso_no_tex;
+			P<Gfx::IRenderPass> m_rp;
+			P<Gfx::IShaderInputLayout> m_slayout;
+			P<Gfx::IShaderInputLayout> m_slayout_no_tex;
+			P<Gfx::IPipelineState> m_pso;
+			P<Gfx::IPipelineState> m_pso_no_tex;
 
-			size_t m_vb_size;
-			size_t m_ib_size;
-			size_t m_cb_size;
+			usize m_vb_size;
+			usize m_ib_size;
+			usize m_cb_size;
 
 			//! All 3 buffers are created in upload heap.
-			P<gfx::IResource> m_vb_res;
-			P<gfx::IResource> m_ib_res;
-			P<gfx::IResource> m_cb_res;
+			P<Gfx::IResource> m_vb_res;
+			P<Gfx::IResource> m_ib_res;
+			P<Gfx::IResource> m_cb_res;
 
-			size_t m_vb_count;
-			size_t m_ib_count;
-			size_t m_cb_count;
+			usize m_vb_count;
+			usize m_ib_count;
+			usize m_cb_count;
 
 			struct DrawCallRange
 			{
 				P<IDrawList> m_list;
-				uint32 m_first;
-				uint32 m_count;
+				u32 m_first;
+				u32 m_count;
 			};
 
 			Vector<DrawCallRange> m_dcs;
 
-			DrawListRenderer(IAllocator* alloc) :
-				luibind(alloc),
-				m_dcs(alloc),
+			DrawListRenderer() :
 				m_vb_size(0),
 				m_ib_size(0),
 				m_cb_size(0),
@@ -61,35 +59,35 @@ namespace luna
 
 			RV init();
 
-			virtual gfx::IGraphicDevice* get_device() override
+			virtual Gfx::IGraphicDevice* get_device() override
 			{
 				return m_rp->get_device();
 			}
-			virtual gfx::IRenderPass* get_render_pass() override
+			virtual Gfx::IRenderPass* get_render_pass() override
 			{
 				return m_rp;
 			}
 			virtual void add_draw_list(IDrawList* draw_list) override
 			{
 				lutsassert();
-				luassert_usr(draw_list);
+				lucheck(draw_list);
 				DrawCallRange r;
 				r.m_list = draw_list;
 				r.m_first = 0;
 				r.m_count = draw_list->count_draw_calls();
 				m_dcs.push_back(move(r));
 			}
-			virtual void add_draw_calls(IDrawList* draw_list, uint32 first, uint32 num_draw_calls) override
+			virtual void add_draw_calls(IDrawList* draw_list, u32 first, u32 num_draw_calls) override
 			{
 				lutsassert();
-				luassert_usr(draw_list);
+				lucheck(draw_list);
 				DrawCallRange r;
 				r.m_list = draw_list;
 				r.m_first = first;
 				r.m_count = num_draw_calls;
 				m_dcs.push_back(move(r));
 			}
-			virtual RV render(gfx::ICommandBuffer* target_cmd_buffer, gfx::IResource* rt, uint32 width, uint32 height) override;
+			virtual RV render(Gfx::ICommandBuffer* target_cmd_buffer, Gfx::IResource* rt, u32 width, u32 height) override;
 		};
 	}
 }

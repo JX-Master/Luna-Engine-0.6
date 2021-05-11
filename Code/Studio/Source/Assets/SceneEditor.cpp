@@ -6,34 +6,35 @@
 */
 #include "SceneEditor.hpp"
 #include "../MainEditor.hpp"
+#include <Runtime/Debug.hpp>
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
 		void SceneEditor::init()
 		{
-			using namespace gfx;
-			uint32 cb_align;
-			renderer::device()->check_feature_support(EDeviceFeature::buffer_data_alignment, &cb_align);
-			m_camera_cb = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(CameraCB), cb_align))).get();
-			m_scene_cmdbuf = renderer::main_graphic_queue()->new_command_buffer().get();
-			m_grid_views = renderer::device()->new_view_set(m_type->m_grid_slayout, ViewSetDesc(1, 0, 0, 0)).get();
-			m_grid_views->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, align_upper(sizeof(CameraCB), cb_align)));
-			m_back_buffer_clear_pass = renderer::device()->new_render_pass(
+			using namespace Gfx;
+			u32 cb_align;
+			Renderer::device()->check_feature_support(EDeviceFeature::buffer_data_alignment, &cb_align);
+			m_camera_cb = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(CameraCB), cb_align))).get();
+			m_scene_cmdbuf = Renderer::main_graphic_queue()->new_command_buffer().get();
+			m_grid_views = Renderer::device()->new_view_set(m_type->m_grid_slayout, ViewSetDesc(1, 0, 0, 0)).get();
+			m_grid_views->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(CameraCB), cb_align)));
+			m_back_buffer_clear_pass = Renderer::device()->new_render_pass(
 				RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba8_unorm, EAttachmentLoadOp::clear, EAttachmentStoreOp::store) }, 
 					EResourceFormat::d32_float, EAttachmentLoadOp::clear, EAttachmentStoreOp::store, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, true)).get();
 
-			m_lighting_params = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, align_upper(sizeof(LightingParams) * 4, cb_align))).get();
+			m_lighting_params = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, align_upper(sizeof(LightingParams) * 4, cb_align))).get();
 			m_num_lights = 4;
 
-			m_tone_mapping_offset = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(Float4) * 16, cb_align))).get();
+			m_tone_mapping_offset = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(Float4) * 16, cb_align))).get();
 
-			m_tone_mapping_params = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(ToneMappingParams), cb_align))).get();
+			m_tone_mapping_params = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(ToneMappingParams), cb_align))).get();
 		
-			m_skybox_params = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(SkyboxParams), cb_align))).get();
+			m_skybox_params = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::constant_buffer, align_upper(sizeof(SkyboxParams), cb_align))).get();
 		}
-		void SceneEditor::draw_entity_list(imgui::IContext* ctx, Vector<scene::IEntity*>& entities)
+		void SceneEditor::draw_entity_list(ImGui::IContext* ctx, Vector<Scene::IEntity*>& entities)
 		{
 			auto s = m_scene.lock();
 
@@ -46,15 +47,15 @@ namespace luna
 			{
 				char name[64];
 				strcpy_s(name, "New_Entity");
-				auto entity = s->add_entity(intern_name(name));
-				if (entity.result() == e_item_already_exists)
+				auto entity = s->add_entity(Name(name));
+				if (entity.errcode() == BasicError::already_exists())
 				{
-					uint32 index = 0;
+					u32 index = 0;
 					// Append index.
 					while (failed(entity))
 					{
 						sprintf_s(name, "New_Entity_%u", index);
-						entity = s->add_entity(intern_name(name));
+						entity = s->add_entity(Name(name));
 						++index;
 					}
 				}
@@ -62,7 +63,7 @@ namespace luna
 
 			auto avail = ctx->get_content_region_avail();
 
-			ctx->push_style_var(imgui::EStyle::child_rounding, 5.0f);
+			ctx->push_style_var(ImGui::EStyle::child_rounding, 5.0f);
 			ctx->begin_child("Entity List", Float2(avail.x, avail.y / 2.0f), true);
 
 			
@@ -77,11 +78,11 @@ namespace luna
 
 				Float2 sel_size{ ctx->get_window_width(), ctx->get_text_line_height() };
 
-				for (size_t i = 0; i < entities.size(); ++i)
+				for (u32 i = 0; i < (u32)entities.size(); ++i)
 				{
 					Float2 sel_pos = ctx->get_cursor_screen_pos();
-					if (in_rect(imgui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && !ctx->is_popup_open(entity_popup_id) &&
-						(ctx->is_mouse_clicked(input::EMouseKey::lb) || ctx->is_mouse_clicked(input::EMouseKey::rb)))
+					if (in_rect(ImGui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && !ctx->is_popup_open(entity_popup_id) &&
+						(ctx->is_mouse_clicked(Input::EMouseKey::lb) || ctx->is_mouse_clicked(Input::EMouseKey::rb)))
 					{
 						if (i != m_current_select_entity)
 						{
@@ -105,19 +106,19 @@ namespace luna
 					if (i == m_current_select_entity && m_name_editing)
 					{
 						ctx->input_text("###NameEdit", m_name_editing_buf);
-						if (!in_rect(imgui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && ctx->is_mouse_clicked(input::EMouseKey::lb))
+						if (!in_rect(ImGui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && ctx->is_mouse_clicked(Input::EMouseKey::lb))
 						{
-							for (size_t i = 0; i < m_name_editing_buf->size(); ++i)
+							for (usize i = 0; i < m_name_editing_buf.size(); ++i)
 							{
-								if (m_name_editing_buf->data()[i] == ' ')
+								if (m_name_editing_buf.data()[i] == ' ')
 								{
-									m_name_editing_buf->data()[i] = '_';
+									m_name_editing_buf.data()[i] = '_';
 								}
 							}
-							auto rename_res = entities[i]->set_name(intern_name(m_name_editing_buf->c_str()));
+							auto rename_res = entities[i]->set_name(Name(m_name_editing_buf.c_str()));
 							if (failed(rename_res))
 							{
-								auto _ = gfx::message_box(explain(rename_res.result()), "Entity Rename Failed.", gfx::EMessageBoxType::ok, gfx::EMessageBoxIcon::error);
+								auto _ = Gfx::message_box(get_errmsg(rename_res.errcode()), "Entity Rename Failed.", Gfx::EMessageBoxType::ok, Gfx::EMessageBoxIcon::error);
 							}
 							m_name_editing = false;
 						}
@@ -128,13 +129,13 @@ namespace luna
 						if (i == m_current_select_entity)
 						{
 							auto dl = ctx->get_window_draw_list();
-							imgui::dl_add_rect_filled(dl, sel_pos, sel_pos + sel_size,
-								color_to_abgr8(ctx->get_style()->Colors[(uint32)imgui::EColor::button]));
+							ImGui::dl_add_rect_filled(dl, sel_pos, sel_pos + sel_size,
+								color_to_abgr8(ctx->get_style()->Colors[(u32)ImGui::EColor::button]));
 						}
-						ctx->text(entities[i]->name()->c_str());
+						ctx->text(entities[i]->name().c_str());
 					}
 
-					if (in_rect(imgui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && ctx->is_mouse_clicked(input::EMouseKey::rb))
+					if (in_rect(ImGui::io_get_mouse_pos(ctx->get_io()), sel_pos, sel_pos + sel_size) && ctx->is_mouse_clicked(Input::EMouseKey::rb))
 					{
 						ctx->open_popup(entity_popup_id);
 					}
@@ -146,7 +147,7 @@ namespace luna
 					if (ctx->selectable("Rename"))
 					{
 						m_name_editing = true;
-						m_name_editing_buf->assign(entities[m_current_select_entity]->name()->c_str());
+						m_name_editing_buf.assign(entities[m_current_select_entity]->name().c_str());
 						ctx->close_current_popup();
 					}
 					if (ctx->selectable("Remove"))
@@ -168,11 +169,11 @@ namespace luna
 			ctx->end_child();
 			ctx->pop_style_var();
 		}
-		void SceneEditor::draw_scene_components_grid(imgui::IContext* ctx)
+		void SceneEditor::draw_scene_components_grid(ImGui::IContext* ctx)
 		{
 			ctx->text("Scene Components");
 
-			ctx->push_style_var(imgui::EStyle::child_rounding, 5.0f);
+			ctx->push_style_var(ImGui::EStyle::child_rounding, 5.0f);
 			ctx->begin_child("Scene Components", Float2(0.0f, 0.0f), true);
 
 			auto s = m_scene.lock();
@@ -185,7 +186,7 @@ namespace luna
 			{
 				for (auto& i : components)
 				{
-					if (ctx->collapsing_header(i->type_object()->type_name()->c_str(), imgui::ETreeNodeFlag::default_open))
+					if (ctx->collapsing_header(i->type_object()->type_name().c_str(), ImGui::ETreeNodeFlag::default_open))
 					{
 						bool has_editor = false;
 						for (auto& j : m_scene_component_editors)
@@ -241,7 +242,7 @@ namespace luna
 
 			if (ctx->begin_popup(new_comp_popup))
 			{
-				auto component_types = scene::scene_component_types();
+				auto component_types = Scene::scene_component_types();
 
 				for (auto& i : component_types)
 				{
@@ -250,12 +251,12 @@ namespace luna
 					if (failed(exists))
 					{
 						// Show enabled.
-						if (ctx->selectable(name->c_str()))
+						if (ctx->selectable(name.c_str()))
 						{
 							auto res = s->add_scene_component(name);
 							if (failed(res))
 							{
-								auto _ = log_error(explain(res.result()));
+								debug_printf(get_errmsg(res.errcode()));
 							}
 							ctx->close_current_popup();
 						}
@@ -263,7 +264,7 @@ namespace luna
 					else
 					{
 						// Show disabled.
-						ctx->selectable(name->c_str(), false, imgui::ESelectableFlag::disabled);
+						ctx->selectable(name.c_str(), false, ImGui::ESelectableFlag::disabled);
 					}
 				}
 				ctx->end_popup();
@@ -274,19 +275,19 @@ namespace luna
 			ctx->pop_style_var();
 		}
 
-		void SceneEditor::draw_scene(imgui::IContext* ctx, Vector<scene::IEntity*>& entities)
+		void SceneEditor::draw_scene(ImGui::IContext* ctx, Vector<Scene::IEntity*>& entities)
 		{
 			ctx->text("Scene");
 
 			auto s = m_scene.lock();
 
-			auto _scene_renderer = s->get_scene_component(intern_name("Scene Renderer"));
+			auto _scene_renderer = s->get_scene_component(Name("Scene Renderer"));
 			if (failed(_scene_renderer))
 			{
 				ctx->text("Please add Scene Renderer Component to the scene.");
 				return;
 			}
-			P<e3d::ISceneRenderer> scene_renderer = _scene_renderer.get();
+			P<E3D::ISceneRenderer> scene_renderer = _scene_renderer.get();
 			auto render_tex = scene_renderer->screen_buffer();
 			auto depth_tex = scene_renderer->depth_buffer();
 
@@ -298,8 +299,8 @@ namespace luna
 				return;
 			}
 
-			auto _transform_component = camera_entity->get_component(intern_name("Transform"));
-			auto _camera_component = camera_entity->get_component(intern_name("Camera"));
+			auto _transform_component = camera_entity->get_component(Name("Transform"));
+			auto _camera_component = camera_entity->get_component(Name("Camera"));
 
 			if (failed(_transform_component) || failed(_camera_component))
 			{
@@ -307,10 +308,10 @@ namespace luna
 				return;
 			}
 
-			P<e3d::ICamera> camera = _camera_component.get();
-			P<e3d::ITransform> transform = _transform_component.get();
+			P<E3D::ICamera> camera = _camera_component.get();
+			P<E3D::ITransform> transform = _transform_component.get();
 
-			ctx->begin_child("Scene Viewport", Float2(0.0f, 0.0f), false, imgui::EWindowFlag::no_move | imgui::EWindowFlag::no_scrollbar);
+			ctx->begin_child("Scene Viewport", Float2(0.0f, 0.0f), false, ImGui::EWindowFlag::no_move | ImGui::EWindowFlag::no_scrollbar);
 
 			ctx->set_next_item_width(100.0f);
 			ctx->slider_float("Camera Speed", &m_camera_speed, 0.1f, 10.0f, "%.3f", 3.3f);
@@ -320,28 +321,28 @@ namespace luna
 				ctx->text("Gizmo Mode");
 				ctx->same_line();
 				auto mode = m_gizmo_mode;
-				if (m_gizmo_mode != imgui::EGizmoMode::local)
+				if (m_gizmo_mode != ImGui::EGizmoMode::local)
 				{
-					ctx->push_style_color(imgui::EColor::text, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					ctx->push_style_color(ImGui::EColor::text, Float4(1.0f, 1.0f, 1.0f, 0.5f));
 				}
 				if (ctx->button("Local"))
 				{
-					mode = imgui::EGizmoMode::local;
+					mode = ImGui::EGizmoMode::local;
 				}
-				if (m_gizmo_mode != imgui::EGizmoMode::local)
+				if (m_gizmo_mode != ImGui::EGizmoMode::local)
 				{
 					ctx->pop_style_color();
 				}
 				ctx->same_line(0);
-				if (m_gizmo_mode != imgui::EGizmoMode::world)
+				if (m_gizmo_mode != ImGui::EGizmoMode::world)
 				{
-					ctx->push_style_color(imgui::EColor::text, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					ctx->push_style_color(ImGui::EColor::text, Float4(1.0f, 1.0f, 1.0f, 0.5f));
 				}
 				if (ctx->button("World"))
 				{
-					mode = imgui::EGizmoMode::world;
+					mode = ImGui::EGizmoMode::world;
 				}
-				if (m_gizmo_mode != imgui::EGizmoMode::world)
+				if (m_gizmo_mode != ImGui::EGizmoMode::world)
 				{
 					ctx->pop_style_color();
 				}
@@ -352,41 +353,41 @@ namespace luna
 				ctx->text("Gizmo Operation");
 				ctx->same_line();
 				auto op = m_gizmo_op;
-				if (m_gizmo_op != imgui::EGizmoOperation::translate)
+				if (m_gizmo_op != ImGui::EGizmoOperation::translate)
 				{
-					ctx->push_style_color(imgui::EColor::text, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					ctx->push_style_color(ImGui::EColor::text, Float4(1.0f, 1.0f, 1.0f, 0.5f));
 				}
 				if (ctx->button("Translate"))
 				{
-					op = imgui::EGizmoOperation::translate;
+					op = ImGui::EGizmoOperation::translate;
 				}
-				if (m_gizmo_op != imgui::EGizmoOperation::translate)
+				if (m_gizmo_op != ImGui::EGizmoOperation::translate)
 				{
 					ctx->pop_style_color();
 				}
 				ctx->same_line(0);
-				if (m_gizmo_op != imgui::EGizmoOperation::rotate)
+				if (m_gizmo_op != ImGui::EGizmoOperation::rotate)
 				{
-					ctx->push_style_color(imgui::EColor::text, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					ctx->push_style_color(ImGui::EColor::text, Float4(1.0f, 1.0f, 1.0f, 0.5f));
 				}
 				if (ctx->button("Rotate"))
 				{
-					op = imgui::EGizmoOperation::rotate;
+					op = ImGui::EGizmoOperation::rotate;
 				}
-				if (m_gizmo_op != imgui::EGizmoOperation::rotate)
+				if (m_gizmo_op != ImGui::EGizmoOperation::rotate)
 				{
 					ctx->pop_style_color();
 				}
 				ctx->same_line(0);
-				if (m_gizmo_op != imgui::EGizmoOperation::scale)
+				if (m_gizmo_op != ImGui::EGizmoOperation::scale)
 				{
-					ctx->push_style_color(imgui::EColor::text, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					ctx->push_style_color(ImGui::EColor::text, Float4(1.0f, 1.0f, 1.0f, 0.5f));
 				}
 				if (ctx->button("Scale"))
 				{
-					op = imgui::EGizmoOperation::scale;
+					op = ImGui::EGizmoOperation::scale;
 				}
-				if (m_gizmo_op != imgui::EGizmoOperation::scale)
+				if (m_gizmo_op != ImGui::EGizmoOperation::scale)
 				{
 					ctx->pop_style_color();
 				}
@@ -404,13 +405,13 @@ namespace luna
 			auto render_desc = render_tex->desc();
 			if (render_desc.width != scene_sz.x || render_desc.height != scene_sz.y)
 			{
-				auto _ = scene_renderer->resize_screen_buffer(UInt2U((uint32)scene_sz.x, (uint32)scene_sz.y));
+				auto _ = scene_renderer->resize_screen_buffer(UInt2U((u32)scene_sz.x, (u32)scene_sz.y));
 				render_tex = scene_renderer->screen_buffer();
 				depth_tex = scene_renderer->depth_buffer();
 			}
 
 			render_desc = render_tex->desc();
-			camera->set_aspect_ratio((float32)render_desc.width / (float32)render_desc.height);
+			camera->set_aspect_ratio((f32)render_desc.width / (f32)render_desc.height);
 			
 			// Update and upload camera data.
 			m_camera_cb_data.world_to_view = transform->world_to_local_matrix();
@@ -426,7 +427,7 @@ namespace luna
 
 			// Draw Scene.
 			{
-				using namespace gfx;
+				using namespace Gfx;
 
 				// Clear render and stencil pass.
 				{
@@ -435,22 +436,22 @@ namespace luna
 						ResourceBarrierDesc::as_transition(depth_tex, EResourceState::depth_stencil_write)
 					};
 					m_scene_cmdbuf->resource_barriers(2, ts);
-					m_back_buffer_clear_fbo = renderer::device()->new_frame_buffer(m_back_buffer_clear_pass, 1, &render_tex, nullptr, depth_tex, nullptr).get();
+					m_back_buffer_clear_fbo = Renderer::device()->new_frame_buffer(m_back_buffer_clear_pass, 1, &render_tex, nullptr, depth_tex, nullptr).get();
 					auto clear_color = Float4U(0.0f, 0.0f, 0.0f, 1.0f);
 					m_scene_cmdbuf->begin_render_pass(m_back_buffer_clear_pass, m_back_buffer_clear_fbo, 1, &clear_color, 1.0f, 0xFF);
 					m_scene_cmdbuf->end_render_pass();
 				}
 
 				// Fetch meshes to draw.
-				Vector<P<e3d::ITransform>> ts;
-				Vector<P<e3d::IModelRenderer>> rs;
+				Vector<P<E3D::ITransform>> ts;
+				Vector<P<E3D::IModelRenderer>> rs;
 				for (auto& i : entities)
 				{
-					auto t = i->get_component(intern_name("Transform"));
-					auto r = i->get_component(intern_name("Model Renderer"));
+					auto t = i->get_component(Name("Transform"));
+					auto r = i->get_component(Name("Model Renderer"));
 					if (succeeded(t) && succeeded(r))
 					{
-						P<e3d::IModelRenderer> ren = r.get();
+						P<E3D::IModelRenderer> ren = r.get();
 						auto model = ren->model().lock();
 						if (!model)
 						{
@@ -470,13 +471,13 @@ namespace luna
 				{
 					if (m_num_model_matrices < ts.size())
 					{
-						m_model_matrices = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, (uint64)sizeof(Float4x4) * 2 * (uint64)ts.size())).get();
+						m_model_matrices = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, (u64)sizeof(Float4x4) * 2 * (u64)ts.size())).get();
 						m_num_model_matrices = ts.size();
 					}
 					if (!ts.empty())
 					{
 						void* mapped = m_model_matrices->map_subresource(0, false, 1, 0).get();
-						for (size_t i = 0; i < ts.size(); ++i)
+						for (usize i = 0; i < ts.size(); ++i)
 						{
 							Float4x4 m2w = ts[i]->local_to_world_matrix();
 							Float4x4 w2m = ts[i]->world_to_local_matrix();
@@ -488,18 +489,18 @@ namespace luna
 				}
 
 				// Fetches lights to draw.
-				Vector<P<e3d::ITransform>> light_ts;
-				Vector<P<e3d::ILight>> light_rs;
+				Vector<P<E3D::ITransform>> light_ts;
+				Vector<P<E3D::ILight>> light_rs;
 				for (auto& i : entities)
 				{
-					auto t = i->get_component(intern_name("Transform"));
-					auto r = i->get_component(intern_name("Directional Light"));
+					auto t = i->get_component(Name("Transform"));
+					auto r = i->get_component(Name("Directional Light"));
 					if (failed(r))
 					{
-						r = i->get_component(intern_name("Point Light"));
+						r = i->get_component(Name("Point Light"));
 						if (failed(r))
 						{
-							r = i->get_component(intern_name("Spot Light"));
+							r = i->get_component(Name("Spot Light"));
 						}
 					}
 					if (succeeded(t) && succeeded(r))
@@ -513,14 +514,14 @@ namespace luna
 				{
 					if (m_num_lights < light_ts.size())
 					{
-						m_lighting_params = renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, sizeof(LightingParams) * light_ts.size())).get();
+						m_lighting_params = Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::shader_resource, sizeof(LightingParams) * light_ts.size())).get();
 						m_num_lights = light_ts.size();
 					}
 					void* mapped = m_lighting_params->map_subresource(0, false, 1, 0).get();
-					for (size_t i = 0; i < light_ts.size(); ++i)
+					for (usize i = 0; i < light_ts.size(); ++i)
 					{
 						LightingParams p;
-						P<e3d::IDirectionalLight> directional = light_rs[i];
+						P<E3D::IDirectionalLight> directional = light_rs[i];
 						if (directional)
 						{
 							p.strength = directional->intensity();
@@ -532,7 +533,7 @@ namespace luna
 						}
 						else
 						{
-							P<e3d::IPointLight> point = light_rs[i];
+							P<E3D::IPointLight> point = light_rs[i];
 							if (point)
 							{
 								p.strength = point->intensity();
@@ -544,7 +545,7 @@ namespace luna
 							}
 							else
 							{
-								P<e3d::ISpotLight> spot = light_rs[i];
+								P<E3D::ISpotLight> spot = light_rs[i];
 								if (spot)
 								{
 									p.strength = spot->intensity();
@@ -577,25 +578,25 @@ namespace luna
 					m_lighting_params->unmap_subresource(0, false, 0, light_ts.size() * sizeof(LightingParams));
 				}
 
-				uint32 cb_align;
-				renderer::device()->check_feature_support(EDeviceFeature::buffer_data_alignment, &cb_align);
+				u32 cb_align;
+				Renderer::device()->check_feature_support(EDeviceFeature::buffer_data_alignment, &cb_align);
 
 				if (m_wireframe)
 				{
 					// Debug wireframe pass.
-					auto debug_renderer_fbo = renderer::device()->new_frame_buffer(m_type->m_debug_mesh_renderer_rp, 1, &render_tex, nullptr, nullptr, nullptr).get();
+					auto debug_renderer_fbo = Renderer::device()->new_frame_buffer(m_type->m_debug_mesh_renderer_rp, 1, &render_tex, nullptr, nullptr, nullptr).get();
 					m_scene_cmdbuf->begin_render_pass(m_type->m_debug_mesh_renderer_rp, debug_renderer_fbo, 0, nullptr, 1.0f, 0xFF);
 					m_scene_cmdbuf->attach_graphic_object(debug_renderer_fbo);
 					m_scene_cmdbuf->set_graphic_shader_input_layout(m_type->m_debug_mesh_renderer_slayout);
 					m_scene_cmdbuf->set_pipeline_state(m_type->m_debug_mesh_renderer_pso);
 					m_scene_cmdbuf->set_primitive_topology(EPrimitiveTopology::triangle_list);
-					m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, render_desc.width, render_desc.height, 0.0f, 1.0f));
-					m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, render_desc.width, render_desc.height));
+					m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, (f32)render_desc.width, (f32)render_desc.height, 0.0f, 1.0f));
+					m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, (i32)render_desc.width, (i32)render_desc.height));
 					// Draw Meshes.
-					for (size_t i = 0; i < ts.size(); ++i)
+					for (usize i = 0; i < ts.size(); ++i)
 					{
-						auto vs = renderer::device()->new_view_set(m_type->m_debug_mesh_renderer_slayout, ViewSetDesc(1, 1, 0, 0)).get();
-						vs->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, align_upper(sizeof(CameraCB), cb_align)));
+						auto vs = Renderer::device()->new_view_set(m_type->m_debug_mesh_renderer_slayout, ViewSetDesc(1, 1, 0, 0)).get();
+						vs->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(CameraCB), cb_align)));
 						vs->set_srv(0, m_model_matrices, &ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, i, 1, sizeof(Float4x4) * 2, false));
 						m_scene_cmdbuf->set_graphic_view_set(vs);
 						m_scene_cmdbuf->attach_graphic_object(vs);
@@ -603,11 +604,11 @@ namespace luna
 						// Draw pieces.
 						auto mesh = rs[i]->model().lock()->mesh().lock();
 						m_scene_cmdbuf->set_vertex_buffers(0, 1, &VertexBufferViewDesc(mesh->vertex_buffer(), 0,
-							mesh->count_vertices() * sizeof(e3d::Vertex), sizeof(e3d::Vertex)));
-						m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(uint32), EResourceFormat::r32_uint);
+							mesh->count_vertices() * sizeof(E3D::Vertex), sizeof(E3D::Vertex)));
+						m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(u32), EResourceFormat::r32_uint);
 
-						size_t num_pieces = mesh->count_pieces();
-						for (size_t j = 0; j < num_pieces; ++j)
+						u32 num_pieces = mesh->count_pieces();
+						for (u32 j = 0; j < num_pieces; ++j)
 						{
 							m_scene_cmdbuf->draw_indexed(mesh->piece_count_indices(j), mesh->piece_first_index_offset(j), 0);
 						}
@@ -618,7 +619,7 @@ namespace luna
 				{
 					// Depth pass.
 					{
-						auto fbo = renderer::device()->new_frame_buffer(m_type->m_depth_pass_rp, 0, nullptr, nullptr, depth_tex, nullptr).get();
+						auto fbo = Renderer::device()->new_frame_buffer(m_type->m_depth_pass_rp, 0, nullptr, nullptr, depth_tex, nullptr).get();
 						m_scene_cmdbuf->begin_render_pass(m_type->m_depth_pass_rp, fbo, 0, nullptr, 1.0f, 0xFF);
 						//m_scene_cmdbuf->attach_graphic_object(fbo);
 						//m_scene_cmdbuf->set_graphic_shader_input_layout(m_type->m_depth_pass_slayout);
@@ -639,7 +640,7 @@ namespace luna
 						//	auto mesh = rs[i]->model().lock()->mesh().lock();
 						//	m_scene_cmdbuf->set_vertex_buffers(0, 1, &VertexBufferViewDesc(mesh->vertex_buffer(), 0,
 						//		mesh->count_vertices() * sizeof(e3d::Vertex), sizeof(e3d::Vertex)));
-						//	m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(uint32), EResourceFormat::r32_uint);
+						//	m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(u32), EResourceFormat::r32_uint);
 
 						//	size_t num_pieces = mesh->count_pieces();
 						//	for (size_t j = 0; j < num_pieces; ++j)
@@ -663,7 +664,7 @@ namespace luna
 								skybox_tex = tex.get();
 							}
 						}
-						if (skybox_tex && camera->camera_type() == e3d::ECameraType::perspective)
+						if (skybox_tex && camera->camera_type() == E3D::ECameraType::perspective)
 						{
 							// Draw skybox.
 							auto view_to_world = transform->local_to_world_matrix();;
@@ -671,8 +672,8 @@ namespace luna
 							auto camera_forward_dir = mul(Float4(0.0f, 0.0f, 1.0f, 0.0f), transform->local_to_world_matrix());
 							memcpy(&mapped->view_to_world, &view_to_world, sizeof(Float4x4));
 							mapped->fov = camera->field_of_view();
-							mapped->width = scene_sz.x;
-							mapped->height = scene_sz.y;
+							mapped->width = (u32)scene_sz.x;
+							mapped->height = (u32)scene_sz.y;
 							m_skybox_params->unmap_subresource(0, false, 0, sizeof(SkyboxParams));
 
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->lighting_buffer(), EResourceState::unordered_access));
@@ -680,21 +681,21 @@ namespace luna
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(m_skybox_params, EResourceState::vertex_and_constant_buffer));
 							m_scene_cmdbuf->set_compute_shader_input_layout(m_type->m_skybox_pass_slayout);
 							m_scene_cmdbuf->set_pipeline_state(m_type->m_skybox_pass_pso);
-							auto vs = renderer::device()->new_view_set(m_type->m_skybox_pass_slayout, ViewSetDesc(1, 1, 1, 1)).get();
-							vs->set_cbv(0, m_skybox_params, ConstantBufferViewDesc(0, align_upper(sizeof(SkyboxParams), cb_align)));
+							auto vs = Renderer::device()->new_view_set(m_type->m_skybox_pass_slayout, ViewSetDesc(1, 1, 1, 1)).get();
+							vs->set_cbv(0, m_skybox_params, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(SkyboxParams), cb_align)));
 							vs->set_srv(0, skybox_tex);
 							vs->set_uav(0, scene_renderer->lighting_buffer());
 							vs->set_sampler(0, SamplerDesc(EFilter::min_mag_mip_linear, ETextureAddressMode::warp, ETextureAddressMode::warp, ETextureAddressMode::warp));
 							m_scene_cmdbuf->set_compute_view_set(vs);
 							m_scene_cmdbuf->attach_graphic_object(vs);
-							m_scene_cmdbuf->dispatch(max<uint32>((uint32)scene_sz.x / 8, 1), max<uint32>((uint32)scene_sz.y / 8, 1), 1);
+							m_scene_cmdbuf->dispatch(max<u32>((u32)scene_sz.x / 8, 1), max<u32>((u32)scene_sz.y / 8, 1), 1);
 						}
 						else
 						{
 							// Clears to black.
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->lighting_buffer(), EResourceState::render_target));
 							auto lighting_rt = scene_renderer->lighting_buffer();
-							auto fbo = renderer::device()->new_frame_buffer(m_type->m_skybox_pass_rp, 1, &lighting_rt, nullptr, nullptr, nullptr).get();
+							auto fbo = Renderer::device()->new_frame_buffer(m_type->m_skybox_pass_rp, 1, &lighting_rt, nullptr, nullptr, nullptr).get();
 							Float4U clear_value = { 0.0f, 0.0f, 0.0f, 0.0f };
 							m_scene_cmdbuf->begin_render_pass(m_type->m_skybox_pass_rp, fbo, 1, &clear_value, 1.0f, 0xFF);
 							m_scene_cmdbuf->attach_graphic_object(fbo);
@@ -705,7 +706,7 @@ namespace luna
 					// Lighting Pass.
 					{
 						auto lighting_rt = scene_renderer->lighting_buffer();
-						auto fbo = renderer::device()->new_frame_buffer(m_type->m_lighting_pass_rp, 1, &lighting_rt, nullptr, depth_tex, nullptr).get();
+						auto fbo = Renderer::device()->new_frame_buffer(m_type->m_lighting_pass_rp, 1, &lighting_rt, nullptr, depth_tex, nullptr).get();
 						m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(lighting_rt, EResourceState::render_target));
 						m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(depth_tex, EResourceState::depth_stencil_write));
 						m_scene_cmdbuf->begin_render_pass(m_type->m_lighting_pass_rp, fbo, 0, nullptr, 0.0f, 0xFF);
@@ -713,28 +714,28 @@ namespace luna
 						m_scene_cmdbuf->set_graphic_shader_input_layout(m_type->m_lighting_pass_slayout);
 						m_scene_cmdbuf->set_pipeline_state(m_type->m_lighting_pass_pso);
 						m_scene_cmdbuf->set_primitive_topology(EPrimitiveTopology::triangle_list);
-						m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, render_desc.width, render_desc.height, 0.0f, 1.0f));
-						m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, render_desc.width, render_desc.height));
+						m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, (f32)render_desc.width, (f32)render_desc.height, 0.0f, 1.0f));
+						m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, (i32)render_desc.width, (i32)render_desc.height));
 
 						// Draw Meshes.
-						for (size_t i = 0; i < ts.size(); ++i)
+						for (usize i = 0; i < ts.size(); ++i)
 						{
 							auto model = rs[i]->model().lock();
 							auto mesh = model->mesh().lock();
 							m_scene_cmdbuf->set_vertex_buffers(0, 1, &VertexBufferViewDesc(mesh->vertex_buffer(), 0,
-								mesh->count_vertices() * sizeof(e3d::Vertex), sizeof(e3d::Vertex)));
-							m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(uint32), EResourceFormat::r32_uint);
+								mesh->count_vertices() * sizeof(E3D::Vertex), sizeof(E3D::Vertex)));
+							m_scene_cmdbuf->set_index_buffer(mesh->index_buffer(), 0, mesh->count_indices() * sizeof(u32), EResourceFormat::r32_uint);
 
-							size_t num_pieces = mesh->count_pieces();
+							u32 num_pieces = mesh->count_pieces();
 
-							for (size_t j = 0; j < num_pieces; ++j)
+							for (u32 j = 0; j < num_pieces; ++j)
 							{
-								P<gfx::IResource> base_color_tex = m_type->m_default_base_color;
-								P<gfx::IResource> roughness_tex = m_type->m_default_roughness;
-								P<gfx::IResource> normal_tex = m_type->m_default_normal;
-								P<gfx::IResource> metallic_tex = m_type->m_default_metallic;
-								P<gfx::IResource> emissive_tex = m_type->m_default_emissive;
-								P<gfx::IResource> sky_tex = m_type->m_default_emissive;
+								P<Gfx::IResource> base_color_tex = m_type->m_default_base_color;
+								P<Gfx::IResource> roughness_tex = m_type->m_default_roughness;
+								P<Gfx::IResource> normal_tex = m_type->m_default_normal;
+								P<Gfx::IResource> metallic_tex = m_type->m_default_metallic;
+								P<Gfx::IResource> emissive_tex = m_type->m_default_emissive;
+								P<Gfx::IResource> sky_tex = m_type->m_default_emissive;
 
 								if (j < model->count_materials())
 								{
@@ -742,11 +743,11 @@ namespace luna
 									if (mat)
 									{
 										// Set material for this piece.
-										P<texture::ITexture> mat_base_color_tex = mat->base_color().lock();
-										P<texture::ITexture> mat_roughness_tex = mat->roughness().lock();
-										P<texture::ITexture> mat_normal_tex = mat->normal().lock();
-										P<texture::ITexture> mat_metallic_tex = mat->metallic().lock();
-										P<texture::ITexture> mat_emissive_tex = mat->emissive().lock();
+										P<Texture::ITexture> mat_base_color_tex = mat->base_color().lock();
+										P<Texture::ITexture> mat_roughness_tex = mat->roughness().lock();
+										P<Texture::ITexture> mat_normal_tex = mat->normal().lock();
+										P<Texture::ITexture> mat_metallic_tex = mat->metallic().lock();
+										P<Texture::ITexture> mat_emissive_tex = mat->emissive().lock();
 										if (mat_base_color_tex)
 										{
 											auto _base_color_tex = mat_base_color_tex->texture();
@@ -805,8 +806,8 @@ namespace luna
 									sky_tex = skybox_tex;
 								}
 
-								auto vs = renderer::device()->new_view_set(m_type->m_depth_pass_slayout, ViewSetDesc(1, 8, 0, 1)).get();
-								vs->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, align_upper(sizeof(CameraCB), cb_align)));
+								auto vs = Renderer::device()->new_view_set(m_type->m_depth_pass_slayout, ViewSetDesc(1, 8, 0, 1)).get();
+								vs->set_cbv(0, m_camera_cb, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(CameraCB), cb_align)));
 								vs->set_srv(0, m_model_matrices, &ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, i, 1, sizeof(Float4x4) * 2, false));
 								if (light_ts.empty())
 								{
@@ -815,7 +816,7 @@ namespace luna
 								}
 								else
 								{
-									vs->set_srv(1, m_lighting_params, &ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, 0, (uint32)light_ts.size(), sizeof(LightingParams)));
+									vs->set_srv(1, m_lighting_params, &ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, 0, (u32)light_ts.size(), sizeof(LightingParams)));
 								}
 								// Set material texture: base_color(t2), roughness(t3), normal(t4), metallic(t5), emissive(t6).
 								vs->set_srv(2, base_color_tex);
@@ -849,14 +850,14 @@ namespace luna
 							Float4 offsets[16];
 							{
 								// How much texels are covered by one sample pixel?
-								float32 TexelsCoveredPerSampleW = scene_sz.x / 1024.0f;
-								float32 TexelsCoveredPerSampleH = scene_sz.y / 1024.0f;
+								f32 TexelsCoveredPerSampleW = scene_sz.x / 1024.0f;
+								f32 TexelsCoveredPerSampleH = scene_sz.y / 1024.0f;
 								// The offset of one texel in uv-space.
-								float32 NormalizedWidthPerTexel = 1.0f / scene_sz.x;
-								float32 NormalizedHeightPerTexel = 1.0f / scene_sz.y;
-								for (int32 i = 0; i < 4; i++)
+								f32 NormalizedWidthPerTexel = 1.0f / scene_sz.x;
+								f32 NormalizedHeightPerTexel = 1.0f / scene_sz.y;
+								for (i32 i = 0; i < 4; i++)
 								{
-									for (int32 j = 0; j < 4; j++)
+									for (i32 j = 0; j < 4; j++)
 									{
 										offsets[4 * i + j] = Float4{
 											NormalizedWidthPerTexel * TexelsCoveredPerSampleW / 8.0f * (float)(2 * j - 3) ,
@@ -870,11 +871,11 @@ namespace luna
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->lighting_buffer(), EResourceState::shader_resource_non_pixel, 0));
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->tone_mapping_buffer(0), EResourceState::unordered_access, 0));
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(m_tone_mapping_offset, EResourceState::vertex_and_constant_buffer, 0));
-							auto vs = renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(1, 1, 1, 1)).get();
+							auto vs = Renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(1, 1, 1, 1)).get();
 							vs->set_srv(0, scene_renderer->lighting_buffer());
 							vs->set_uav(0, scene_renderer->tone_mapping_buffer(0));
 							vs->set_sampler(0, SamplerDesc(EFilter::min_mag_mip_linear, ETextureAddressMode::warp, ETextureAddressMode::warp, ETextureAddressMode::warp));
-							vs->set_cbv(0, m_tone_mapping_offset, ConstantBufferViewDesc(0, align_upper(sizeof(Float4) * 16, cb_align)));
+							vs->set_cbv(0, m_tone_mapping_offset, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(Float4) * 16, cb_align)));
 							m_scene_cmdbuf->set_compute_view_set(vs);
 							m_scene_cmdbuf->attach_graphic_object(vs);
 							m_scene_cmdbuf->dispatch(128, 128, 1);
@@ -884,16 +885,16 @@ namespace luna
 						{
 							m_scene_cmdbuf->set_compute_shader_input_layout(m_type->m_lum_pass_slayout);
 							m_scene_cmdbuf->set_pipeline_state(m_type->m_lum_pass_pso);
-							for (uint32 i = 0; i < 10; ++i)
+							for (u32 i = 0; i < 10; ++i)
 							{
 								m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->tone_mapping_buffer(i), EResourceState::shader_resource_non_pixel, 0));
 								m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->tone_mapping_buffer(i + 1), EResourceState::unordered_access, 0));
-								auto vs = renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(0, 1, 1, 0)).get();
+								auto vs = Renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(0, 1, 1, 0)).get();
 								vs->set_srv(0, scene_renderer->tone_mapping_buffer(i));
 								vs->set_uav(0, scene_renderer->tone_mapping_buffer(i + 1));
 								m_scene_cmdbuf->set_compute_view_set(vs);
 								m_scene_cmdbuf->attach_graphic_object(vs);
-								uint32 dispatches = max(64 >> i, 1);
+								u32 dispatches = max(64 >> i, 1);
 								m_scene_cmdbuf->dispatch(dispatches, dispatches, 1);
 							}
 						}
@@ -911,14 +912,14 @@ namespace luna
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->lighting_buffer(), EResourceState::shader_resource_non_pixel));
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(scene_renderer->screen_buffer(), EResourceState::unordered_access));
 							m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(m_tone_mapping_params, EResourceState::vertex_and_constant_buffer));
-							auto vs = renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(1, 2, 1, 0)).get();
-							vs->set_cbv(0, m_tone_mapping_params, ConstantBufferViewDesc(0, align_upper(sizeof(ToneMappingParams), cb_align)));
+							auto vs = Renderer::device()->new_view_set(m_type->m_first_lum_pass_slayout, ViewSetDesc(1, 2, 1, 0)).get();
+							vs->set_cbv(0, m_tone_mapping_params, ConstantBufferViewDesc(0, (u32)align_upper(sizeof(ToneMappingParams), cb_align)));
 							vs->set_srv(0, scene_renderer->lighting_buffer());
 							vs->set_srv(1, scene_renderer->tone_mapping_buffer(10));
 							vs->set_uav(0, scene_renderer->screen_buffer());
 							m_scene_cmdbuf->set_compute_view_set(vs);
 							m_scene_cmdbuf->attach_graphic_object(vs);
-							m_scene_cmdbuf->dispatch(max<uint32>((uint32)scene_sz.x / 8, 1), max<uint32>((uint32)scene_sz.y / 8, 1), 1);
+							m_scene_cmdbuf->dispatch(max<u32>((u32)scene_sz.x / 8, 1), max<u32>((u32)scene_sz.y / 8, 1), 1);
 						}
 					}
 
@@ -928,8 +929,8 @@ namespace luna
 			// Draw Overlays.
 			{
 				// Draw Grid.
-				using namespace gfx;
-				m_grid_fb = renderer::device()->new_frame_buffer(m_type->m_grid_rp, 1, &render_tex, nullptr, nullptr, nullptr).get();
+				using namespace Gfx;
+				m_grid_fb = Renderer::device()->new_frame_buffer(m_type->m_grid_rp, 1, &render_tex, nullptr, nullptr, nullptr).get();
 				m_scene_cmdbuf->resource_barrier(ResourceBarrierDesc::as_transition(render_tex, EResourceState::render_target));
 				m_scene_cmdbuf->begin_render_pass(m_type->m_grid_rp, m_grid_fb, 0, nullptr, 0.0f, 0xFF);
 				m_scene_cmdbuf->set_graphic_shader_input_layout(m_type->m_grid_slayout);
@@ -937,8 +938,8 @@ namespace luna
 				m_scene_cmdbuf->set_vertex_buffers(0, 1, &VertexBufferViewDesc(m_type->m_grid_vb.get(), 0, sizeof(Float4) * 44, sizeof(Float4)));
 				m_scene_cmdbuf->set_primitive_topology(EPrimitiveTopology::line_list);
 				m_scene_cmdbuf->set_graphic_view_set(m_grid_views);
-				m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, render_desc.width, render_desc.height, 0.0f, 1.0f));
-				m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, render_desc.width, render_desc.height));
+				m_scene_cmdbuf->set_viewport(Viewport(0.0f, 0.0f, (f32)render_desc.width, (f32)render_desc.height, 0.0f, 1.0f));
+				m_scene_cmdbuf->set_scissor_rect(RectI(0, 0, (i32)render_desc.width, (i32)render_desc.height));
 				m_scene_cmdbuf->draw(44, 0);
 			}
 
@@ -954,10 +955,10 @@ namespace luna
 					auto& e = entities[m_current_select_entity];
 					if (e != camera_entity.get())
 					{
-						auto _et = e->get_component(intern_name("Transform"));
+						auto _et = e->get_component(Name("Transform"));
 						if (succeeded(_et))
 						{
-							P<e3d::ITransform> et = _et.get();
+							P<E3D::ITransform> et = _et.get();
 							Float4x4 world_mat = et->local_to_world_matrix();
 							bool edited = false;
 							ctx->gizmo(world_mat, m_camera_cb_data.world_to_view, m_camera_cb_data.view_to_proj,
@@ -981,20 +982,20 @@ namespace luna
 				ctx->set_cursor_pos(backup_pos);
 			}
 
-			if (ctx->is_mouse_clicked(input::EMouseKey::rb) && in_rect(imgui::io_get_mouse_pos(ctx->get_io()), scene_pos, scene_pos + scene_sz))
+			if (ctx->is_mouse_clicked(Input::EMouseKey::rb) && in_rect(ImGui::io_get_mouse_pos(ctx->get_io()), scene_pos, scene_pos + scene_sz))
 			{
 				m_navigating = true;
-				m_scene_click_pos = input::get_device(intern_name("mouse")).get().as<input::IMouse>()->pos();
+				m_scene_click_pos = Input::get_device(Name("mouse")).get().as<Input::IMouse>()->pos();
 			}
 
-			if (m_navigating && ctx->is_mouse_released(input::EMouseKey::rb))
+			if (m_navigating && ctx->is_mouse_released(Input::EMouseKey::rb))
 			{
 				m_navigating = false;
 			}
 
 			if (m_navigating)
 			{
-				auto mouse = input::get_device(intern_name("mouse")).get().as<input::IMouse>();
+				auto mouse = Input::get_device(Name("mouse")).get().as<Input::IMouse>();
 				auto mouse_pos = mouse->pos();
 				auto mouse_delta = mouse_pos - m_scene_click_pos;
 				auto _ = mouse->set_pos(m_scene_click_pos.x, m_scene_click_pos.y);
@@ -1008,38 +1009,38 @@ namespace luna
 				auto up = rot_mat.up();
 				auto io = ctx->get_io();
 
-				float32 camera_speed = m_camera_speed;
-				if (imgui::io_is_key_down(io, input::EKeyCode::shift))
+				f32 camera_speed = m_camera_speed;
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::shift))
 				{
 					camera_speed *= 2.0f;
 				}
 				
-				if (imgui::io_is_key_down(io, input::EKeyCode::w))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::w))
 				{
 					transform->set_local_position(transform->local_position() + forward * 0.1f * camera_speed);
 				}
-				if (imgui::io_is_key_down(io, input::EKeyCode::a))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::a))
 				{
 					transform->set_local_position(transform->local_position() + left * 0.1f * camera_speed);
 				}
-				if (imgui::io_is_key_down(io, input::EKeyCode::s))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::s))
 				{
 					transform->set_local_position(transform->local_position() - forward * 0.1f * camera_speed);
 				}
-				if (imgui::io_is_key_down(io, input::EKeyCode::d))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::d))
 				{
 					transform->set_local_position(transform->local_position() - left * 0.1f * camera_speed);
 				}
-				if (imgui::io_is_key_down(io, input::EKeyCode::q))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::q))
 				{
 					transform->set_local_position(transform->local_position() - up * 0.1f * camera_speed);
 				}
-				if (imgui::io_is_key_down(io, input::EKeyCode::e))
+				if (ImGui::io_is_key_down(io, Input::EKeyCode::e))
 				{
 					transform->set_local_position(transform->local_position() + up * 0.1f * camera_speed);
 				}
 				auto eular = rot_mat.euler_angles();
-				eular += {deg_to_rad((float32)mouse_delta.y / 10.0f), deg_to_rad((float32)mouse_delta.x / 10.0f), 0.0f};
+				eular += {deg_to_rad((f32)mouse_delta.y / 10.0f), deg_to_rad((f32)mouse_delta.x / 10.0f), 0.0f};
 				eular.x = clamp(eular.x, deg_to_rad(-85.0f), deg_to_rad(85.0f));
 				transform->set_local_rotation(Quaternion::from_roll_pitch_yaw(eular.x, eular.y, eular.z));
 
@@ -1052,13 +1053,13 @@ namespace luna
 			ctx->end_child();
 		}
 
-		void SceneEditor::draw_components_grid(imgui::IContext* ctx, Vector<scene::IEntity*>& entities)
+		void SceneEditor::draw_components_grid(ImGui::IContext* ctx, Vector<Scene::IEntity*>& entities)
 		{
 			// Draw component property grid.
 
 			ctx->text("Components Grid");
 
-			ctx->push_style_var(imgui::EStyle::child_rounding, 5.0f);
+			ctx->push_style_var(ImGui::EStyle::child_rounding, 5.0f);
 			ctx->begin_child("Components Grid", Float2(0.0f, 0.0f), true);
 
 			auto current_entity = m_current_entity.lock();
@@ -1083,7 +1084,7 @@ namespace luna
 				{
 					for (auto& i : components)
 					{
-						if (ctx->collapsing_header(i->type_object()->type_name()->c_str(), imgui::ETreeNodeFlag::default_open))
+						if (ctx->collapsing_header(i->type_object()->type_name().c_str(), ImGui::ETreeNodeFlag::default_open))
 						{
 							bool has_editor = false;
 							for (auto& j : m_component_editors)
@@ -1121,7 +1122,7 @@ namespace luna
 										break;
 									}
 								}
-								current_entity->remove_component(i->type_object()->type_name());
+								auto _ = current_entity->remove_component(i->type_object()->type_name());
 							}
 
 							ctx->pop_id();
@@ -1138,7 +1139,7 @@ namespace luna
 
 				if (ctx->begin_popup(new_comp_popup))
 				{
-					auto component_types = scene::component_types();
+					auto component_types = Scene::component_types();
 
 					for (auto& i : component_types)
 					{
@@ -1147,12 +1148,12 @@ namespace luna
 						if (failed(exists))
 						{
 							// Show enabled.
-							if (ctx->selectable(name->c_str()))
+							if (ctx->selectable(name.c_str()))
 							{
 								auto res = current_entity->add_component(name);
 								if (failed(res))
 								{
-									log_error(explain(res.result()));
+									debug_printf(get_errmsg(res.errcode()));
 								}
 								ctx->close_current_popup();
 							}
@@ -1160,7 +1161,7 @@ namespace luna
 						else
 						{
 							// Show disabled.
-							ctx->selectable(name->c_str(), false, imgui::ESelectableFlag::disabled);
+							ctx->selectable(name.c_str(), false, ImGui::ESelectableFlag::disabled);
 						}
 					}
 					ctx->end_popup();
@@ -1174,12 +1175,12 @@ namespace luna
 			ctx->end_child();
 			ctx->pop_style_var();
 		}
-		void SceneEditor::on_render(imgui::IContext* ctx)
+		void SceneEditor::on_render(ImGui::IContext* ctx)
 		{
 			char title[32];
-			sprintf_s(title, "Scene Editor###%d", (uint32)this);
-			ctx->set_next_window_size(Float2(1000, 500), imgui::ECondition::first_use_ever);
-			ctx->begin(title, &m_open, imgui::EWindowFlag::no_collapse | imgui::EWindowFlag::menu_bar);
+			sprintf_s(title, "Scene Editor###%d", (u32)(usize)this);
+			ctx->set_next_window_size(Float2(1000, 500), ImGui::ECondition::first_use_ever);
+			ctx->begin(title, &m_open, ImGui::EWindowFlag::no_collapse | ImGui::EWindowFlag::menu_bar);
 			auto s = m_scene.lock();
 			if (!s)
 			{
@@ -1187,11 +1188,11 @@ namespace luna
 				ctx->end();
 				return;
 			}
-			if (s->meta()->state() == asset::EAssetState::unloaded)
+			if (s->meta()->state() == Asset::EAssetState::unloaded)
 			{
-				s->meta()->load(asset::EAssetLoadFlag::none);
+				s->meta()->load(Asset::EAssetLoadFlag::none);
 			}
-			if (s->meta()->state() != asset::EAssetState::loaded)
+			if (s->meta()->state() != Asset::EAssetState::loaded)
 			{
 				ctx->text("Scene Loading");
 				ctx->end();
@@ -1206,22 +1207,22 @@ namespace luna
 					{
 						lutry
 						{
-							lulet(r1, s->meta()->save_meta(asset::EAssetSaveFormat::ascii));
-							lulet(r2, s->meta()->save_data(asset::EAssetSaveFormat::ascii));
+							lulet(r1, s->meta()->save_meta(Asset::EAssetSaveFormat::ascii));
+							lulet(r2, s->meta()->save_data(Asset::EAssetSaveFormat::ascii));
 							r1->wait();
 							r2->wait();
-							if (failed(r1->result()))
+							if (r1->result())
 							{
 								luthrow(r1->result());
 							}
-							if (failed(r2->result()))
+							if (r2->result())
 							{
 								luthrow(r2->result());
 							}
 						}
 						lucatch
 						{
-							gfx::message_box(explain(lures), "Failed to save scene", gfx::EMessageBoxType::ok, gfx::EMessageBoxIcon::error);
+							auto _ = Gfx::message_box(get_errmsg(lures), "Failed to save scene", Gfx::EMessageBoxType::ok, Gfx::EMessageBoxIcon::error);
 						}
 					}
 					ctx->end_menu();
@@ -1253,40 +1254,40 @@ namespace luna
 		{
 			//! Initialize Grid data.
 			Float4 grids[44];
-			for (int32 i = -5; i <= 5; ++i) // 0 - 21
+			for (i32 i = -5; i <= 5; ++i) // 0 - 21
 			{
-				grids[(i + 5) * 2] = Float4(i, 0.0f, 5.0f, 1.0f);
-				grids[(i + 5) * 2 + 1] = Float4(i, 0.0f, -5.0f, 1.0f);
+				grids[(i + 5) * 2] = Float4((f32)i, 0.0f, 5.0f, 1.0f);
+				grids[(i + 5) * 2 + 1] = Float4((f32)i, 0.0f, -5.0f, 1.0f);
 			}
-			for (int32 i = -5; i <= 5; ++i) // 22 - 43
+			for (i32 i = -5; i <= 5; ++i) // 22 - 43
 			{
-				grids[(i + 5) * 2 + 22] = Float4(-5.0f, 0.0f, i, 1.0f);
-				grids[(i + 5) * 2 + 23] = Float4(5.0f, 0.0f, i, 1.0f);
+				grids[(i + 5) * 2 + 22] = Float4(-5.0f, 0.0f, (f32)i, 1.0f);
+				grids[(i + 5) * 2 + 23] = Float4(5.0f, 0.0f, (f32)i, 1.0f);
 			}
 
 			lutry
 			{
-				using namespace gfx;
+				using namespace Gfx;
 				{
-					luset(m_grid_vb, renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::gpu_local, EResourceUsageFlag::vertex_buffer, sizeof(grids))));
-					luset(m_default_base_color, renderer::device()->new_resource(
+					luset(m_grid_vb, Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::gpu_local, EResourceUsageFlag::vertex_buffer, sizeof(grids))));
+					luset(m_default_base_color, Renderer::device()->new_resource(
 						ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource, 1, 1, 1, 1)));
-					luset(m_default_roughness, renderer::device()->new_resource(
+					luset(m_default_roughness, Renderer::device()->new_resource(
 						ResourceDesc::tex2d(EResourceFormat::r8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource, 1, 1, 1, 1)));
-					luset(m_default_normal, renderer::device()->new_resource(
+					luset(m_default_normal, Renderer::device()->new_resource(
 						ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource, 1, 1, 1, 1)));
-					luset(m_default_metallic, renderer::device()->new_resource(
+					luset(m_default_metallic, Renderer::device()->new_resource(
 						ResourceDesc::tex2d(EResourceFormat::r8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource, 1, 1, 1, 1)));
-					luset(m_default_emissive, renderer::device()->new_resource(
+					luset(m_default_emissive, Renderer::device()->new_resource(
 						ResourceDesc::tex2d(EResourceFormat::rgba8_unorm, EAccessType::gpu_local, EResourceUsageFlag::shader_resource, 1, 1, 1, 1)));
 
 					ShaderInputGroupDesc group(EShaderInputGroupType::cbv, 0, 1, EShaderVisibility::vertex);
-					luset(m_grid_slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(&group, 1,
+					luset(m_grid_slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(&group, 1,
 						EShaderInputLayoutFlag::allow_input_assembler_input_layout |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
 						EShaderInputLayoutFlag::deny_hull_shader_access)));
-					luset(m_grid_rp, renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba8_unorm,
+					luset(m_grid_rp, Renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba8_unorm,
 						EAttachmentLoadOp::dont_care, EAttachmentStoreOp::store) }, EResourceFormat::unknown,
 						EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, false)));
 					static const char* vertexShader =
@@ -1313,10 +1314,10 @@ namespace luna
 						  output.pos = mul(world_to_proj, input.pos);\
 						  return output;\
 						}";
-					lulet(vs_blob, gfx::compile_shader(gfx::ShaderCompileDesc(vertexShader, strlen(vertexShader),
-						"GridVS", "main", gfx::EShaderSourceType::hlsl, gfx::EShaderTargetType::dx_bytecode,
-						gfx::EShaderType::vertex, gfx::EShaderModel::sm_5_0, gfx::EShaderOptimizationLevel::full,
-						gfx::EShaderCompileFlag::none)));
+					lulet(vs_blob, Gfx::compile_shader(Gfx::ShaderCompileDesc(vertexShader, strlen(vertexShader),
+						"GridVS", "main", Gfx::EShaderSourceType::hlsl, Gfx::EShaderTargetType::dx_bytecode,
+						Gfx::EShaderType::vertex, Gfx::EShaderModel::sm_5_0, Gfx::EShaderOptimizationLevel::full,
+						Gfx::EShaderCompileFlag::none)));
 					static const char* pixelShader =
 						"struct PS_INPUT\
 						{\
@@ -1327,15 +1328,15 @@ namespace luna
 						{\
 						  return float4(1.0f, 1.0f, 1.0f, 1.0f); \
 						}";
-					lulet(ps_blob, gfx::compile_shader(gfx::ShaderCompileDesc(pixelShader, strlen(pixelShader),
-						"GridPS", "main", gfx::EShaderSourceType::hlsl, gfx::EShaderTargetType::dx_bytecode,
-						gfx::EShaderType::pixel, gfx::EShaderModel::sm_5_0, gfx::EShaderOptimizationLevel::full,
-						gfx::EShaderCompileFlag::none)));
+					lulet(ps_blob, Gfx::compile_shader(Gfx::ShaderCompileDesc(pixelShader, strlen(pixelShader),
+						"GridPS", "main", Gfx::EShaderSourceType::hlsl, Gfx::EShaderTargetType::dx_bytecode,
+						Gfx::EShaderType::pixel, Gfx::EShaderModel::sm_5_0, Gfx::EShaderOptimizationLevel::full,
+						Gfx::EShaderCompileFlag::none)));
 
 					GraphicsPipelineStateDesc ps_desc;
 					memzero(&ps_desc, sizeof(GraphicsPipelineStateDesc));
 					ps_desc.primitive_topology_type = EPrimitiveTopologyType::line;
-					ps_desc.sample_mask = uint32_max_v;
+					ps_desc.sample_mask = u32_max;
 					ps_desc.sample_quality = 0;
 					ps_desc.blend_state = BlendDesc(false, false, { RenderTargetBlendDesc(true, false, EBlendFactor::src_alpha,
 						EBlendFactor::inv_src_alpha, EBlendOp::add, EBlendFactor::inv_src_alpha, EBlendFactor::zero, EBlendOp::add, ELogicOp::noop, EColorWriteMask::all) });
@@ -1347,59 +1348,59 @@ namespace luna
 					};
 					ps_desc.input_layout.input_elements = input_elements;
 					ps_desc.input_layout.num_elements = 1;
-					ps_desc.vs.code = vs_blob->data();
-					ps_desc.vs.length = vs_blob->size();
-					ps_desc.ps.code = ps_blob->data();
-					ps_desc.ps.length = ps_blob->size();
-					luset(m_grid_pso, renderer::device()->new_graphics_pipeline_state(m_grid_slayout, m_grid_rp, ps_desc));
+					ps_desc.vs.code = vs_blob.data();
+					ps_desc.vs.length = vs_blob.size();
+					ps_desc.ps.code = ps_blob.data();
+					ps_desc.ps.length = ps_blob.size();
+					luset(m_grid_pso, Renderer::device()->new_graphics_pipeline_state(m_grid_slayout, m_grid_rp, ps_desc));
 				}
 
 				// Upload grid vertex data.
-				lulet(grid_vb, renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, sizeof(grids))));
+				lulet(grid_vb, Renderer::device()->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, sizeof(grids))));
 				lulet(mapped, grid_vb->map_subresource(0, false, 1, 0));
 				memcpy(mapped, grids, sizeof(grids));
 				grid_vb->unmap_subresource(0, true);
-				lulet(cmdbuf, renderer::main_copy_queue()->new_command_buffer());
+				lulet(cmdbuf, Renderer::main_copy_queue()->new_command_buffer());
 				cmdbuf->copy_resource(m_grid_vb, grid_vb);
 
 				// Upload default texture data.
-				lulet(base_color_data, renderer::device()->new_resource(
+				lulet(base_color_data, Renderer::device()->new_resource(
 					ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, 4)));
-				lulet(roughness_data, renderer::device()->new_resource(
+				lulet(roughness_data, Renderer::device()->new_resource(
 					ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, 1)));
-				lulet(normal_data, renderer::device()->new_resource(
+				lulet(normal_data, Renderer::device()->new_resource(
 					ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, 4)));
-				lulet(metallic_data, renderer::device()->new_resource(
+				lulet(metallic_data, Renderer::device()->new_resource(
 					ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, 1)));
-				lulet(emissive_data, renderer::device()->new_resource(
+				lulet(emissive_data, Renderer::device()->new_resource(
 					ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, 4)));
 				lulet(base_color_data_mapped, base_color_data->map_subresource(0, false, 1, 0));
 				lulet(roughness_data_mapped, roughness_data->map_subresource(0, false, 1, 0));
 				lulet(normal_data_mapped, normal_data->map_subresource(0, false, 1, 0));
 				lulet(metallic_data_mapped, metallic_data->map_subresource(0, false, 1, 0));
 				lulet(emissive_data_mapped, emissive_data->map_subresource(0, false, 1, 0));
-				((uint8*)base_color_data_mapped)[0] = 255;
-				((uint8*)base_color_data_mapped)[1] = 255;
-				((uint8*)base_color_data_mapped)[2] = 255;
-				((uint8*)base_color_data_mapped)[3] = 255;
-				((uint8*)roughness_data_mapped)[0] = 127;
-				((uint8*)normal_data_mapped)[0] = 127;
-				((uint8*)normal_data_mapped)[1] = 127;
-				((uint8*)normal_data_mapped)[2] = 255;
-				((uint8*)normal_data_mapped)[3] = 255;
-				((uint8*)metallic_data_mapped)[0] = 0;
-				((uint8*)emissive_data_mapped)[0] = 0;
-				((uint8*)emissive_data_mapped)[1] = 0;
-				((uint8*)emissive_data_mapped)[2] = 0;
-				((uint8*)emissive_data_mapped)[3] = 0;
+				((u8*)base_color_data_mapped)[0] = 255;
+				((u8*)base_color_data_mapped)[1] = 255;
+				((u8*)base_color_data_mapped)[2] = 255;
+				((u8*)base_color_data_mapped)[3] = 255;
+				((u8*)roughness_data_mapped)[0] = 127;
+				((u8*)normal_data_mapped)[0] = 127;
+				((u8*)normal_data_mapped)[1] = 127;
+				((u8*)normal_data_mapped)[2] = 255;
+				((u8*)normal_data_mapped)[3] = 255;
+				((u8*)metallic_data_mapped)[0] = 0;
+				((u8*)emissive_data_mapped)[0] = 0;
+				((u8*)emissive_data_mapped)[1] = 0;
+				((u8*)emissive_data_mapped)[2] = 0;
+				((u8*)emissive_data_mapped)[3] = 0;
 				base_color_data->unmap_subresource(0, true);
 				roughness_data->unmap_subresource(0, true);
 				normal_data->unmap_subresource(0, true);
 				metallic_data->unmap_subresource(0, true);
 				emissive_data->unmap_subresource(0, true);
 
-				uint32 tex_data_pitch_align;
-				renderer::device()->check_feature_support(EDeviceFeature::texture_data_pitch_alignment, &tex_data_pitch_align);
+				u32 tex_data_pitch_align;
+				Renderer::device()->check_feature_support(EDeviceFeature::texture_data_pitch_alignment, &tex_data_pitch_align);
 
 				cmdbuf->copy_texture_region(TextureCopyLocation::as_subresource_index(m_default_base_color, 0), 0, 0, 0,
 					TextureCopyLocation::as_placed_foorprint(base_color_data, 0, EResourceFormat::rgba8_unorm, 1, 1, 1, tex_data_pitch_align));
@@ -1460,10 +1461,10 @@ namespace luna
 							return output;\
 						}";
 
-				lulet(vs_blob, gfx::compile_shader(gfx::ShaderCompileDesc(vertexShaderCommon, strlen(vertexShaderCommon),
-					"MeshDebugVS", "main", gfx::EShaderSourceType::hlsl, gfx::EShaderTargetType::dx_bytecode,
-					gfx::EShaderType::vertex, gfx::EShaderModel::sm_5_0, gfx::EShaderOptimizationLevel::full,
-					gfx::EShaderCompileFlag::none)));
+				lulet(vs_blob, Gfx::compile_shader(Gfx::ShaderCompileDesc(vertexShaderCommon, strlen(vertexShaderCommon),
+					"MeshDebugVS", "main", Gfx::EShaderSourceType::hlsl, Gfx::EShaderTargetType::dx_bytecode,
+					Gfx::EShaderType::vertex, Gfx::EShaderModel::sm_5_0, Gfx::EShaderOptimizationLevel::full,
+					Gfx::EShaderCompileFlag::none)));
 
 				InputElementDesc input_elements_common[] = {
 						InputElementDesc("POSITION", 0, EResourceFormat::rgb32_float),
@@ -1481,12 +1482,12 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::cbv, 0, 1, EShaderVisibility::vertex),
 						ShaderInputGroupDesc(EShaderInputGroupType::srv, 0, 1, EShaderVisibility::vertex),
 					};
-					luset(m_debug_mesh_renderer_slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
+					luset(m_debug_mesh_renderer_slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
 						EShaderInputLayoutFlag::allow_input_assembler_input_layout |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
 						EShaderInputLayoutFlag::deny_hull_shader_access)));
-					luset(m_debug_mesh_renderer_rp, renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba8_unorm,
+					luset(m_debug_mesh_renderer_rp, Renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba8_unorm,
 						EAttachmentLoadOp::dont_care, EAttachmentStoreOp::store) }, EResourceFormat::unknown,
 						EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, false)));
 					static const char* pixelShader =
@@ -1504,15 +1505,15 @@ namespace luna
 						{\
 						  return float4(1.0f, 1.0f, 1.0f, 1.0f); \
 						}";
-					lulet(ps_blob, gfx::compile_shader(gfx::ShaderCompileDesc(pixelShader, strlen(pixelShader),
-						"MeshDebugPS", "main", gfx::EShaderSourceType::hlsl, gfx::EShaderTargetType::dx_bytecode,
-						gfx::EShaderType::pixel, gfx::EShaderModel::sm_5_0, gfx::EShaderOptimizationLevel::full,
-						gfx::EShaderCompileFlag::none)));
+					lulet(ps_blob, Gfx::compile_shader(Gfx::ShaderCompileDesc(pixelShader, strlen(pixelShader),
+						"MeshDebugPS", "main", Gfx::EShaderSourceType::hlsl, Gfx::EShaderTargetType::dx_bytecode,
+						Gfx::EShaderType::pixel, Gfx::EShaderModel::sm_5_0, Gfx::EShaderOptimizationLevel::full,
+						Gfx::EShaderCompileFlag::none)));
 
 					GraphicsPipelineStateDesc ps_desc;
 					memzero(&ps_desc, sizeof(GraphicsPipelineStateDesc));
 					ps_desc.primitive_topology_type = EPrimitiveTopologyType::triangle;
-					ps_desc.sample_mask = uint32_max_v;
+					ps_desc.sample_mask = u32_max;
 					ps_desc.sample_quality = 0;
 					ps_desc.blend_state = BlendDesc(false, false, { RenderTargetBlendDesc(true, false, EBlendFactor::src_alpha,
 						EBlendFactor::inv_src_alpha, EBlendOp::add, EBlendFactor::inv_src_alpha, EBlendFactor::zero, EBlendOp::add, ELogicOp::noop, EColorWriteMask::all) });
@@ -1520,11 +1521,11 @@ namespace luna
 					ps_desc.depth_stencil_state = DepthStencilDesc(false, false, EComparisonFunc::always, false, 0x00, 0x00, DepthStencilOpDesc(Default()), DepthStencilOpDesc(Default()));
 					ps_desc.ib_strip_cut_value = EIndexBufferStripCutValue::disabled;
 					ps_desc.input_layout = input_layout_common;
-					ps_desc.vs.code = vs_blob->data();
-					ps_desc.vs.length = vs_blob->size();
-					ps_desc.ps.code = ps_blob->data();
-					ps_desc.ps.length = ps_blob->size();
-					luset(m_debug_mesh_renderer_pso, renderer::device()->new_graphics_pipeline_state(m_debug_mesh_renderer_slayout, m_debug_mesh_renderer_rp, ps_desc));
+					ps_desc.vs.code = vs_blob.data();
+					ps_desc.vs.length = vs_blob.size();
+					ps_desc.ps.code = ps_blob.data();
+					ps_desc.ps.length = ps_blob.size();
+					luset(m_debug_mesh_renderer_pso, Renderer::device()->new_graphics_pipeline_state(m_debug_mesh_renderer_slayout, m_debug_mesh_renderer_rp, ps_desc));
 				}
 
 				// Depth Pass.
@@ -1533,28 +1534,28 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::cbv, 0, 1, EShaderVisibility::vertex),
 						ShaderInputGroupDesc(EShaderInputGroupType::srv, 0, 1, EShaderVisibility::vertex),
 					};
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
 						EShaderInputLayoutFlag::allow_input_assembler_input_layout |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
 						EShaderInputLayoutFlag::deny_hull_shader_access |
 						EShaderInputLayoutFlag::deny_pixel_shader_access)));
-					lulet(rp, renderer::device()->new_render_pass(RenderPassDesc({}, EResourceFormat::d32_float,
+					lulet(rp, Renderer::device()->new_render_pass(RenderPassDesc({}, EResourceFormat::d32_float,
 						EAttachmentLoadOp::load, EAttachmentStoreOp::store, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, true)));
 
 					GraphicsPipelineStateDesc ps_desc;
 					memzero(&ps_desc, sizeof(GraphicsPipelineStateDesc));
 					ps_desc.primitive_topology_type = EPrimitiveTopologyType::triangle;
-					ps_desc.sample_mask = uint32_max_v;
+					ps_desc.sample_mask = u32_max;
 					ps_desc.sample_quality = 0;
 					ps_desc.blend_state = BlendDesc(false, false, {});
 					ps_desc.rasterizer_state = RasterizerDesc(EFillMode::solid, ECullMode::back, 0, 0.0f, 0.0f, 0, false, true, false, false, false);
 					ps_desc.depth_stencil_state = DepthStencilDesc(true, true, EComparisonFunc::less , false, 0x00, 0x00, DepthStencilOpDesc(Default()), DepthStencilOpDesc(Default()));
 					ps_desc.ib_strip_cut_value = EIndexBufferStripCutValue::disabled;
 					ps_desc.input_layout = input_layout_common;
-					ps_desc.vs.code = vs_blob->data();
-					ps_desc.vs.length = vs_blob->size();
-					lulet(pso, renderer::device()->new_graphics_pipeline_state(slayout, rp, ps_desc));
+					ps_desc.vs.code = vs_blob.data();
+					ps_desc.vs.length = vs_blob.size();
+					lulet(pso, Renderer::device()->new_graphics_pipeline_state(slayout, rp, ps_desc));
 
 					m_depth_pass_slayout = slayout;
 					m_depth_pass_rp = rp;
@@ -1570,25 +1571,25 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::sampler, 0, 1, EShaderVisibility::all)
 					};
 
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 4,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 4,
 						EShaderInputLayoutFlag::deny_vertex_shader_access |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
 						EShaderInputLayoutFlag::deny_hull_shader_access |
 						EShaderInputLayoutFlag::deny_pixel_shader_access)));
 
-					lulet(rp, renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba32_float, EAttachmentLoadOp::clear, EAttachmentStoreOp::store) }, EResourceFormat::unknown,
+					lulet(rp, Renderer::device()->new_render_pass(RenderPassDesc({ AttachmentDesc(EResourceFormat::rgba32_float, EAttachmentLoadOp::clear, EAttachmentStoreOp::store) }, EResourceFormat::unknown,
 						EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, true)));
 
 					lulet(psf, platform_open_file("SkyboxCS.cso", EFileOpenFlag::read, EFileCreationMode::open_existing));
-					lulet(file_size, psf->size());
-					auto cs_blob = new_buffer((size_t)file_size);
-					luexp(psf->read(cs_blob->buffer(), cs_blob->buffer_size()));
+					auto file_size = psf->size();
+					auto cs_blob = Blob((usize)file_size);
+					luexp(psf->read(cs_blob.data(), cs_blob.size()));
 					psf = nullptr;
 					ComputePipelineStateDesc ps_desc;
-					ps_desc.cs.code = cs_blob->data();
-					ps_desc.cs.length = cs_blob->size();
-					lulet(pso, renderer::device()->new_compute_pipline_state(slayout, ps_desc));
+					ps_desc.cs.code = cs_blob.data();
+					ps_desc.cs.length = cs_blob.size();
+					lulet(pso, Renderer::device()->new_compute_pipline_state(slayout, ps_desc));
 					m_skybox_pass_slayout = slayout;
 					m_skybox_pass_rp = rp;
 					m_skybox_pass_pso = pso;
@@ -1601,25 +1602,25 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::srv, 0, 8, EShaderVisibility::all),
 						ShaderInputGroupDesc(EShaderInputGroupType::sampler, 0, 1, EShaderVisibility::pixel)
 					};
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 3,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 3,
 						EShaderInputLayoutFlag::allow_input_assembler_input_layout |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
 						EShaderInputLayoutFlag::deny_hull_shader_access)));
-					lulet(rp, renderer::device()->new_render_pass(RenderPassDesc({AttachmentDesc(EResourceFormat::rgba32_float, EAttachmentLoadOp::load, EAttachmentStoreOp::store)}, EResourceFormat::d32_float,
+					lulet(rp, Renderer::device()->new_render_pass(RenderPassDesc({AttachmentDesc(EResourceFormat::rgba32_float, EAttachmentLoadOp::load, EAttachmentStoreOp::store)}, EResourceFormat::d32_float,
 						EAttachmentLoadOp::load, EAttachmentStoreOp::store, EAttachmentLoadOp::dont_care, EAttachmentStoreOp::dont_care, 1, true)));
 
 					
 					lulet(psf, platform_open_file("LightingPassPixel.cso", EFileOpenFlag::read, EFileCreationMode::open_existing));
-					lulet(file_size, psf->size());
-					auto ps_blob = new_buffer((size_t)file_size);
-					luexp(psf->read(ps_blob->buffer(), ps_blob->buffer_size()));
+					auto file_size = psf->size();
+					auto ps_blob = Blob((usize)file_size);
+					luexp(psf->read(ps_blob.data(), ps_blob.size()));
 					psf = nullptr;
 
 					GraphicsPipelineStateDesc ps_desc;
 					memzero(&ps_desc, sizeof(GraphicsPipelineStateDesc));
 					ps_desc.primitive_topology_type = EPrimitiveTopologyType::triangle;
-					ps_desc.sample_mask = uint32_max_v;
+					ps_desc.sample_mask = u32_max;
 					ps_desc.sample_quality = 0;
 					ps_desc.blend_state = BlendDesc(false, false, { RenderTargetBlendDesc(false, false, EBlendFactor::src_alpha,
 						EBlendFactor::inv_src_alpha, EBlendOp::add, EBlendFactor::inv_src_alpha, EBlendFactor::zero, EBlendOp::add, ELogicOp::noop, EColorWriteMask::all) });
@@ -1627,11 +1628,11 @@ namespace luna
 					ps_desc.depth_stencil_state = DepthStencilDesc(true, true, EComparisonFunc::less_equal, false, 0x00, 0x00, DepthStencilOpDesc(Default()), DepthStencilOpDesc(Default()));
 					ps_desc.ib_strip_cut_value = EIndexBufferStripCutValue::disabled;
 					ps_desc.input_layout = input_layout_common;
-					ps_desc.vs.code = vs_blob->data();
-					ps_desc.vs.length = vs_blob->size();
-					ps_desc.ps.code = ps_blob->data();
-					ps_desc.ps.length = ps_blob->size();
-					lulet(pso, renderer::device()->new_graphics_pipeline_state(slayout, rp, ps_desc));
+					ps_desc.vs.code = vs_blob.data();
+					ps_desc.vs.length = vs_blob.size();
+					ps_desc.ps.code = ps_blob.data();
+					ps_desc.ps.length = ps_blob.size();
+					lulet(pso, Renderer::device()->new_graphics_pipeline_state(slayout, rp, ps_desc));
 
 					m_lighting_pass_slayout = slayout;
 					m_lighting_pass_rp = rp;
@@ -1646,7 +1647,7 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::uav, 0, 1, EShaderVisibility::all),
 						ShaderInputGroupDesc(EShaderInputGroupType::sampler, 0, 1, EShaderVisibility::all)
 					};
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 4,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 4,
 						EShaderInputLayoutFlag::deny_vertex_shader_access |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
@@ -1654,14 +1655,14 @@ namespace luna
 						EShaderInputLayoutFlag::deny_pixel_shader_access)));
 
 					lulet(psf, platform_open_file("LumFirstCS.cso", EFileOpenFlag::read, EFileCreationMode::open_existing));
-					lulet(file_size, psf->size());
-					auto cs_blob = new_buffer((size_t)file_size);
-					luexp(psf->read(cs_blob->buffer(), cs_blob->buffer_size()));
+					auto file_size = psf->size();
+					auto cs_blob = Blob((usize)file_size);
+					luexp(psf->read(cs_blob.data(), cs_blob.size()));
 					psf = nullptr;
 					ComputePipelineStateDesc ps_desc;
-					ps_desc.cs.code = cs_blob->data();
-					ps_desc.cs.length = cs_blob->size();
-					lulet(pso, renderer::device()->new_compute_pipline_state(slayout, ps_desc));
+					ps_desc.cs.code = cs_blob.data();
+					ps_desc.cs.length = cs_blob.size();
+					lulet(pso, Renderer::device()->new_compute_pipline_state(slayout, ps_desc));
 					m_first_lum_pass_slayout = slayout;
 					m_first_lum_pass_pso = pso;
 				}
@@ -1672,7 +1673,7 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::srv, 0, 1, EShaderVisibility::all),
 						ShaderInputGroupDesc(EShaderInputGroupType::uav, 0, 1, EShaderVisibility::all)
 					};
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 2,
 						EShaderInputLayoutFlag::deny_vertex_shader_access |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
@@ -1680,14 +1681,14 @@ namespace luna
 						EShaderInputLayoutFlag::deny_pixel_shader_access)));
 
 					lulet(psf, platform_open_file("LumCS.cso", EFileOpenFlag::read, EFileCreationMode::open_existing));
-					lulet(file_size, psf->size());
-					auto cs_blob = new_buffer((size_t)file_size);
-					luexp(psf->read(cs_blob->buffer(), cs_blob->buffer_size()));
+					auto file_size = psf->size();
+					auto cs_blob = Blob((usize)file_size);
+					luexp(psf->read(cs_blob.data(), cs_blob.size()));
 					psf = nullptr;
 					ComputePipelineStateDesc ps_desc;
-					ps_desc.cs.code = cs_blob->data();
-					ps_desc.cs.length = cs_blob->size();
-					lulet(pso, renderer::device()->new_compute_pipline_state(slayout, ps_desc));
+					ps_desc.cs.code = cs_blob.data();
+					ps_desc.cs.length = cs_blob.size();
+					lulet(pso, Renderer::device()->new_compute_pipline_state(slayout, ps_desc));
 					m_lum_pass_slayout = slayout;
 					m_lum_pass_pso = pso;
 				}
@@ -1699,7 +1700,7 @@ namespace luna
 						ShaderInputGroupDesc(EShaderInputGroupType::srv, 0, 2, EShaderVisibility::all),
 						ShaderInputGroupDesc(EShaderInputGroupType::uav, 0, 1, EShaderVisibility::all)
 					};
-					lulet(slayout, renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 3,
+					lulet(slayout, Renderer::device()->new_shader_input_layout(ShaderInputLayoutDesc(groups, 3,
 						EShaderInputLayoutFlag::deny_vertex_shader_access |
 						EShaderInputLayoutFlag::deny_domain_shader_access |
 						EShaderInputLayoutFlag::deny_geometry_shader_access |
@@ -1707,14 +1708,14 @@ namespace luna
 						EShaderInputLayoutFlag::deny_pixel_shader_access)));
 
 					lulet(psf, platform_open_file("ToneMappingCS.cso", EFileOpenFlag::read, EFileCreationMode::open_existing));
-					lulet(file_size, psf->size());
-					auto cs_blob = new_buffer((size_t)file_size);
-					luexp(psf->read(cs_blob->buffer(), cs_blob->buffer_size()));
+					auto file_size = psf->size();
+					auto cs_blob = Blob((usize)file_size);
+					luexp(psf->read(cs_blob.data(), cs_blob.size()));
 					psf = nullptr;
 					ComputePipelineStateDesc ps_desc;
-					ps_desc.cs.code = cs_blob->data();
-					ps_desc.cs.length = cs_blob->size();
-					lulet(pso, renderer::device()->new_compute_pipline_state(slayout, ps_desc));
+					ps_desc.cs.code = cs_blob.data();
+					ps_desc.cs.length = cs_blob.size();
+					lulet(pso, Renderer::device()->new_compute_pipline_state(slayout, ps_desc));
 					m_tone_mapping_pass_slayout = slayout;
 					m_tone_mapping_pass_pso = pso;
 				}
@@ -1722,69 +1723,68 @@ namespace luna
 				cmdbuf->wait();
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
-		void SceneEditorType::on_draw_tile(imgui::IContext* ctx, asset::IAsset* asset, const RectF& draw_rect)
+		void SceneEditorType::on_draw_tile(ImGui::IContext* ctx, Asset::IAsset* asset, const RectF& draw_rect)
 		{
 			auto text_sz = ctx->calc_text_size("Scene");
 			Float2 center = Float2((draw_rect.right + draw_rect.left) / 2.0f, (draw_rect.top + draw_rect.bottom) / 2.0f);
 			ctx->set_cursor_pos(center - text_sz / 2.0f);
 			ctx->text("Scene");
 		}
-		P<IAssetEditor> SceneEditorType::new_editor(asset::IAsset* editing_asset)
+		P<IAssetEditor> SceneEditorType::new_editor(Asset::IAsset* editing_asset)
 		{
-			auto edit = box_ptr(new_obj_aligned<SceneEditor>(get_module_allocator()));
+			auto edit = newobj<SceneEditor>();
 			edit->m_type = this;
-			edit->m_scene = P<scene::IScene>(editing_asset);
+			edit->m_scene = P<Scene::IScene>(editing_asset);
 			edit->init();
 			return edit;
 		}
 		void SceneEditorType::register_component_editor_type(IComponentEditorType* component_type)
 		{
-			m_component_editor_types.insert(Pair<P<IName>, P<IComponentEditorType>>(component_type->type(), component_type));
+			m_component_editor_types.insert(Pair<Name, P<IComponentEditorType>>(component_type->type(), component_type));
 		}
 		void SceneEditorType::register_scene_component_editor_type(ISceneComponentEditorType* component_type)
 		{
-			m_scene_component_editor_types.insert(Pair<P<IName>, P<IComponentEditorType>>(component_type->type(), component_type));
+			m_scene_component_editor_types.insert(Pair<Name, P<IComponentEditorType>>(component_type->type(), component_type));
 		}
-		void SceneCreator::on_render(imgui::IContext* ctx)
+		void SceneCreator::on_render(ImGui::IContext* ctx)
 		{
 			char title[32];
-			sprintf_s(title, "Create Scene###%d", (uint32)this);
+			sprintf_s(title, "Create Scene###%d", (u32)(usize)this);
 
-			ctx->begin(title, &m_open, imgui::EWindowFlag::no_collapse);
+			ctx->begin(title, &m_open, ImGui::EWindowFlag::no_collapse);
 
 			ctx->input_text("Scene Asset Name", m_asset_name);
-			if (!m_asset_name->empty())
+			if (!m_asset_name.empty())
 			{
-				ctx->text("The Scene will be created as: %s%s", m_create_dir->encode()->c_str(), m_asset_name->c_str());
+				ctx->text("The Scene will be created as: %s%s", m_create_dir.encode().c_str(), m_asset_name.c_str());
 				if (ctx->button("Create"))
 				{
 					lutry
 					{
-						P<scene::IScene> s;
-						luset(s, scene::new_scene());
+						P<Scene::IScene> s;
+						luset(s, Scene::new_scene());
 						s->reset();
-						while (s->meta()->state() == asset::EAssetState::loading)
+						while (s->meta()->state() == Asset::EAssetState::loading)
 						{
 							yield_current_thread();
 						}
 						// Save the asset.
-						auto ass_path = new_path();
-						ass_path->assign(m_create_dir);
-						ass_path->push_back(intern_name(m_asset_name->c_str()));
-						ass_path->set_flags(ass_path->flags() & ~EPathFlag::diretory);
+						auto ass_path = m_create_dir;
+						ass_path.push_back(Name(m_asset_name.c_str()));
+						ass_path.flags() = (ass_path.flags() & ~EPathFlag::diretory);
 						luexp(s->meta()->set_meta_path(ass_path));
 						s->meta()->set_data_path(ass_path);
-						lulet(r1, s->meta()->save_meta(asset::EAssetSaveFormat::ascii));
-						lulet(r2, s->meta()->save_data(asset::EAssetSaveFormat::ascii));
+						lulet(r1, s->meta()->save_meta(Asset::EAssetSaveFormat::ascii));
+						lulet(r2, s->meta()->save_data(Asset::EAssetSaveFormat::ascii));
 						r1->wait();
 						r2->wait();
 					}
 					lucatch
 					{
-						auto _ = gfx::message_box(explain(lures), "Failed to create scene asset",
-										gfx::EMessageBoxType::ok, gfx::EMessageBoxIcon::error);
+						auto _ = Gfx::message_box(get_errmsg(lures), "Failed to create scene asset",
+										Gfx::EMessageBoxType::ok, Gfx::EMessageBoxIcon::error);
 					}
 				}
 			}

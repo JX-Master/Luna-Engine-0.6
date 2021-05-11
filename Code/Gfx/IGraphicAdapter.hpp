@@ -7,9 +7,9 @@
 #pragma once
 #include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		enum class EGraphicAdapterFlag
 		{
@@ -27,11 +27,11 @@ namespace luna
 			//! The GPU dedicated memory may be allocated from video memory for dedicated video card,
 			//! or part of system memory for embedded GPU. The memory can only be read/write by GPU,
 			//! CPU does not have access to it.
-			size_t local_memory;
+			usize local_memory;
 			//! The amount of memory shared from system main memory for this adapter. The memory is allocated
 			//! in system memory, and can be accessed by both CPU and GPU. GPU accesses this memory usually
 			//! through PCIes and with cache enabled so it is much slower than accessing local memory.
-			size_t shared_memory;
+			usize shared_memory;
 			//! A combination of EGraphicAdapterFlag.
 			EGraphicAdapterFlag flags;
 		};

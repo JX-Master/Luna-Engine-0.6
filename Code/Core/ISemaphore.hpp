@@ -7,12 +7,12 @@
 */
 #pragma once
 #include "IWaitable.hpp"
-namespace luna
+namespace Luna
 {
 	struct ISemaphore : public IWaitable
 	{
 		luiid("{ef6a7782-0a6c-4a40-abc9-a6d2381a3397}");
 
-		virtual void unacquire(int32 release_count = 1) = 0;
+		virtual void unacquire(i32 release_count = 1) = 0;
 	};
 }

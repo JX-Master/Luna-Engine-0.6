@@ -7,7 +7,7 @@
 #pragma once
 #include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	RP<IPath> select_project();
+	R<Path> select_project();
 }

@@ -5,21 +5,21 @@
 * @date 2019/7/26
 */
 #pragma once
-#include <Base/PlatformDefines.hpp>
+#include <Runtime/PlatformDefines.hpp>
 
 #ifdef LUNA_PLATFORM_WINDOWS
 
 #include "../InputHeader.hpp"
 #include "../../IKeyboard.hpp"
-#include <Base/Interface.hpp>
+#include <Core/Interface.hpp>
 
-#include <Base/Platform/Windows/MiniWin.hpp>
+#include <Runtime/Source/Platform/Windows/MiniWin.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		namespace win
+		namespace Win
 		{
 			class Keyboard : public IKeyboard
 			{

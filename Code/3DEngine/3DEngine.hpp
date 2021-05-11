@@ -18,11 +18,10 @@
 #define LUNA_3DENGINE_API 
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
-		LUNA_3DENGINE_API RV init();
 		LUNA_3DENGINE_API RP<IMesh> new_mesh();
 		LUNA_3DENGINE_API RP<IMaterial> new_material();
 		LUNA_3DENGINE_API RP<IModel> new_model();

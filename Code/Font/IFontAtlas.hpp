@@ -5,14 +5,14 @@
 * @date 2019/10/5
 */
 #pragma once
-#include <Base/IObject.hpp>
-#include <Base/Math.hpp>
+#include <Core/IObject.hpp>
+#include <Runtime/Math.hpp>
 #include "IFontFile.hpp"
 #include <Image/IImage.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace font
+	namespace Font
 	{
 		struct FontAtlasChar
 		{
@@ -31,10 +31,10 @@ namespace luna
 			Float2U pos_top_left;
 			//! The unscaled width from this character's origin point to next character's origin point.
 			//! This is used for measuring in layout, not for sampling the atlas image.
-			float32 advance_width;
+			f32 advance_width;
 			//! The unscaled width between the x axis of the origin point to the x of the leftest pixel.
 			//! This is used for measuring in layout, not for sampling the atlas image.
-			float32 left_side_bearing;
+			f32 left_side_bearing;
 
 			// -------------------------- Rendering UV rect for the character --------------------------
 
@@ -50,9 +50,9 @@ namespace luna
 		struct FontAtlasRange
 		{
 			//! The codepoint of the first character in the range.
-			uint32 start_codepoint;
+			u32 start_codepoint;
 			//! The number of characters in the range.
-			uint32 num_chars;
+			u32 num_chars;
 		};
 
 		//! @interface IFontAtlas
@@ -67,18 +67,18 @@ namespace luna
 			virtual IFontFile* get_font_file() = 0;
 
 			//! Gets the index of the font in the font file that this font atlas is rendered.
-			virtual uint32 get_font_index() = 0;
+			virtual u32 get_font_index() = 0;
 
 			//! Sets the font file and index. 
 			//! Call `render` after this to apply changes to the bound bitmap.
-			virtual void set_font(IFontFile* fontfile, uint32 font_index) = 0;
+			virtual void set_font(IFontFile* fontfile, u32 font_index) = 0;
 
 			//! Gets the height of the font in the atlas.
-			virtual float32 get_font_height() = 0;
+			virtual f32 get_font_height() = 0;
 
 			//! Sets the height of the font in the atlas.
 			//! Call `render` after this to apply changes to the bound bitmap.
-			virtual void set_font_height(float32 font_height) = 0;
+			virtual void set_font_height(f32 font_height) = 0;
 
 			//! Gets the font scale factor. 
 			//! The scale factor is used for rendering fonts in High-DPI monitor, where the metrics size
@@ -87,16 +87,16 @@ namespace luna
 			//! size on the font image will be 18x27 pixels, but the character still gets 12x18 sizes when 
 			//! you measuring the character to arrange them on screen.
 			//! The default scale factor is 1.0f.
-			virtual float32 get_scale_factor() = 0;
+			virtual f32 get_scale_factor() = 0;
 			
 			//! Sets the font scale factor.
 			//! Call `render` after this to apply changes to the bound bitmap.
-			virtual void set_scale_factor(float32 scale_factor) = 0;
+			virtual void set_scale_factor(f32 scale_factor) = 0;
 
 			//! Adds all character glyphs in the specified range into the font atlas. The font atlas
 			//! removes duplicated glyphs automatically.
 			//! Call `render` after this to apply changes to the bound bitmap.
-			virtual void add_glyph_ranges(uint32 num_ranges, const FontAtlasRange* ranges) = 0;
+			virtual void add_glyph_ranges(u32 num_ranges, const FontAtlasRange* ranges) = 0;
 
 			//! Adds all character glyphs in the provided UTF-8 string into the font atlas. The font 
 			//! atlas removes duplicated glyphs automatically.
@@ -107,12 +107,12 @@ namespace luna
 			//! Same as `add_glyphs_from_string`, but takes a non-null-terminated string as parameter.
 			//! @param[in] `str` The string to add.
 			//! @param[in] `len` The length of the string to scan, which is the number of `char`s in the string.
-			virtual void add_glyphs_from_lstring(const char* str, size_t len) = 0;
+			virtual void add_glyphs_from_lstring(const char* str, usize len) = 0;
 
 			//! Removes all glyphs in the specified range from the font atlas. The font atlas
 			//! ignores glyphs that do not exist in the atlas automatically.
 			//! Call `render` after this to apply changes to the bound bitmap.
-			virtual void remove_glyph_ranges(uint32 num_ranges, const FontAtlasRange* ranges) = 0;
+			virtual void remove_glyph_ranges(u32 num_ranges, const FontAtlasRange* ranges) = 0;
 
 			//! Removes all glyphs in the provided UTF-8 string from the font atlas. The font atlas
 			//! ignores glyphs that do not exist in the atlas automatically.
@@ -122,7 +122,7 @@ namespace luna
 			//! Same as `remove_glyphs_from_string`, but accepts a non-null-terminated string as parameter.
 			//! @param[in] `str` The string to remove.
 			//! @param[in] `len` The length of the string to scan, which is the number of `char`s in the string.
-			virtual void remove_glyphs_from_lstring(const char* str, size_t len) = 0;
+			virtual void remove_glyphs_from_lstring(const char* str, usize len) = 0;
 
 			//! Checks if any changes have been made to the font parameters or glyphs in the atlas and
 			//! the atlas needs to be rendered again.
@@ -140,7 +140,7 @@ namespace luna
 			//! Gets the generated font atlas image.
 			//! The returned image will only have one subimage, which is the rendered texture.
 			//! This call returns `nullptr` if the image has been discarded.
-			virtual image::IImage* get_rendered_image() = 0;
+			virtual Image::IImage* get_rendered_image() = 0;
 
 			//! Discards the generated font atlas image. `is_dirty` returns `true` after this call.
 			virtual void discard_rendered_image() = 0;
@@ -151,7 +151,7 @@ namespace luna
 			//! line_gap is the spacing between one row's descent and the next row's ascent...
 			//! so you should advance the vertical position by "*ascent - *descent + *line_gap"
 			//!   Unlike those in `IFontFile`, these values are expressed in SCALED coordinates.
-			virtual void get_vmetrics(float32* ascent, float32* descent, float32* line_gap) = 0;
+			virtual void get_vmetrics(f32* ascent, f32* descent, f32* line_gap) = 0;
 
 			//! Checks if the specified character is contained by this font atlas.
 			virtual bool contain_char(codepoint_t char_codepoint) = 0;
@@ -159,7 +159,7 @@ namespace luna
 			//! Get an additional amount to add to the 'advance' value between ch1 and ch2.
 			//! Unlike in `IFontFile`, the returned value has been scaled and it accepts codepoint_t instead
 			//! of glyph_t.
-			virtual float32 get_kern_advance(codepoint_t ch1, codepoint_t ch2) = 0;
+			virtual f32 get_kern_advance(codepoint_t ch1, codepoint_t ch2) = 0;
 
 			//! Gets the character rect information used to draw character. The rect information includes the size of the 
 			//! character and the texture coordinate rect to index in the font texture.
@@ -178,7 +178,7 @@ namespace luna
 			//! @param[in] num_chars Number of UTF-16 characters to use in the `text`, if this is `0`, then the full text will be 
 			//! used (the text stream until null terminator).
 			//! @param[in] spacing An extra spacing value to add between chars.
-			virtual float32 get_line_width(const char* text, uint32 num_chars = 0, float32 spacing = 0.0f) = 0;
+			virtual f32 get_line_width(const char* text, u32 num_chars = 0, f32 spacing = 0.0f) = 0;
 
 			//! Gets the height of the region to render the text when the maximum width is specified.
 			//! @param[in] region_width The fixed width of the region.
@@ -189,7 +189,7 @@ namespace luna
 			//! used (the text stream until null terminator).
 			//! @param[in] spacing_x An extra spacing value to add between characters.
 			//! @param[in] spacing_y An extra spacing value to add between lines.
-			virtual void get_draw_region(float32 region_max_width, const char* text, float32* width, float32* height, uint32 num_chars = 0, float32 spacing_x = 0.0f, float32 spacing_y = 0.0f) = 0;
+			virtual void get_draw_region(f32 region_max_width, const char* text, f32* width, f32* height, u32 num_chars = 0, f32 spacing_x = 0.0f, f32 spacing_y = 0.0f) = 0;
 		};
 	}
 }

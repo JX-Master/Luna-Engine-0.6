@@ -14,12 +14,10 @@
 #define LUNA_SCENE_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
-		LUNA_SCENE_API void init();
-
 		//! Registers a new component type to the manager. 
 		//! The manager keeps a strong reference to the component type.
 		//! @param[in] component_type The component type object to register.

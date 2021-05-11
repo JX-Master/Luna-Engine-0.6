@@ -5,9 +5,9 @@
 * @date 2019/12/30
 */
 #pragma once
-#include "IVariant.hpp"
+#include "Variant.hpp"
 
-namespace luna
+namespace Luna
 {
 	//! @interface ISerializable
 	//! Represents a object that can be serialized into a variant object.
@@ -16,9 +16,9 @@ namespace luna
 		luiid("{3e9c2eb4-15b1-4541-b23d-ea70426a44ef}");
 
 		//! Serializes the data in the object into one variant object.
-		virtual RP<IVariant> serialize() = 0;
+		virtual R<Variant> serialize() = 0;
 
 		//! Deserializes the data from the data object.
-		virtual RV deserialize(IVariant* obj) = 0;
+		virtual RV deserialize(const Variant& obj) = 0;
 	};
 }

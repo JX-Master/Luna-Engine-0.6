@@ -6,13 +6,13 @@
 */
 #include "TransformComponentEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
-		void TransformComponentEditor::on_render(imgui::IContext* ctx)
+		void TransformComponentEditor::on_render(ImGui::IContext* ctx)
 		{
-			P<e3d::ITransform> t = m_component.lock();
+			P<E3D::ITransform> t = m_component.lock();
 
 			auto position = t->local_position();
 			ctx->drag_float3("Position", position.m, 0.01f);

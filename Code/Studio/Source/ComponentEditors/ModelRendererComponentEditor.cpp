@@ -6,16 +6,16 @@
 */
 #include "ModelRendererComponentEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
-		void ModelRendererComponentEditor::on_render(imgui::IContext* ctx)
+		void ModelRendererComponentEditor::on_render(ImGui::IContext* ctx)
 		{
-			auto c = m_component.lock().as<e3d::IModelRenderer>();
+			auto c = m_component.lock().as<E3D::IModelRenderer>();
 
-			auto new_model_asset = asset::fetch_asset(new_path(m_model_name->c_str()));
-			if (succeeded(new_model_asset) && (new_model_asset.get()->meta()->type() == intern_name("Model")))
+			auto new_model_asset = Asset::fetch_asset(Path(m_model_name.c_str()));
+			if (succeeded(new_model_asset) && (new_model_asset.get()->meta()->type() == Name("Model")))
 			{
 				c->set_model(new_model_asset.get()->meta()->guid());
 			}
@@ -23,11 +23,11 @@ namespace luna
 			auto model = c->model().lock();
 			if (!m_editing && model)
 			{
-				m_model_name->assign(model->meta()->meta_path()->encode()->c_str());
+				m_model_name.assign(model->meta()->meta_path().encode().c_str());
 			}
 			else
 			{
-				m_model_name->clear();
+				m_model_name.clear();
 			}
 
 			ctx->input_text("Model Asset", m_model_name);

@@ -10,11 +10,11 @@
 #ifdef LUNA_PLATFORM_WINDOWS
 
 #include "GraphicSystemWindows.hpp"
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			class GraphicAdapter : public IGraphicAdapter
 			{
@@ -26,8 +26,7 @@ namespace luna
 				GraphicAdapterDesc m_desc;
 				ComPtr<IDXGIAdapter1> m_adapter;
 
-				GraphicAdapter() :
-					luibind(get_module_allocator()) {}
+				GraphicAdapter() {}
 
 				void init(IDXGIAdapter1* adapter);
 				virtual GraphicAdapterDesc desc() override

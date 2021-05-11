@@ -6,13 +6,13 @@
 */
 #pragma once
 #include <Scene/Scene.hpp>
-#include <Base/Math.hpp>
+#include <Runtime/Math.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
-		struct ITransform : public scene::IComponent
+		struct ITransform : public Scene::IComponent
 		{
 		public:
 			luiid("{5068efe9-4307-44db-ab73-cd1780ccdd55}");

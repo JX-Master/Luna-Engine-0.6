@@ -6,38 +6,39 @@
 */
 #include "AssetSystem.hpp"
 #include "AssetMeta.hpp"
-namespace luna
+#include <Runtime/Module.hpp>
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
-		P<IName> g_name_type;
-		P<IName> g_name_guid;
-		P<IName> g_name_data_path;
-		P<IName> g_name_attachments;
-		P<IName> g_name_dependencies;
-		Unconstructed<HashMap<P<IName>, P<IAssetType>>> g_types;
-		P<IReadWriteLock> g_type_lock;
+		Name g_name_type;
+		Name g_name_guid;
+		Name g_name_data_path;
+		Name g_name_attachments;
+		Name g_name_dependencies;
+		Unconstructed<HashMap<Name, P<IAssetType>>> g_types;
+		P<IMutex> g_type_lock;
 		Unconstructed<HashMap<Guid, P<IAsset>>> g_assets;
-		Unconstructed<HashMap<P<IPath>, Guid>> g_path_mapping;
+		Unconstructed<HashMap<Path, Guid>> g_path_mapping;
 		P<IMutex> g_lock;
 		P<IDispatchQueue> g_dispatch;
 		Unconstructed<HashMap<Guid, Vector<Guid>>> m_unresolved;
 
-		LUNA_EXPORT void init()
+		RV init()
 		{
-			g_assets.construct(get_module_allocator());
-			g_types.construct(get_module_allocator());
-			g_path_mapping.construct(get_module_allocator());
-			m_unresolved.construct(get_module_allocator());
+			g_assets.construct();
+			g_types.construct();
+			g_path_mapping.construct();
+			m_unresolved.construct();
 			g_lock = new_mutex();
-			g_type_lock = new_read_write_lock();
+			g_type_lock = new_mutex();
 			g_dispatch = new_dispatch_queue(1);
-			g_name_type = intern_name("type");
-			g_name_attachments = intern_name("attachments");
-			g_name_dependencies = intern_name("dependencies");
-			g_name_guid = intern_name("guid");
-			g_name_data_path = intern_name("data_path");
-			add_module("Asset", deinit);
+			g_name_type = u8"type";
+			g_name_attachments = u8"attachments";
+			g_name_dependencies = u8"dependencies";
+			g_name_guid = u8"guid";
+			g_name_data_path = u8"data_path";
+			return RV();
 		}
 
 		void deinit()
@@ -56,6 +57,8 @@ namespace luna
 			g_assets.destruct();
 		}
 
+		StaticRegisterModule m("Asset", "Core", init, deinit);
+
 		void add_dependency(AssetMeta* from, const Guid& to)
 		{
 			MutexGuard g(g_lock);
@@ -66,7 +69,7 @@ namespace luna
 				auto iter = m_unresolved.get().find(to);
 				if (iter == m_unresolved.get().end())
 				{
-					Pair<Guid, Vector<Guid>> p(move(to), move(Vector<Guid>(get_module_allocator())));
+					Pair<Guid, Vector<Guid>> p(move(to), move(Vector<Guid>()));
 					iter = m_unresolved.get().insert(move(p)).first;
 				}
 				iter->second.push_back(from->guid());
@@ -122,24 +125,24 @@ namespace luna
 			return true;
 		}
 
-		RP<IVariant> load_asset_from_file(IPath* path, bool load_meta)
+		R<Variant> load_asset_from_file(const Path& path, bool load_meta)
 		{
-			P<IVariant> r;
+			Variant r;
 			lutry
 			{
-				auto p = new_path();
-				p->assign(path);
+				auto p = path;
 				P<IFile> f;
 				bool is_binary = false;
 				if (load_meta)
 				{
-					const char ext[] = ".meta.la";
-					auto filename = p->node(p->count_nodes() - 1);
-					char* filename_ext = (char*)alloca(sizeof(char) * (filename->size() + 9));
-					memcpy(filename_ext, filename->c_str(), filename->size() * sizeof(char));
-					memcpy(filename_ext + filename->size(), ext, 9 * sizeof(char));
-					auto filename_name = intern_name(filename_ext);
-					p->set_node(p->count_nodes() - 1, filename_name);
+					const c8 ext[] = ".meta.la";
+					auto filename = p[p.size() - 1];
+					auto filename_sz = strlen(filename.c_str());
+					c8* filename_ext = (c8*)alloca(sizeof(c8) * (filename_sz + 9));
+					memcpy(filename_ext, filename.c_str(), filename_sz * sizeof(c8));
+					memcpy(filename_ext + filename_sz, ext, 9 * sizeof(c8));
+					auto filename_name = Name(filename_ext);
+					p[p.size() - 1] = filename_name;
 					auto rf = open_file(p, EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing);
 					if (succeeded(rf))
 					{
@@ -148,28 +151,29 @@ namespace luna
 					else
 					{
 						is_binary = true;
-						const char ext2[] = ".meta.lb";
-						memcpy(filename_ext, filename->c_str(), filename->size() * sizeof(char));
-						memcpy(filename_ext + filename->size(), ext2, 9 * sizeof(char));
-						filename_name = intern_name(filename_ext);
-						p->set_node(p->count_nodes() - 1, filename_name);
+						const c8 ext2[] = ".meta.lb";
+						memcpy(filename_ext, filename.c_str(), filename_sz * sizeof(c8));
+						memcpy(filename_ext + filename_sz, ext2, 9 * sizeof(c8));
+						filename_name = Name(filename_ext);
+						p[p.size() - 1] = filename_name;
 						rf = open_file(p, EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing);
 						if (failed(rf))
 						{
-							return rf.result();
+							return rf.errcode();
 						}
 						f = rf.get();
 					}
 				}
 				else
 				{
-					const char ext[] = ".data.la";
-					auto filename = p->node(p->count_nodes() - 1);
-					char* filename_ext = (char*)alloca(sizeof(char) * (filename->size() + 9));
-					memcpy(filename_ext, filename->c_str(), filename->size() * sizeof(char));
-					memcpy(filename_ext + filename->size(), ext, 9 * sizeof(char));
-					auto filename_name = intern_name(filename_ext);
-					p->set_node(p->count_nodes() - 1, filename_name);
+					const c8 ext[] = ".data.la";
+					auto filename = p[p.size() - 1];
+					auto filename_sz = strlen(filename.c_str());
+					char* filename_ext = (c8*)alloca(sizeof(c8) * (filename_sz + 9));
+					memcpy(filename_ext, filename.c_str(), filename_sz * sizeof(c8));
+					memcpy(filename_ext + filename_sz, ext, 9 * sizeof(c8));
+					auto filename_name = Name(filename_ext);
+					p[p.size() - 1] = filename_name;
 					auto rf = open_file(p, EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing);
 					if (succeeded(rf))
 					{
@@ -178,15 +182,15 @@ namespace luna
 					else
 					{
 						is_binary = true;
-						const char ext2[] = ".data.lb";
-						memcpy(filename_ext, filename->c_str(), filename->size() * sizeof(char));
-						memcpy(filename_ext + filename->size(), ext2, 9 * sizeof(char));
-						filename_name = intern_name(filename_ext);
-						p->set_node(p->count_nodes() - 1, filename_name);
+						const c8 ext2[] = ".data.lb";
+						memcpy(filename_ext, filename.c_str(), filename_sz * sizeof(c8));
+						memcpy(filename_ext + filename_sz, ext2, 9 * sizeof(c8));
+						filename_name = Name(filename_ext);
+						p[p.size() - 1] = filename_name;
 						rf = open_file(p, EFileOpenFlag::read | EFileOpenFlag::user_buffering, EFileCreationMode::open_existing);
 						if (failed(rf))
 						{
-							return rf.result();
+							return rf.errcode();
 						}
 						f = rf.get();
 					}
@@ -212,7 +216,7 @@ namespace luna
 			g_assets.get().insert(Pair<Guid, P<IAsset>>(meta->m_guid, ass));
 
 			// Inserts the path to the registry if not nullptr.
-			if (ass->meta()->meta_path())
+			if (!(ass->meta()->meta_path().empty()))
 			{
 				g_path_mapping.get().insert_or_assign(ass->meta()->meta_path(), ass->meta()->guid());
 			}
@@ -228,46 +232,45 @@ namespace luna
 
 		RV register_asset_type(IAssetType* type_obj)
 		{
-			luassert_usr(type_obj);
-			WriteGuard g(g_type_lock);
+			lucheck(type_obj);
+			MutexGuard g(g_type_lock);
 			auto name = type_obj->type_name();
 			auto iter = g_types.get().find(name);
 			if (iter != g_types.get().end())
 			{
-				return e_item_already_exists;
+				return BasicError::already_exists();
 			}
-			g_types.get().insert(Pair<P<IName>, WP<IAssetType>>(name, type_obj));
-			return s_ok;
+			g_types.get().insert(Pair<Name, WP<IAssetType>>(name, type_obj));
+			return RV();
 		}
 
-		RV unregister_asset_type(IName* type_name)
+		RV unregister_asset_type(const Name& type_name)
 		{
-			luassert_usr(type_name);
-			WriteGuard g(g_type_lock);
+			lucheck(type_name);
+			MutexGuard g(g_type_lock);
 			auto iter = g_types.get().find(type_name);
 			if (iter == g_types.get().end())
 			{
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 			g_types.get().erase(iter);
-			return s_ok;
+			return RV();
 		}
 
-		RP<IAssetType> get_asset_type(IName* type_name)
+		RP<IAssetType> get_asset_type(const Name& type_name)
 		{
-			luassert_usr(type_name);
-			WriteGuard g(g_type_lock);
+			lucheck(type_name);
+			MutexGuard g(g_type_lock);
 			auto iter = g_types.get().find(type_name);
 			if (iter == g_types.get().end())
 			{
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 			return iter->second;
 		}
 
-		RP<IAsset> load_asset_meta(IPath* meta_path)
+		RP<IAsset> load_asset_meta(const Path& meta_path)
 		{
-			luassert_usr(meta_path);
 			P<IAsset> ass;
 			lutry
 			{
@@ -276,68 +279,62 @@ namespace luna
 				lulet(meta_var, load_asset_from_file(meta_path, true));
 				// Parse data object to fetch meta information.
 				Guid guid;
-				lulet(guid_field, meta_var->field(0, g_name_guid));
-				lulet(u64_buf, guid_field->check_u64_buf());
+				auto guid_field = meta_var.field(0, g_name_guid);
+				lulet(u64_buf, guid_field.check_u64_buf());
 				guid.low = u64_buf[0];
 				guid.high = u64_buf[1];
 				auto test_ass = fetch_asset(guid);
 				if (succeeded(test_ass))
 				{
-					return RP<IAsset>(test_ass.get(), s_already_done);
+					return test_ass.get();
 				}
 
-				P<AssetMeta> meta = box_ptr(new_obj<AssetMeta>(get_module_allocator()));
-				if (!meta)
-				{
-					return e_bad_memory_alloc;
-				}
+				P<AssetMeta> meta = newobj<AssetMeta>();
 				
 				meta->m_guid = guid;
-				meta->m_meta_path = meta_path->clone();
-				meta->m_error = new_err();
+				meta->m_meta_path = meta_path;
 
 				// Load type.
-				lulet(type_field, meta_var->field(0, g_name_type));
-				lulet(type_name, type_field->check_name());
+				lulet(type_name, meta_var.field(0, g_name_type).check_name());
 				meta->m_type = type_name;
 
 				// Load data path.
-				auto data_path_field = meta_var->field(0, g_name_data_path);
-				if (succeeded(data_path_field) && (data_path_field.get()->type() == EVariantType::path))
+				auto data_path_field = meta_var.field(0, g_name_data_path);
+				if (data_path_field.type() == EVariantType::path)
 				{
-					auto data_path = data_path_field.get()->path();
-					if ((data_path->flags() & EPathFlag::absolute) == EPathFlag::none)
+					auto& data_path = data_path_field.to_path();
+					if ((data_path.flags() & EPathFlag::absolute) == EPathFlag::none)
 					{
-						auto abs_data_path = new_path();
-						abs_data_path->assign(meta->m_meta_path);
-						abs_data_path->append(data_path);
+						auto abs_data_path = meta->m_meta_path;
+						abs_data_path.append(data_path);
 						meta->m_data_path = abs_data_path;
 					}
 					else
 					{
-						meta->m_data_path = data_path->clone();
+						meta->m_data_path = data_path;
 					}
 				}
 				else
 				{
 					// Same as meta path.
-					meta->m_data_path = meta->m_meta_path->clone();
+					meta->m_data_path = meta->m_meta_path;
 				}
 				
 				// Load dependencies.
-				auto dependencies_field = meta_var->field(0, g_name_dependencies);
-				if (succeeded(dependencies_field))
+				auto& dependencies_field = meta_var.field(0, g_name_dependencies);
+				if (dependencies_field.type() != EVariantType::null)
 				{
-					size_t num_dependencies = dependencies_field.get()->length(2);
-					lulet(dependencies_buf, dependencies_field.get()->check_u64_buf());
-					for (size_t i = 0; i < num_dependencies; ++i)
+					usize num_dependencies = dependencies_field.length(2);
+					lulet(dependencies_buf, dependencies_field.check_u64_buf());
+					for (usize i = 0; i < num_dependencies; ++i)
 					{
 						Guid guid2;
-						guid2.low = dependencies_buf[dependencies_field.get()->index(0, i)];
-						guid2.high = dependencies_buf[dependencies_field.get()->index(1, i)];
+						guid2.low = dependencies_buf[dependencies_field.index(0, i)];
+						guid2.high = dependencies_buf[dependencies_field.index(1, i)];
 						meta->internal_add_dependency(guid2);
 					}
 				}
+				
 
 				// Create asset object.
 				lulet(mgr, route_mgr(meta->m_type));
@@ -363,9 +360,9 @@ namespace luna
 			return ass;
 		}
 
-		RP<IAsset> new_asset(IName* asset_type, const Guid* guid)
+		RP<IAsset> new_asset(const Name& asset_type, const Guid* guid)
 		{
-			luassert_usr(asset_type);
+			lucheck(asset_type);
 			P<IAsset> ass;
 			lutry
 			{
@@ -374,15 +371,11 @@ namespace luna
 					auto fr = fetch_asset(*guid);
 					if (succeeded(fr))
 					{
-						return RP<IAsset>::success(fr.get(), s_already_done);
+						return fr.get();
 					}
 				}
 				MutexGuard g(g_lock);
-				P<AssetMeta> meta = box_ptr(new_obj<AssetMeta>(get_module_allocator()));
-				if (!meta)
-				{
-					return e_bad_memory_alloc;
-				}
+				P<AssetMeta> meta = newobj<AssetMeta>();
 				if (guid)
 				{
 					meta->m_guid = *guid;
@@ -429,12 +422,12 @@ namespace luna
 			}
 			else
 			{
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 			return ass;
 		}
 
-		RP<IAsset> fetch_asset(IPath* meta_path)
+		RP<IAsset> fetch_asset(const Path& meta_path)
 		{
 			MutexGuard g(g_lock);
 			auto iter = g_path_mapping.get().find(meta_path);
@@ -444,7 +437,7 @@ namespace luna
 			}
 			else
 			{
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 		}
 
@@ -455,7 +448,7 @@ namespace luna
 			auto iter = g_assets.get().find(asset_id);
 			if (iter == g_assets.get().end())
 			{
-				return e_item_not_exist;
+				return BasicError::not_found();
 			}
 			P<IAsset> ass = iter->second;
 			
@@ -496,7 +489,7 @@ namespace luna
 			{
 				g_path_mapping.get().erase(piter);
 			}
-			return s_ok;
+			return RV();
 		}
 	}
 }

@@ -7,7 +7,7 @@
 #pragma once
 #include "ISceneComponentEditor.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -16,11 +16,11 @@ namespace luna
 			luiid("{b3aef80d-c4ed-4799-b059-f73472fc93d8}");
 
 			//! Gets the type of the component this editor plugin manages.
-			virtual IName* type() = 0;
+			virtual Name type() = 0;
 
 			//! Creates a new instance of the editor for the specified component.
 			//! The editor should keep a weak reference to the component.
-			virtual P<ISceneComponentEditor> new_editor(scene::ISceneComponent* component) = 0;
+			virtual P<ISceneComponentEditor> new_editor(Scene::ISceneComponent* component) = 0;
 		};
 	}
 }

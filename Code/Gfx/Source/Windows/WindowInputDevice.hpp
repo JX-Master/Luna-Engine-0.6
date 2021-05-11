@@ -8,31 +8,33 @@
 
 #ifdef LUNA_PLATFORM_WINDOWS
 
-namespace luna
+#include <Runtime/Vector.hpp>
+#include <Core/Interface.hpp>
+
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			class WindowInputDevice : public IWindowInputDevice
 			{
 			public:
 				lucid("{10f9e666-98d2-4aa1-bd1b-ccbd494647e3}");
-				luiimpl_static(WindowInputDevice, IWindowInputDevice, input::IInputDevice, IObject);
+				luiimpl_static(WindowInputDevice, IWindowInputDevice, Input::IInputDevice, IObject);
 
 				P<IMutex> m_mtx;
 				Vector<WP<IWindowEventListener>> m_listeners;
 
-				WindowInputDevice(IAllocator* alloc) :
-					m_listeners(alloc) {}
+				WindowInputDevice() {}
 
 				void remove_invalid_listeners();
 
 				bool dispatch_event(IWindow* window, EWindowEvent e, void* data);
 
-				virtual input::EInputDeviceFlag flags() override
+				virtual Input::EInputDeviceFlag flags() override
 				{
-					return input::EInputDeviceFlag::buffered;
+					return Input::EInputDeviceFlag::buffered;
 				}
 				virtual void update() override;
 				virtual void add_listener(IWindowEventListener* listener) override;

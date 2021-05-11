@@ -11,13 +11,13 @@
 
 #include "CommandBuffer.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
-			result_t CommandQueue::init(const CommandQueueDesc& desc)
+			RV CommandQueue::init(const CommandQueueDesc& desc)
 			{
 				m_desc = desc;
 				ID3D12Device* dev = m_device->m_device.Get();
@@ -38,24 +38,24 @@ namespace luna
 				d.Type = encode_command_list_type(desc.type);
 				if (FAILED(dev->CreateCommandQueue(&d, IID_PPV_ARGS(&m_queue))))
 				{
-					return e_failure;
+					return BasicError::failure();
 				}
 				m_mtx = new_mutex();
-				return s_ok;
+				return RV();
 			}
 
 			RV CommandQueue::wait_command_buffer(ICommandBuffer* command_buffer)
 			{
 				CommandBuffer* buffer = static_cast<CommandBuffer*>(command_buffer);
 				HRESULT hr = m_queue->Wait(buffer->m_fence.Get(), buffer->m_wait_value);
-				return SUCCEEDED(hr) ? s_ok : e_bad_system_call;
+				return SUCCEEDED(hr) ? RV() : BasicError::bad_system_call();
 			}
 			RP<ICommandBuffer> CommandQueue::new_command_buffer()
 			{
-				P<CommandBuffer> buffer = box_ptr(new_obj<CommandBuffer>());
+				P<CommandBuffer> buffer = newobj<CommandBuffer>();
 				if (!buffer)
 				{
-					return e_bad_memory_alloc;
+					return BasicError::bad_memory_alloc();
 				}
 				lutry
 				{

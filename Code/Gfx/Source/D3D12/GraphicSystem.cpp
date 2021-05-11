@@ -15,44 +15,46 @@
 #include "SwapChain.hpp"
 #include "../Windows/Window.hpp"
 #include <dxgi1_4.h>
+#include <Runtime/Module.hpp>
 #pragma comment(lib, "d3d12.lib")
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 
 			RV init()
 			{
-				result_t r = win::init_graphic_system_windows();
-				if (failed(r))
+				RV r = Win::init_graphic_system_windows();
+				if (!r.valid())
 				{
-					return r;
+					return r.errcode();
 				}
 #ifdef LUNA_DEBUG_LEVEL_DEBUG
 				ComPtr<ID3D12Debug> debug;
 				D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 				debug->EnableDebugLayer();
 #endif
-				return s_ok;
+				return RV();
 			}
 		}
 		void deinit()
 		{
-			win::deinit_graphic_system_windows();
+			Win::deinit_graphic_system_windows();
 		}
 
-		LUNA_GFX_API RV init()
+		RV init()
 		{
-			auto r = d3d12::init();
-			if (failed(r))
+			auto r = D3D12::init();
+			if (!r.valid())
 			{
-				return r;
+				return r.errcode();
 			}
-			add_module("Gfx", deinit);
-			return s_ok;
+			return RV();
 		}
+
+		StaticRegisterModule m("Gfx", "Core;Input", init, deinit);
 
 		LUNA_GFX_API RP<IGraphicDevice> new_device(IGraphicAdapter* adapter)
 		{
@@ -60,7 +62,7 @@ namespace luna
 			IDXGIAdapter* ada;
 			if (adapter)
 			{
-				ada = static_cast<win::GraphicAdapter*>(adapter)->m_adapter.Get();
+				ada = static_cast<Win::GraphicAdapter*>(adapter)->m_adapter.Get();
 			}
 			else
 			{
@@ -71,29 +73,25 @@ namespace luna
 				// try warp device.
 				ComPtr<IDXGIAdapter> warp;
 				ComPtr<IDXGIFactory4> fac;
-				win::m_dxgi.As(&fac);
+				Win::m_dxgi.As(&fac);
 				fac->EnumWarpAdapter(IID_PPV_ARGS(&warp));
 
 				if (FAILED(D3D12CreateDevice(warp.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&dev))))
 				{
-					set_err(e_bad_system_call, "IGraphicSystem::new_device - Failed to create D3D12 Device.");
-					return e_user_failure;
+					get_error_object() = Error(BasicError::bad_system_call(), "IGraphicSystem::new_device - Failed to create D3D12 Device.");
+					return BasicError::error_object();
 				}
 			}
-			d3d12::GraphicDevice* device = new_obj<d3d12::GraphicDevice>();
+			P<D3D12::GraphicDevice> device = newobj<D3D12::GraphicDevice>();
 			device->init(dev.Get());
-			return box_ptr(device);
+			return device;
 		}
 		LUNA_GFX_API RP<ISwapChain> new_swap_chain(ICommandQueue* queue, IWindow* window, const SwapChainDesc& desc)
 		{
-			P<d3d12::SwapChain> r = box_ptr(new_obj<d3d12::SwapChain>());
-			if (!r)
-			{
-				return e_bad_memory_alloc;
-			}
+			P<D3D12::SwapChain> r = newobj<D3D12::SwapChain>();
 			lutry
 			{
-				luexp(r->init(static_cast<win::Window*>(window), static_cast<d3d12::CommandQueue*>(queue), desc));
+				luexp(r->init(static_cast<Win::Window*>(window), static_cast<D3D12::CommandQueue*>(queue), desc));
 			}
 			lucatchret;
 			return r;

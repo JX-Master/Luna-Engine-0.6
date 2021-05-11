@@ -1,0 +1,16 @@
+namespace MyModule
+{
+    /*
+        Sample Multi-line comment.
+    */
+    struct TestClass
+    {
+        // Sample single-line comment.
+        [private]
+        let mut t = tuple(12, -125, +237, 53_395, 0b0010_1000, +0o375, -0xF_F_2_e_9_c_3_B, // Integers.
+            3.0, -12.25, +3.75, 1.25e2, 2.5e+2, -12.5E-1, 0xF.0p2, -0x3A.2Ep-1,            // Floating-point literals.
+            'a', '我', 'ラ', '\0', '\\', '\t', '\n', '\r', '\"', '\'', '\u{0090}',         // Character literals.
+            "2021/4/22.\n 辛丑年三月十一。",
+            true, false, (u8&?)null);
+    }
+}

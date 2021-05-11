@@ -7,7 +7,7 @@
 #pragma once
 #include "StudioHeader.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -17,7 +17,7 @@ namespace luna
 		{
 			luiid("{410f7868-38b5-4e3f-b291-8e58d2cb7372}");
 
-			virtual void on_render(imgui::IContext* ctx) = 0;
+			virtual void on_render(ImGui::IContext* ctx) = 0;
 			virtual bool closed() = 0;
 		};
 	}

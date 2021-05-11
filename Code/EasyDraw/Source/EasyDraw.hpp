@@ -6,14 +6,14 @@
 */
 #pragma once
 #include "EasyDrawHeader.hpp"
-#include <Base/Interface.hpp>
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		extern P<IBlob> g_vs;
-		extern P<IBlob> g_ps;
-		extern P<IBlob> g_ps_no_tex;
+		extern Blob g_vs;
+		extern Blob g_ps;
+		extern Blob g_ps_no_tex;
 	}
 }

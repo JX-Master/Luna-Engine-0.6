@@ -7,23 +7,19 @@
 #include "ObjLoaderHeader.hpp"
 #include "ObjFile.hpp"
 #include <TinyObjLoader/tiny_obj_loader.h>
+#include <Runtime/Module.hpp>
 
-namespace luna
+namespace Luna
 {
 	namespace obj_loader
 	{
 		static_assert(sizeof(Index) == sizeof(tinyobj::index_t), "Index size does not match");
 
-		void deinit() {}
-
-		LUNA_OBJ_LOADER_API void init()
-		{
-			add_module("ObjLoader", deinit);
-		}
+		StaticRegisterModule m("ObjLoader", "Core", nullptr, nullptr);
 
 		void copy_shape(Shape& dest, const tinyobj::shape_t& src)
 		{
-			dest.name = intern_name(src.name.c_str());
+			dest.name = Name(src.name.c_str());
 			
 			// Copy mesh.
 			dest.mesh.indices.resize(src.mesh.indices.size());
@@ -34,17 +30,17 @@ namespace luna
 			dest.mesh.num_face_vertices.resize(src.mesh.num_face_vertices.size());
 			if (dest.mesh.num_face_vertices.size())
 			{
-				memcpy(&dest.mesh.num_face_vertices[0], &src.mesh.num_face_vertices[0], dest.mesh.num_face_vertices.size() * sizeof(uint8));
+				memcpy(&dest.mesh.num_face_vertices[0], &src.mesh.num_face_vertices[0], dest.mesh.num_face_vertices.size() * sizeof(u8));
 			}
 			dest.mesh.material_ids.resize(src.mesh.material_ids.size());
 			if (dest.mesh.material_ids.size())
 			{
-				memcpy(&dest.mesh.material_ids[0], &src.mesh.material_ids[0], dest.mesh.material_ids.size() * sizeof(int32));
+				memcpy(&dest.mesh.material_ids[0], &src.mesh.material_ids[0], dest.mesh.material_ids.size() * sizeof(i32));
 			}
 			dest.mesh.smoothing_group_ids.resize(src.mesh.smoothing_group_ids.size());
 			if (dest.mesh.smoothing_group_ids.size())
 			{
-				memcpy(&dest.mesh.smoothing_group_ids[0], &src.mesh.smoothing_group_ids[0], dest.mesh.smoothing_group_ids.size() * sizeof(int32));
+				memcpy(&dest.mesh.smoothing_group_ids[0], &src.mesh.smoothing_group_ids[0], dest.mesh.smoothing_group_ids.size() * sizeof(i32));
 			}
 
 			// Copy lines.
@@ -56,7 +52,7 @@ namespace luna
 			dest.lines.num_line_vertices.resize(src.lines.num_line_vertices.size());
 			if (dest.lines.num_line_vertices.size())
 			{
-				memcpy(&dest.lines.num_line_vertices[0], &src.lines.num_line_vertices[0], dest.lines.num_line_vertices.size() * sizeof(int32));
+				memcpy(&dest.lines.num_line_vertices[0], &src.lines.num_line_vertices[0], dest.lines.num_line_vertices.size() * sizeof(i32));
 			}
 
 			// Copy points.
@@ -82,13 +78,12 @@ namespace luna
 			{
 				if (!err.empty())
 				{
-					set_err(e_failure, err.c_str());
-					return e_user_failure;
+					return custom_error(BasicError::failure(), err.c_str());
 				}
-				return e_failure;
+				return BasicError::failure();
 			}
 
-			auto obj = box_ptr(new_obj<ObjFile>(get_module_allocator()));
+			auto obj = newobj<ObjFile>();
 
 			auto& attributes = obj->m_attributes;
 
@@ -117,7 +112,7 @@ namespace luna
 
 			// Copy shape information.
 			obj->m_shapes.resize(shapes.size());
-			for (size_t i = 0; i < shapes.size(); ++i)
+			for (usize i = 0; i < shapes.size(); ++i)
 			{
 				copy_shape(obj->m_shapes[i], shapes[i]);
 			}

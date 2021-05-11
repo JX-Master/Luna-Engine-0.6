@@ -7,9 +7,9 @@
 #pragma once
 #include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		struct IGraphicDevice;
 		//! @interface IGraphicDeviceChild

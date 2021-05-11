@@ -8,11 +8,11 @@
 #include "IGraphicDeviceChild.hpp"
 #include "GraphicDefines.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class EAttachmentLoadOp : uint32
+		enum class EAttachmentLoadOp : u32
 		{
 			//! The previous contents of the texture within the render area will be preserved.
 			load = 0,
@@ -23,7 +23,7 @@ namespace luna
 			dont_care = 2,
 		};
 
-		enum class EAttachmentStoreOp : uint32
+		enum class EAttachmentStoreOp : u32
 		{
 			//! Preserves the content of the texture after ending the render pass.
 			store = 0,
@@ -55,7 +55,7 @@ namespace luna
 		struct RenderPassDesc
 		{
 			//! Number of attachments (render targets) this render pass have. The number is 1-8.
-			uint32 num_attachments;
+			u32 num_attachments;
 			//! 8 color attachments.
 			AttachmentDesc attachments[8];
 			//! The format for depth stencil attachment.
@@ -69,18 +69,18 @@ namespace luna
 			//! The store operation for stencil attachment.
 			EAttachmentStoreOp stencil_store_op;
 			//! Specify the sample count, 1 if MSAA is not used.
-			uint32 sample_count;
+			u32 sample_count;
 			bool use_depth_stencil;
 
 			RenderPassDesc() = default;
 			RenderPassDesc(
-				initializer_list<AttachmentDesc> _attachments,
+				InitializerList<AttachmentDesc> _attachments,
 				EResourceFormat _depth_stencil_format,
 				EAttachmentLoadOp _depth_load_op,
 				EAttachmentStoreOp _depth_store_op,
 				EAttachmentLoadOp _stencil_load_op,
 				EAttachmentStoreOp _stencil_store_op,
-				uint32 _sample_count,
+				u32 _sample_count,
 				bool _use_depth_stencil
 			) :
 				depth_stencil_format(_depth_stencil_format),
@@ -91,8 +91,8 @@ namespace luna
 				sample_count(_sample_count),
 				use_depth_stencil(_use_depth_stencil)
 			{
-				num_attachments = min<uint32>((uint32)_attachments.size(), 8);
-				for (uint32 i = 0; i < num_attachments; ++i)
+				num_attachments = min<u32>((u32)_attachments.size(), 8);
+				for (u32 i = 0; i < num_attachments; ++i)
 				{
 					attachments[i] = *(_attachments.begin() + i);
 				}

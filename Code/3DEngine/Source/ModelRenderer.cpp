@@ -6,36 +6,36 @@
 */
 #include "ModelRenderer.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		Unconstructed<ModelRendererType> g_model_renderer_type;
-		RP<IVariant> ModelRenderer::serialize()
+		R<Variant> ModelRenderer::serialize()
 		{
-			auto var = new_var(EVariantType::table);
-			auto model = new_var1(EVariantType::u64, 2);
-			model->u64_buf()[0] = m_model.guid().high;
-			model->u64_buf()[1] = m_model.guid().low;
-			var->set_field(0, intern_name("model"), model);
+			auto var = Variant(EVariantType::table);
+			auto model = Variant(EVariantType::u64, 2);
+			model.to_u64_buf()[0] = m_model.guid().high;
+			model.to_u64_buf()[1] = m_model.guid().low;
+			var.set_field(0, Name("model"), model);
 			return var;
 		}
-		RV ModelRenderer::deserialize(IVariant* obj)
+		RV ModelRenderer::deserialize(const Variant& obj)
 		{
 			lutry
 			{
-				lulet(m, obj->field(0, intern_name("model")));
-				lulet(m_buf, m->check_u64_buf());
+				auto& m = obj.field(0, Name("model"));
+				lulet(m_buf, m.check_u64_buf());
 				m_model = Guid(m_buf[0], m_buf[1]);
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
-		scene::IComponentType* ModelRenderer::type_object()
+		Scene::IComponentType* ModelRenderer::type_object()
 		{
 			return &g_model_renderer_type.get();
 		}
-		P<scene::IEntity> ModelRenderer::belonging_entity()
+		P<Scene::IEntity> ModelRenderer::belonging_entity()
 		{
 			return m_belonging_entity.lock();
 		}
@@ -48,16 +48,16 @@ namespace luna
 			}
 			return assets;
 		}
-		asset::PAsset<IModel> ModelRenderer::model()
+		Asset::PAsset<IModel> ModelRenderer::model()
 		{
 			return m_model;
 		}
-		void ModelRenderer::set_model(asset::PAsset<IModel> model)
+		void ModelRenderer::set_model(Asset::PAsset<IModel> model)
 		{
-			asset::notify_asset_change(m_belonging_entity.lock()->belonging_scene()->meta(), m_model.guid(), model.guid());
+			Asset::notify_asset_change(m_belonging_entity.lock()->belonging_scene()->meta(), m_model.guid(), model.guid());
 			m_model = model;
 		}
-		void ModelRendererType::on_dependency_replace(scene::IComponent* component, const Guid& before, const Guid& after)
+		void ModelRendererType::on_dependency_replace(Scene::IComponent* component, const Guid& before, const Guid& after)
 		{
 			P<ModelRenderer> renderer = component;
 			if (renderer->m_model.guid() == before)

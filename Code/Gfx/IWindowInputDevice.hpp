@@ -8,11 +8,11 @@
 #include <Input/IInputDevice.hpp>
 #include "IWindowEventListener.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		struct IWindowInputDevice : public input::IInputDevice
+		struct IWindowInputDevice : public Input::IInputDevice
 		{
 			luiid("{403d5af0-6755-4915-afbb-c289f194847c}");
 

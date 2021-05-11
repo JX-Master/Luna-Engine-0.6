@@ -11,17 +11,15 @@
 #define LUNA_RECT_PACK_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace rpack
+	namespace RectPack
 	{
 		struct IRectPackContext;
-
-		LUNA_RECT_PACK_API void init();
 
 		//! Creates a new packer context.
 		//! @param[in] width The width of the rect.
 		//! @param[in] height The height of the rect.
-		LUNA_RECT_PACK_API P<IRectPackContext> new_context(uint32 width, uint32 height);
+		LUNA_RECT_PACK_API P<IRectPackContext> new_context(u32 width, u32 height);
 	}
 }

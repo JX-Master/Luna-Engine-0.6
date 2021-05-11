@@ -7,9 +7,9 @@
 #pragma once
 #include "ImageHeader.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 	}
 }

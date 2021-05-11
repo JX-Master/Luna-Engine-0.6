@@ -384,7 +384,7 @@ STBIDEF stbi_uc *stbi_load_gif_from_memory(stbi_uc const *buffer, int len, int *
 #endif
 
 #ifdef STBI_WINDOWS_UTF8
-STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* input);
+STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* Input);
 #endif
 
 ////////////////////////////////////
@@ -1006,7 +1006,7 @@ static void *stbi__load_main(stbi__context *s, int *x, int *y, int *comp, int re
 {
    memset(ri, 0, sizeof(*ri)); // make sure it's initialized if we add new fields
    ri->bits_per_channel = 8; // default is 8 so most paths don't have to be changed
-   ri->channel_order = STBI_ORDER_RGB; // all current input & output are this, but this is here so we can add BGR order
+   ri->channel_order = STBI_ORDER_RGB; // all current Input & output are this, but this is here so we can add BGR order
    ri->num_channels = 0;
 
    #ifndef STBI_NO_JPEG
@@ -1184,9 +1184,9 @@ STBI_EXTERN __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int
 #endif
 
 #if defined(_MSC_VER) && defined(STBI_WINDOWS_UTF8)
-STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* input)
+STBIDEF int stbi_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* Input)
 {
-	return WideCharToMultiByte(65001 /* UTF8 */, 0, input, -1, buffer, (int) bufferlen, NULL, NULL);
+	return WideCharToMultiByte(65001 /* UTF8 */, 0, Input, -1, buffer, (int) bufferlen, NULL, NULL);
 }
 #endif
 
@@ -2012,7 +2012,7 @@ static const stbi_uc stbi__jpeg_dezigzag[64+15] =
    29, 22, 15, 23, 30, 37, 44, 51,
    58, 59, 52, 45, 38, 31, 39, 46,
    53, 60, 61, 54, 47, 55, 62, 63,
-   // let corrupt input sample past end
+   // let corrupt Input sample past end
    63, 63, 63, 63, 63, 63, 63, 63,
    63, 63, 63, 63, 63, 63, 63
 };
@@ -3239,7 +3239,7 @@ static stbi_uc *resample_row_1(stbi_uc *out, stbi_uc *in_near, stbi_uc *in_far, 
 
 static stbi_uc* stbi__resample_row_v_2(stbi_uc *out, stbi_uc *in_near, stbi_uc *in_far, int w, int hs)
 {
-   // need to generate two samples vertically for every one in input
+   // need to generate two samples vertically for every one in Input
    int i;
    STBI_NOTUSED(hs);
    for (i=0; i < w; ++i)
@@ -3249,25 +3249,25 @@ static stbi_uc* stbi__resample_row_v_2(stbi_uc *out, stbi_uc *in_near, stbi_uc *
 
 static stbi_uc*  stbi__resample_row_h_2(stbi_uc *out, stbi_uc *in_near, stbi_uc *in_far, int w, int hs)
 {
-   // need to generate two samples horizontally for every one in input
+   // need to generate two samples horizontally for every one in Input
    int i;
-   stbi_uc *input = in_near;
+   stbi_uc *Input = in_near;
 
    if (w == 1) {
       // if only one sample, can't do any interpolation
-      out[0] = out[1] = input[0];
+      out[0] = out[1] = Input[0];
       return out;
    }
 
-   out[0] = input[0];
-   out[1] = stbi__div4(input[0]*3 + input[1] + 2);
+   out[0] = Input[0];
+   out[1] = stbi__div4(Input[0]*3 + Input[1] + 2);
    for (i=1; i < w-1; ++i) {
-      int n = 3*input[i]+2;
-      out[i*2+0] = stbi__div4(n+input[i-1]);
-      out[i*2+1] = stbi__div4(n+input[i+1]);
+      int n = 3*Input[i]+2;
+      out[i*2+0] = stbi__div4(n+Input[i-1]);
+      out[i*2+1] = stbi__div4(n+Input[i+1]);
    }
-   out[i*2+0] = stbi__div4(input[w-2]*3 + input[w-1] + 2);
-   out[i*2+1] = input[w-1];
+   out[i*2+0] = stbi__div4(Input[w-2]*3 + Input[w-1] + 2);
+   out[i*2+1] = Input[w-1];
 
    STBI_NOTUSED(in_far);
    STBI_NOTUSED(hs);
@@ -3279,7 +3279,7 @@ static stbi_uc*  stbi__resample_row_h_2(stbi_uc *out, stbi_uc *in_near, stbi_uc 
 
 static stbi_uc *stbi__resample_row_hv_2(stbi_uc *out, stbi_uc *in_near, stbi_uc *in_far, int w, int hs)
 {
-   // need to generate 2x2 samples for every one in input
+   // need to generate 2x2 samples for every one in Input
    int i,t0,t1;
    if (w == 1) {
       out[0] = out[1] = stbi__div4(3*in_near[0] + in_far[0] + 2);
@@ -3304,7 +3304,7 @@ static stbi_uc *stbi__resample_row_hv_2(stbi_uc *out, stbi_uc *in_near, stbi_uc 
 #if defined(STBI_SSE2) || defined(STBI_NEON)
 static stbi_uc *stbi__resample_row_hv_2_simd(stbi_uc *out, stbi_uc *in_near, stbi_uc *in_far, int w, int hs)
 {
-   // need to generate 2x2 samples for every one in input
+   // need to generate 2x2 samples for every one in Input
    int i=0,t0,t1;
 
    if (w == 1) {
@@ -3845,7 +3845,7 @@ static int stbi__jpeg_info(stbi__context *s, int *x, int *y, int *comp)
 
 // public domain zlib decode    v0.2  Sean Barrett 2006-11-18
 //    simple implementation
-//      - all input must be provided in an upfront buffer
+//      - all Input must be provided in an upfront buffer
 //      - all output is written to a single output buffer (can malloc/realloc)
 //    performance
 //      - fast huffman
@@ -5378,7 +5378,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
 
    if (req_comp && req_comp != target) {
       out = stbi__convert_format(out, target, req_comp, s->img_x, s->img_y);
-      if (out == NULL) return out; // stbi__convert_format frees input on failure
+      if (out == NULL) return out; // stbi__convert_format frees Input on failure
    }
 
    *x = s->img_x;
@@ -5912,7 +5912,7 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
                   *q = (stbi__uint16) stbi__get16be(s);
             } else {
                stbi_uc *p = out+channel;
-               if (bitdepth == 16) {  // input bpc
+               if (bitdepth == 16) {  // Input bpc
                   for (i = 0; i < pixelCount; i++, p += 4)
                      *p = (stbi_uc) (stbi__get16be(s) >> 8);
                } else {
@@ -5959,7 +5959,7 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
          out = (stbi_uc *) stbi__convert_format16((stbi__uint16 *) out, 4, req_comp, w, h);
       else
          out = stbi__convert_format(out, 4, req_comp, w, h);
-      if (out == NULL) return out; // stbi__convert_format frees input on failure
+      if (out == NULL) return out; // stbi__convert_format frees Input on failure
    }
 
    if (comp) *comp = 4;
@@ -6730,18 +6730,18 @@ static char *stbi__hdr_gettoken(stbi__context *z, char *buffer)
    return buffer;
 }
 
-static void stbi__hdr_convert(float *output, stbi_uc *input, int req_comp)
+static void stbi__hdr_convert(float *output, stbi_uc *Input, int req_comp)
 {
-   if ( input[3] != 0 ) {
+   if ( Input[3] != 0 ) {
       float f1;
       // Exponent
-      f1 = (float) ldexp(1.0f, input[3] - (int)(128 + 8));
+      f1 = (float) ldexp(1.0f, Input[3] - (int)(128 + 8));
       if (req_comp <= 2)
-         output[0] = (input[0] + input[1] + input[2]) * f1 / 3;
+         output[0] = (Input[0] + Input[1] + Input[2]) * f1 / 3;
       else {
-         output[0] = input[0] * f1;
-         output[1] = input[1] * f1;
-         output[2] = input[2] * f1;
+         output[0] = Input[0] * f1;
+         output[1] = Input[1] * f1;
+         output[2] = Input[2] * f1;
       }
       if (req_comp == 2) output[1] = 1;
       if (req_comp == 4) output[3] = 1;
@@ -7123,7 +7123,7 @@ static void *stbi__pnm_load(stbi__context *s, int *x, int *y, int *comp, int req
 
    if (req_comp && req_comp != s->img_n) {
       out = stbi__convert_format(out, s->img_n, req_comp, s->img_x, s->img_y);
-      if (out == NULL) return out; // stbi__convert_format frees input on failure
+      if (out == NULL) return out; // stbi__convert_format frees Input on failure
    }
    return out;
 }
@@ -7436,7 +7436,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
       1.31  (2011-06-20)
               a few more leak fixes, bug in PNG handling (SpartanJ)
       1.30  (2011-06-11)
-              added ability to load files via callbacks to accomidate custom input streams (Ben Wenger)
+              added ability to load files via callbacks to accomidate custom Input streams (Ben Wenger)
               removed deprecated format-specific test/load functions
               removed support for installable file formats (stbi_loader) -- would have been broken for IO callbacks anyway
               error cases in bmp and tga give messages and don't leak (Raymond Barbiero, grisha)

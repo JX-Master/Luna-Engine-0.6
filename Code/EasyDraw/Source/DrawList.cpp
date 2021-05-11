@@ -6,16 +6,16 @@
 */
 #include "DrawList.hpp"
 #include "EasyDraw.hpp"
-#include <Base/Unicode.hpp>
+#include <Runtime/Unicode.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		using namespace gfx;
+		using namespace Gfx;
 		void DrawList::new_draw_call()
 		{
-			m_bufs.emplace_back(DrawCallBuf(get_module_allocator()));
+			m_bufs.emplace_back(DrawCallBuf());
 			DrawCallBuf& dc = m_bufs.back();
 			dc.m_texture = m_texture;
 			dc.origin_x = m_left_offset;
@@ -32,7 +32,7 @@ namespace luna
 			{
 				// If state is changed, we find one available draw call and sets it 
 				// to be the current draw call.
-				for (uint32 i = m_dc_barrier_index; i < m_bufs.size(); ++i)
+				for (u32 i = m_dc_barrier_index; i < m_bufs.size(); ++i)
 				{
 					DrawCallBuf& dc = m_bufs[i];
 					if (state_equal(i))
@@ -44,7 +44,7 @@ namespace luna
 				}
 				new_draw_call();
 				m_state_dirty = false;
-				m_target_dc_index = (int32)m_bufs.size() - 1;
+				m_target_dc_index = (i32)m_bufs.size() - 1;
 				return &m_bufs[m_target_dc_index];
 			}
 			else
@@ -52,7 +52,7 @@ namespace luna
 				return &m_bufs[m_target_dc_index];
 			}
 		}
-		bool DrawList::state_equal(uint32 index)
+		bool DrawList::state_equal(u32 index)
 		{
 			DrawCallBuf& dc = m_bufs[index];
 			if (dc.m_texture == m_texture &&
@@ -73,7 +73,7 @@ namespace luna
 		}
 		void DrawList::drawcall_barrier()
 		{
-			m_dc_barrier_index = (uint32)m_bufs.size();
+			m_dc_barrier_index = (u32)m_bufs.size();
 		}
 		void DrawList::reset()
 		{
@@ -93,9 +93,9 @@ namespace luna
 			drawcall_barrier();	// The appended draw calls does not get merged with previous draw calls.
 			DrawList* d = static_cast<DrawList*>(draw_list);
 			m_bufs.reserve(m_bufs.size() + m_bufs.size());
-			for (size_t i = 0; i < d->m_bufs.size(); ++i)
+			for (usize i = 0; i < d->m_bufs.size(); ++i)
 			{
-				m_bufs.emplace_back(get_module_allocator());
+				m_bufs.emplace_back();
 				DrawCallBuf& buf = m_bufs.back();
 				if ((flags & EDrawListAppendFlag::copy_data) != EDrawListAppendFlag::none)
 				{
@@ -132,59 +132,58 @@ namespace luna
 				d->m_state_dirty = false;
 			}
 		}
-		void DrawList::draw_triangle_list(uint32 num_vertices, const PrimitiveVertex* vertices,
-			uint32 num_indices, const uint32* indices)
+		void DrawList::draw_triangle_list(u32 num_vertices, const PrimitiveVertex* vertices,
+			u32 num_indices, const u32* indices)
 		{
 			auto dc = get_target_drawcall();
 
-			uint32 idx_offset = (uint32)dc->m_vertices.size();
-			for (uint32 i = 0; i < num_vertices; ++i)
+			u32 idx_offset = (u32)dc->m_vertices.size();
+			for (u32 i = 0; i < num_vertices; ++i)
 			{
 				dc->m_vertices.push_back(vertices[i]);
 			}
-			for (uint32 i = 0; i < num_indices; ++i)
+			for (u32 i = 0; i < num_indices; ++i)
 			{
 				dc->m_indices.push_back(indices[i] + idx_offset);
 			}
 		}
 
-		R<TextDrawResult> DrawList::draw_text(const char* text, const Float2& top_left, const Float2& region_size, const Color& col, const Float2& spacing)
+		R<TextDrawResult> DrawList::draw_text(const char* text, const Float2& top_left, const Float2& region_size, const Float4& col, const Float2& spacing)
 		{
 			if (!m_font)
 			{
-				set_err(e_failure, "IDrawList::draw_text_region - No font texture is bound, text will not be drawn.");
-				return e_user_failure;
+				return custom_error(BasicError::bad_calling_time(), "IDrawList::draw_text_region - No font texture is bound, text will not be drawn.");
 			}
 			TextDrawResult res;
 			// backup the previous state.
 			P<IResource> prior_tex = m_texture;
-			gfx::SamplerDesc prior_sampler = m_sampler;
+			Gfx::SamplerDesc prior_sampler = m_sampler;
 			lutry
 			{
 				P<IResource> font_tex = m_font->get_font_texture();
 				set_texture(font_tex);
 
-				float32 c2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+				f32 c2[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 				set_sampler(&SamplerDesc(EFilter::min_mag_mip_linear, ETextureAddressMode::clamp, ETextureAddressMode::clamp,
 					ETextureAddressMode::clamp, 0.0f, 1, EComparisonFunc::always, c2, 0.0f, 1.0f));
 
-				float32 ascent, descent, line_gap;
+				f32 ascent, descent, line_gap;
 				m_font->get_font_atlas()->get_vmetrics(&ascent, &descent, &line_gap);
 
-				float32 row_gap = ascent - descent + line_gap;
-				float32 row_adv = 0.0f;
-				float32 char_adv = 0.0f;
-				float32 max_char_adv = char_adv;
+				f32 row_gap = ascent - descent + line_gap;
+				f32 row_adv = 0.0f;
+				f32 char_adv = 0.0f;
+				f32 max_char_adv = char_adv;
 				const char* cur_char = text;
 				while (*cur_char && (!region_size.y || (row_adv + row_gap) < region_size.y))
 				{
 					// The y value of the base line.
-					float32 row_ori = row_adv + ascent;
+					f32 row_ori = row_adv + ascent;
 					while (*cur_char && (!region_size.x || char_adv < region_size.x))
 					{
 						// Get information about the char.
 						char32_t c = utf8_decode_char(cur_char);
-						font::FontAtlasChar ch_info;
+						Font::FontAtlasChar ch_info;
 						luexp(m_font->get_font_atlas()->get_char(c, ch_info));
 						if (region_size.x && (ch_info.size.x + ch_info.left_side_bearing + char_adv > region_size.x))
 						{
@@ -205,8 +204,8 @@ namespace luna
 							csize.x
 							*/
 							PrimitiveVertex v[4];
-							float32 char_x = top_left.x + char_adv + ch_info.pos_top_left.x;
-							float32 char_y = top_left.y + row_ori + ch_info.pos_top_left.y;
+							f32 char_x = top_left.x + char_adv + ch_info.pos_top_left.x;
+							f32 char_y = top_left.y + row_ori + ch_info.pos_top_left.y;
 							v[0].pos.x = char_x;
 							v[0].pos.y = char_y;
 							v[1].pos.x = char_x + ch_info.size.x;
@@ -223,15 +222,15 @@ namespace luna
 							v[1].uv = Float2U(ch_info.uv_bottom_right.x, ch_info.uv_top_left.y);
 							v[2].uv = Float2U(ch_info.uv_top_left.x, ch_info.uv_bottom_right.y);
 							v[3].uv = ch_info.uv_bottom_right;
-							uint32 indices[] = { 0, 1, 2, 1, 3, 2 };
+							u32 indices[] = { 0, 1, 2, 1, 3, 2 };
 							draw_triangle_list(4, v, 6, indices);
 						}
 
 						char32_t nc = utf8_decode_char(cur_char);
-						float32 kern;
+						f32 kern;
 						if (nc)
 						{
-							kern = m_font->get_font_atlas()->get_kern_advance((font::codepoint_t)c, (font::codepoint_t)nc);
+							kern = m_font->get_font_atlas()->get_kern_advance((Font::codepoint_t)c, (Font::codepoint_t)nc);
 						}
 						else
 						{
@@ -260,7 +259,7 @@ namespace luna
 			return res;
 		}
 
-		void DrawList::draw_triangle_filled(const Float2& p1, const Float2& p2, const Float2& p3, const Color& col, bool antialiased)
+		void DrawList::draw_triangle_filled(const Float2& p1, const Float2& p2, const Float2& p3, const Float4& col, bool antialiased)
 		{
 			m_path->begin(p1, col);
 			m_path->line_to(p2);
@@ -269,7 +268,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_triangle_bordered(const Float2& p1, const Float2& p2, const Float2& p3, const Color& col, float32 line_width, bool antialiased)
+		void DrawList::draw_triangle_bordered(const Float2& p1, const Float2& p2, const Float2& p3, const Float4& col, f32 line_width, bool antialiased)
 		{
 			m_path->begin(p1, col);
 			m_path->line_to(p2);
@@ -278,7 +277,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_rectangle_filled(const Float2& top_left, const Float2& size, const Color& col)
+		void DrawList::draw_rectangle_filled(const Float2& top_left, const Float2& size, const Float4& col)
 		{
 			m_path->begin(top_left, col);
 			m_path->line_to(Float2(top_left.x + size.x, top_left.y));
@@ -288,7 +287,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_rectangle_bordered(const Float2& top_left, const Float2& size, const Color& col, float32 line_width)
+		void DrawList::draw_rectangle_bordered(const Float2& top_left, const Float2& size, const Float4& col, f32 line_width)
 		{
 			m_path->begin(top_left, col);
 			m_path->line_to(Float2(top_left.x + size.x, top_left.y));
@@ -298,12 +297,12 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_circle_filled(const Float2& center, float32 radius, const Color& col, bool antialiased, uint32 num_segments)
+		void DrawList::draw_circle_filled(const Float2& center, f32 radius, const Float4& col, bool antialiased, u32 num_segments)
 		{
-			float32 delta = two_pi / (float32)num_segments;
-			float32 angle = delta / 2.0f;
+			f32 delta = two_pi / (f32)num_segments;
+			f32 angle = delta / 2.0f;
 			m_path->begin(Float2(center.x + radius * cosf(angle), center.y + radius * sinf(angle)), col);
-			for (uint32 i = 0; i < num_segments - 1; ++i)
+			for (u32 i = 0; i < num_segments - 1; ++i)
 			{
 				angle -= delta;
 				m_path->line_to(Float2(center.x + radius * cosf(angle), center.y + radius * sinf(angle)));
@@ -312,12 +311,12 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_circle_bordered(const Float2& center, float32 radius, const Color& col, float32 line_width, bool antialiased, uint32 num_segments)
+		void DrawList::draw_circle_bordered(const Float2& center, f32 radius, const Float4& col, f32 line_width, bool antialiased, u32 num_segments)
 		{
-			float32 delta = two_pi / (float32)num_segments;
-			float32 angle = delta / 2.0f;
+			f32 delta = two_pi / (f32)num_segments;
+			f32 angle = delta / 2.0f;
 			m_path->begin(Float2(center.x + radius * cosf(angle), center.y + radius * sinf(angle)), col);
-			for (uint32 i = 0; i < num_segments - 1; ++i)
+			for (u32 i = 0; i < num_segments - 1; ++i)
 			{
 				angle -= delta;
 				m_path->line_to(Float2(center.x + radius * cosf(angle), center.y + radius * sinf(angle)));
@@ -326,7 +325,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_rounded_rectangle_filled(const Float2& top_left, const Float2& size, const Color& col, float32 round_radius, bool antialiased)
+		void DrawList::draw_rounded_rectangle_filled(const Float2& top_left, const Float2& size, const Float4& col, f32 round_radius, bool antialiased)
 		{
 			m_path->begin(Float2(top_left.x + round_radius, top_left.y), col);
 			m_path->line_to(Float2(top_left.x + size.x - round_radius, top_left.y));
@@ -341,7 +340,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_rounded_rectangle_bordered(const Float2& top_left, const Float2& size, const Color& col, float32 round_radius, float32 line_width, bool antialiased)
+		void DrawList::draw_rounded_rectangle_bordered(const Float2& top_left, const Float2& size, const Float4& col, f32 round_radius, f32 line_width, bool antialiased)
 		{
 			m_path->begin(Float2(top_left.x + round_radius, top_left.y), col);
 			m_path->line_to(Float2(top_left.x + size.x - round_radius, top_left.y));
@@ -356,7 +355,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_line(const Float2& pos1, const Float2& pos2, const Color& col, float32 line_width, bool antialiased)
+		void DrawList::draw_line(const Float2& pos1, const Float2& pos2, const Float4& col, f32 line_width, bool antialiased)
 		{
 			m_path->begin(pos1, col);
 			m_path->line_to(pos2);
@@ -364,7 +363,7 @@ namespace luna
 			m_path->submit_triangle_list(this);
 		}
 
-		void DrawList::draw_texture(const Float2& top_left, const Float2& size, const Color& tint, gfx::IResource* tex, gfx::EResourceState state, const Float2& top_left_uv, const Float2& bottom_right_uv)
+		void DrawList::draw_texture(const Float2& top_left, const Float2& size, const Float4& tint, Gfx::IResource* tex, Gfx::EResourceState state, const Float2& top_left_uv, const Float2& bottom_right_uv)
 		{
 			m_path->begin(top_left, tint, Float2(0.0f, 0.0f));
 			m_path->set_texcoord(Float2(1.0f, 0.0f));

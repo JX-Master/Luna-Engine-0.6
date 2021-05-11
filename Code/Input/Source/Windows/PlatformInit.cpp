@@ -12,12 +12,13 @@
 #include "Mouse.hpp"
 #include "Keyboard.hpp"
 #include "XBOXController.hpp"
+#include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		namespace win
+		namespace Win
 		{
 			// A simple object that manages the lifetime of the drivers.
 			class WindowsInputDevices : public IObject
@@ -39,24 +40,24 @@ namespace luna
 
 		RV platform_input_init()
 		{
-			win::g_mouse.construct();
-			win::g_keyboard.construct();
-			win::g_xbox_controller.construct();
-			win::g_xbox_controller.get().m_vib_mtx = new_mutex();
-			win::g_input_devices.construct();
-			win::g_input_devices.get().m_controller = box_ptr(&(win::g_xbox_controller.get()));
-			win::g_input_devices.get().m_mouse = box_ptr(&(win::g_mouse.get()));
-			win::g_input_devices.get().m_keyboard = box_ptr(&(win::g_keyboard.get()));
+			Win::g_mouse.construct();
+			Win::g_keyboard.construct();
+			Win::g_xbox_controller.construct();
+			Win::g_xbox_controller.get().m_vib_mtx = new_mutex();
+			Win::g_input_devices.construct();
+			Win::g_input_devices.get().m_controller = box_ptr(&(Win::g_xbox_controller.get()));
+			Win::g_input_devices.get().m_mouse = box_ptr(&(Win::g_mouse.get()));
+			Win::g_input_devices.get().m_keyboard = box_ptr(&(Win::g_keyboard.get()));
 			// register devices.
-			m_platform_devices = box_ptr<IObject>(&(win::g_input_devices.get()));
+			m_platform_devices = box_ptr<IObject>(&(Win::g_input_devices.get()));
 			lutry
 			{
-				luexp(mount_device(intern_name("mouse"), &(win::g_mouse.get())));
-				luexp(mount_device(intern_name("keyboard"), &(win::g_keyboard.get())));
-				luexp(mount_device(intern_name("controller"), &(win::g_xbox_controller.get())));
+				luexp(mount_device(Name("mouse"), &(Win::g_mouse.get())));
+				luexp(mount_device(Name("keyboard"), &(Win::g_keyboard.get())));
+				luexp(mount_device(Name("controller"), &(Win::g_xbox_controller.get())));
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 	}
 }

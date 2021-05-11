@@ -8,11 +8,11 @@
 
 #ifdef LUNA_GFX_D3D12
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			RV ViewSet::init(const ViewSetDesc& desc)
 			{
@@ -35,7 +35,7 @@ namespace luna
 				{
 					if (FAILED(m_device->m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_cbv_srv_uav_heap))))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 				}
 
@@ -45,20 +45,20 @@ namespace luna
 				{
 					if (FAILED(m_device->m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_sampler_heap))))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 				}
-				return s_ok;
+				return RV();
 			}
-			void ViewSet::set_cbv(uint32 index, IResource* res, const ConstantBufferViewDesc& cbv)
+			void ViewSet::set_cbv(u32 index, IResource* res, const ConstantBufferViewDesc& cbv)
 			{
-				luassert_usr(index < m_desc.num_cbvs && res);
+				lucheck(index < m_desc.num_cbvs && res);
 				lutsassert();
 				Resource* r = static_cast<Resource*>(res);
 				D3D12_CONSTANT_BUFFER_VIEW_DESC d;
 				d.BufferLocation = r->m_res->GetGPUVirtualAddress() + cbv.offset;
 				d.SizeInBytes = cbv.size;
-				size_t addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + index * m_cbv_srv_uav_size;
+				usize addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + index * m_cbv_srv_uav_size;
 				D3D12_CPU_DESCRIPTOR_HANDLE h;
 				h.ptr = addr;
 				m_device->m_device->CreateConstantBufferView(&d, h);
@@ -86,19 +86,19 @@ namespace luna
 				case EResourceType::texture_3d:
 					return ShaderResourceViewDesc::as_tex3d(d.format, 0, d.mip_levels, 0.0f);
 				case EResourceType::buffer:
-					return ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, 0, (uint32)d.width, 1, false);
+					return ShaderResourceViewDesc::as_buffer(EResourceFormat::unknown, 0, (u32)d.width, 1, false);
 				default:
 					break;
 				}
 				lupanic();
 				return ShaderResourceViewDesc();
 			}
-			void ViewSet::set_srv(uint32 index, IResource* res, const ShaderResourceViewDesc* srv)
+			void ViewSet::set_srv(u32 index, IResource* res, const ShaderResourceViewDesc* srv)
 			{
-				luassert_usr(index < m_desc.num_srvs && res);
+				lucheck(index < m_desc.num_srvs && res);
 				lutsassert();
 				Resource* r = static_cast<Resource*>(res);
-				size_t addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + (m_desc.num_cbvs + index) * m_cbv_srv_uav_size;
+				usize addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + (m_desc.num_cbvs + index) * m_cbv_srv_uav_size;
 				D3D12_CPU_DESCRIPTOR_HANDLE h;
 				h.ptr = addr;
 				if (srv)
@@ -194,7 +194,7 @@ namespace luna
 				switch (d.type)
 				{
 				case EResourceType::buffer:
-					return UnorderedAccessViewDesc::as_buffer(EResourceFormat::unknown, 0, (uint32)d.width, 1, 0, false);
+					return UnorderedAccessViewDesc::as_buffer(EResourceFormat::unknown, 0, (u32)d.width, 1, 0, false);
 				case EResourceType::texture_1d:
 					return (d.depth_or_array_size) == 1 ?
 						UnorderedAccessViewDesc::as_tex1d(d.format, 0) :
@@ -212,13 +212,13 @@ namespace luna
 				return UnorderedAccessViewDesc();
 			}
 
-			void ViewSet::set_uav(uint32 index, IResource* res, IResource* counter_resource, const UnorderedAccessViewDesc* uav)
+			void ViewSet::set_uav(u32 index, IResource* res, IResource* counter_resource, const UnorderedAccessViewDesc* uav)
 			{
-				luassert_usr(index < m_desc.num_uavs && res);
+				lucheck(index < m_desc.num_uavs && res);
 				lutsassert();
 				ID3D12Resource* r = static_cast<Resource*>(res)->m_res.Get();
 				ID3D12Resource* cr = counter_resource ? static_cast<Resource*>(counter_resource)->m_res.Get() : nullptr;
-				size_t addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + (m_desc.num_cbvs + m_desc.num_srvs + index) * m_cbv_srv_uav_size;
+				usize addr = m_cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart().ptr + (m_desc.num_cbvs + m_desc.num_srvs + index) * m_cbv_srv_uav_size;
 				D3D12_CPU_DESCRIPTOR_HANDLE h;
 				h.ptr = addr;
 				if (uav)
@@ -279,9 +279,9 @@ namespace luna
 				m_uas[index] = res;
 				m_counter_ress[index] = counter_resource;
 			}
-			void ViewSet::set_sampler(uint32 index, const SamplerDesc& sampler)
+			void ViewSet::set_sampler(u32 index, const SamplerDesc& sampler)
 			{
-				luassert_usr(index < m_desc.num_samplers);
+				lucheck(index < m_desc.num_samplers);
 				lutsassert();
 				D3D12_SAMPLER_DESC d;
 				d.AddressU = encode_address_mode(sampler.address_u);
@@ -297,7 +297,7 @@ namespace luna
 				d.MaxLOD = sampler.max_lod;
 				d.MinLOD = sampler.min_lod;
 				d.MipLODBias = sampler.mip_lod_bias;
-				size_t addr = m_sampler_heap->GetCPUDescriptorHandleForHeapStart().ptr + index * m_sampler_size;
+				usize addr = m_sampler_heap->GetCPUDescriptorHandleForHeapStart().ptr + index * m_sampler_size;
 				D3D12_CPU_DESCRIPTOR_HANDLE h;
 				h.ptr = addr;
 				m_device->m_device->CreateSampler(&d, h);

@@ -6,10 +6,11 @@
 */
 #pragma once
 #include "AssetHeader.hpp"
+#include <Core/Interface.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		class AssetLoadRequest : public IRunnable
 		{
@@ -18,13 +19,12 @@ namespace luna
 			luiimpl(AssetLoadRequest, IRunnable, IObject);
 
 			WP<IAsset> m_asset;
-			P<IVariant> m_params;
+			Variant m_params;
 			EAssetLoadFlag m_flags;
 
-			AssetLoadRequest(IAllocator* alloc) :
-				luibind(alloc) {}
+			AssetLoadRequest() {}
 
-			virtual int run() override;
+			virtual void run() override;
 		};
 
 		class AssetSaveRequest : public IAssetSaveRequest, public IRunnable
@@ -38,17 +38,16 @@ namespace luna
 			lurc();
 
 			WP<IAsset> m_asset;
-			P<IError> m_err;
-			P<IVariant> m_params;
-			result_t m_res;
+			Error m_err;
+			Variant m_params;
+			errcode_t m_res;
 			bool m_save_data;
 			volatile bool m_finished;
 			EAssetSaveFormat m_format;
 
-			AssetSaveRequest(IAllocator* alloc) :
-				luibind(alloc),
+			AssetSaveRequest() :
 				m_finished(false),
-				m_res(s_ok) {}
+				m_res(0) {}
 
 			virtual void wait() override
 			{
@@ -59,15 +58,15 @@ namespace luna
 			}
 			virtual RV try_wait() override
 			{
-				return m_finished ? s_ok : e_pending;
+				return m_finished ? RV() : BasicError::timeout();
 			}
 
-			virtual int run() override;
-			virtual result_t result() override
+			virtual void run() override;
+			virtual errcode_t result() override
 			{
 				return m_res;
 			}
-			virtual IError* error_object() override
+			virtual Error& error_object() override
 			{
 				return m_err;
 			}

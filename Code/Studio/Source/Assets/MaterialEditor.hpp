@@ -9,7 +9,7 @@
 #include "../IAssetEditorType.hpp"
 #include "../IAssetImporterType.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -22,27 +22,19 @@ namespace luna
 			
 			MaterialEditorType* m_type;
 
-			WP<e3d::IMaterial> m_material;
+			WP<E3D::IMaterial> m_material;
 
-			P<IStringBuffer> m_base_color_name;
-			P<IStringBuffer> m_roughness_name;
-			P<IStringBuffer> m_normal_name;
-			P<IStringBuffer> m_metallic_name;
-			P<IStringBuffer> m_emissive_name;
+			String m_base_color_name;
+			String m_roughness_name;
+			String m_normal_name;
+			String m_metallic_name;
+			String m_emissive_name;
 
 			bool m_open = true;
 
-			MaterialEditor(IAllocator* alloc) :
-				luibind(alloc)
-			{
-				m_base_color_name = new_string_buffer();
-				m_roughness_name = new_string_buffer();
-				m_normal_name = new_string_buffer();
-				m_metallic_name = new_string_buffer();
-				m_emissive_name = new_string_buffer();
-			}
+			MaterialEditor() {}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 			virtual bool closed() override
 			{
 				return !m_open;
@@ -55,20 +47,19 @@ namespace luna
 			lucid("{a4fe7266-6b7a-43fa-99b8-9199233f1fbf}");
 			luiimpl(MaterialEditorType, IAssetEditorType, IObject);
 
-			P<IName> m_type;
+			Name m_type;
 
-			MaterialEditorType(IAllocator* alloc) :
-				luibind(alloc)
+			MaterialEditorType()
 			{
-				m_type = intern_name("Material");
+				m_type = u8"Material";
 			}
 
-			virtual IName* asset_type() override
+			virtual Name asset_type() override
 			{
 				return m_type;
 			}
-			virtual void on_draw_tile(imgui::IContext* ctx, asset::IAsset* asset, const RectF& draw_rect) override;
-			virtual P<IAssetEditor> new_editor(asset::IAsset* editing_asset) override;
+			virtual void on_draw_tile(ImGui::IContext* ctx, Asset::IAsset* asset, const RectF& draw_rect) override;
+			virtual P<IAssetEditor> new_editor(Asset::IAsset* editing_asset) override;
 		};
 
 		class MaterialCreator : public IAssetEditor
@@ -77,18 +68,14 @@ namespace luna
 			lucid("{d87a96b8-a7e8-4a1d-b5e6-1d31987b60a9}");
 			luiimpl(MaterialCreator, IAssetEditor, IObject);
 
-			P<IPath> m_create_dir;
-			P<IStringBuffer> m_asset_name;
+			Path m_create_dir;
+			String m_asset_name;
 			bool m_open;
 
-			MaterialCreator(IAllocator* alloc) :
-				luibind(alloc),
-				m_open(true)
-			{
-				m_asset_name = new_string_buffer();
-			}
+			MaterialCreator() :
+				m_open(true) {}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 			virtual bool closed() override
 			{
 				return !m_open;
@@ -101,21 +88,20 @@ namespace luna
 			lucid("{a55b2a64-58f0-4e9c-9829-2b0cec305c02}");
 			luiimpl(MaterialCreatorType, IAssetImporterType, IObject);
 
-			P<IName> m_name;
+			Name m_name;
 
-			MaterialCreatorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_name(intern_name("Material")) {}
+			MaterialCreatorType() :
+				m_name(u8"Material") {}
 
-			virtual IName* name() override
+			virtual Name name() override
 			{
 				return m_name;
 			}
 
-			virtual P<IAssetEditor> new_importer(IPath* create_dir) override
+			virtual P<IAssetEditor> new_importer(const Path& create_dir) override
 			{
-				auto dialog = box_ptr(new_obj<MaterialCreator>(get_module_allocator()));
-				dialog->m_create_dir = create_dir->clone();
+				auto dialog = newobj<MaterialCreator>();
+				dialog->m_create_dir = create_dir;
 				return dialog;
 			}
 		};

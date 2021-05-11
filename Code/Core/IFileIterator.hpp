@@ -6,7 +6,7 @@
  */
 #pragma once
 #include "IFile.hpp"
-namespace  luna
+namespace  Luna
 {
 	//! @interface IFileIterator
 	//! Represents a directory stream that can be used to iterate all files and directories
@@ -20,7 +20,7 @@ namespace  luna
 
 		//! Returns the name of the file the iterator currently points to.
 		//! Returns `nullptr` if the file iterator is invalid.
-		virtual const char* filename() = 0;
+		virtual const c8* filename() = 0;
 
 		//! Returns the file attribute of the file the iterator currently points to.
 		//! Returns EFileAttributeFlag::none if the file iterator is invalid.

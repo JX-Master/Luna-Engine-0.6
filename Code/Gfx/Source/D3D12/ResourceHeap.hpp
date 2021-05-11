@@ -14,13 +14,13 @@
 #include "../Windows/CommonInclude.hpp"
 #include <d3d12.h>
 #include "GraphicDevice.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class ResourceHeap : public IResourceHeap
 			{
@@ -29,13 +29,12 @@ namespace luna
 				luiimpl(ResourceHeap, IResourceHeap, IGraphicDeviceChild, IObject);
 				lutsassert_lock();
 
-				uint64 m_alignment;
+				u64 m_alignment;
 				P<GraphicDevice> m_device;
 				ResourceHeapDesc m_desc;
 				ComPtr<ID3D12Heap> m_heap;
 
 				ResourceHeap(GraphicDevice* device) :
-					luibind(get_module_allocator()),
 					m_device(device) {}
 
 				RV init(const ResourceHeapDesc& desc);
@@ -48,7 +47,7 @@ namespace luna
 				{
 					return m_desc;
 				}
-				virtual RP<IResource> new_resource(uint64 offset, const ResourceDesc& desc, const ClearValue* optimized_clear_value) override;
+				virtual RP<IResource> new_resource(u64 offset, const ResourceDesc& desc, const ClearValue* optimized_clear_value) override;
 			};
 		}
 	}

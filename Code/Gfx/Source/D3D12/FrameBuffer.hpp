@@ -13,11 +13,11 @@
 #include "Resource.hpp"
 #include "RenderPass.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class FrameBuffer : public IFrameBuffer
 			{
@@ -31,18 +31,15 @@ namespace luna
 				P<Resource> m_ds;
 				DepthStencilViewDesc m_dsv;
 
-				size_t m_rtv_size;
+				usize m_rtv_size;
 				ComPtr<ID3D12DescriptorHeap> m_rtv_heap;
 				ComPtr<ID3D12DescriptorHeap> m_dsv_heap;
 
-				FrameBuffer() :
-					luibind(get_module_allocator()),
-					m_rts(get_module_allocator()),
-					m_rtvs(get_module_allocator()){}
+				FrameBuffer() {}
 
-				RV init(uint32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv);
+				RV init(u32 num_rtvs, IResource** rts, RenderTargetViewDesc** rtvs, IResource* ds, DepthStencilViewDesc* dsv);
 
-				D3D12_CPU_DESCRIPTOR_HANDLE get_rtv_cpu_handle(uint32 index)
+				D3D12_CPU_DESCRIPTOR_HANDLE get_rtv_cpu_handle(u32 index)
 				{
 					D3D12_CPU_DESCRIPTOR_HANDLE h = m_rtv_heap->GetCPUDescriptorHandleForHeapStart();
 					h.ptr += index * m_rtv_size;
@@ -54,9 +51,9 @@ namespace luna
 					return m_dsv_heap->GetCPUDescriptorHandleForHeapStart();
 				}
 
-				uint32 count_rtv()
+				u32 count_rtv()
 				{
-					return (uint32)m_rtvs.size();
+					return (u32)m_rtvs.size();
 				}
 
 				virtual IGraphicDevice* get_device() override

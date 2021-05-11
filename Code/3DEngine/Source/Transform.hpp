@@ -6,27 +6,26 @@
 */
 #pragma once
 #include "3DEngineHeader.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		class Transform : public ITransform
 		{
 		public:
 			lucid("{850961ce-327b-4f6e-a041-503b0a8b82e5}");
-			luiimpl(Transform, ITransform, scene::IComponent, ISerializable, IObject);
+			luiimpl(Transform, ITransform, Scene::IComponent, ISerializable, IObject);
 			lutsassert_lock();
 
 			Tranform3D m_transform;
 
-			WP<scene::IEntity> m_entity;
+			WP<Scene::IEntity> m_entity;
 			WP<ITransform> m_parent;
 			Vector<WP<ITransform>> m_children;
 
-			Transform(IAllocator* alloc) :
-				luibind(alloc),
+			Transform() :
 				m_transform(Tranform3D::identity()) {}
 
 			void set_parent(ITransform* parent_transform)
@@ -34,10 +33,10 @@ namespace luna
 				m_parent = parent_transform;
 			}
 
-			virtual RP<IVariant> serialize() override;
-			virtual RV deserialize(IVariant* obj) override;
-			virtual scene::IComponentType* type_object() override;
-			virtual P<scene::IEntity> belonging_entity() override;
+			virtual R<Variant> serialize() override;
+			virtual RV deserialize(const Variant& obj) override;
+			virtual Scene::IComponentType* type_object() override;
+			virtual P<Scene::IEntity> belonging_entity() override;
 			virtual Vector<Guid> referred_assets() override
 			{
 				return Vector<Guid>();
@@ -89,30 +88,30 @@ namespace luna
 			virtual void set_world_to_local_matrix(const Float4x4& mat) override;
 		};
 
-		class TransformComponentType : public scene::IComponentType
+		class TransformComponentType : public Scene::IComponentType
 		{
 		public:
 			lucid("{fea5b366-355d-48db-8cdc-2cb417fa2518}");
-			luiimpl_static(TransformComponentType, scene::IComponentType, IObject);
+			luiimpl_static(TransformComponentType, Scene::IComponentType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
 			TransformComponentType() :
-				m_type_name(intern_name("Transform")) {}
+				m_type_name(Name("Transform")) {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
-			virtual RP<scene::IComponent> new_component(scene::IEntity* belonging_entity) override
+			virtual RP<Scene::IComponent> new_component(Scene::IEntity* belonging_entity) override
 			{
-				auto t = box_ptr(new_obj_aligned<Transform>(get_module_allocator()));
+				auto t = newobj<Transform>();
 				t->m_entity = belonging_entity;
 				return t;
 			}
-			virtual void on_dependency_data_load(scene::IComponent* component, asset::IAsset* dependency_asset) override {}
-			virtual void on_dependency_data_unload(scene::IComponent* component, asset::IAsset* dependency_asset) override {}
-			virtual void on_dependency_replace(scene::IComponent* component, const Guid& before, const Guid& after) override {}
+			virtual void on_dependency_data_load(Scene::IComponent* component, Asset::IAsset* dependency_asset) override {}
+			virtual void on_dependency_data_unload(Scene::IComponent* component, Asset::IAsset* dependency_asset) override {}
+			virtual void on_dependency_replace(Scene::IComponent* component, const Guid& before, const Guid& after) override {}
 		};
 		
 		extern Unconstructed<TransformComponentType> g_transform_type;

@@ -8,7 +8,7 @@
 
 #include "../IComponentEditorType.hpp"
 
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -18,23 +18,22 @@ namespace luna
 			lucid("{991679a8-1354-415c-b0d6-74d25fc7476c}");
 			luiimpl(ModelRendererComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<e3d::IModelRenderer> m_component;
+			Name m_type_name;
+			WP<E3D::IModelRenderer> m_component;
 
-			P<IStringBuffer> m_model_name;
+			String m_model_name;
 
 			bool m_editing = false;
 
-			ModelRendererComponentEditor(IAllocator* alloc) :
-				luibind(alloc),
-				m_model_name(new_string_buffer()) {}
+			ModelRendererComponentEditor() :
+				m_model_name(String()) {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class ModelRendererComponentEditorType : public IComponentEditorType
@@ -43,20 +42,19 @@ namespace luna
 			lucid("{df3ec6fd-36c4-4f27-8f72-47e318362b1b}");
 			luiimpl(ModelRendererComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			ModelRendererComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Model Renderer")) {}
+			ModelRendererComponentEditorType() :
+				m_type_name(Name("Model Renderer")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
 
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<ModelRendererComponentEditor>(get_module_allocator()));
+				auto r = newobj<ModelRendererComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;

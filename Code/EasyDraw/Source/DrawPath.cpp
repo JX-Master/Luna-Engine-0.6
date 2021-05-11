@@ -6,11 +6,11 @@
 */
 #include "DrawPath.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		void DrawPath::begin(const Float2& initial_pos, const Color& initial_color, const Float2& initial_uv)
+		void DrawPath::begin(const Float2& initial_pos, const Float4& initial_color, const Float2& initial_uv)
 		{
 			m_uv = initial_uv;
 			m_color = initial_color;
@@ -39,9 +39,9 @@ namespace luna
 				}
 			}
 		}
-		void DrawPath::arc_to(const Float2& center, float32 radius, float32 a_min, float32 a_max, bool skip_min, bool skip_max, uint32 num_segments)
+		void DrawPath::arc_to(const Float2& center, f32 radius, f32 a_min, f32 a_max, bool skip_min, bool skip_max, u32 num_segments)
 		{
-			size_t points_to_draw = num_segments + 1;
+			usize points_to_draw = num_segments + 1;
 			if (skip_min)
 			{
 				--points_to_draw;
@@ -51,32 +51,32 @@ namespace luna
 				--points_to_draw;
 			}
 			m_points.reserve(m_points.size() + points_to_draw);
-			for (uint32 i = 0; i <= num_segments; i++)
+			for (u32 i = 0; i <= num_segments; i++)
 			{
 				if ((!i && skip_min) || (i == num_segments && skip_max))
 				{
 					continue;
 				}
-				const float32 a = deg_to_rad(a_min + ((float32)i / (float32)num_segments) * (a_max - a_min));
+				const f32 a = deg_to_rad(a_min + ((f32)i / (f32)num_segments) * (a_max - a_min));
 				line_to(Float2(center.x + cosf(a) * radius, center.y + sinf(a) * radius));
 			}
 		}
-		void DrawPath::bezier_to(const Float2& dest, const Float2& cp1, const Float2& cp2, uint32 num_segments)
+		void DrawPath::bezier_to(const Float2& dest, const Float2& cp1, const Float2& cp2, u32 num_segments)
 		{
-			float32 t_step = 1.0f / (float32)num_segments;
+			f32 t_step = 1.0f / (f32)num_segments;
 			Float2 src = m_points.back().pos;
-			for (uint32 i_step = 1; i_step <= num_segments; i_step++)
+			for (u32 i_step = 1; i_step <= num_segments; i_step++)
 			{
-				float32 t = t_step * i_step;
-				float32 u = 1.0f - t;
-				float32 w1 = u * u * u;
-				float32 w2 = 3 * u * u * t;
-				float32 w3 = 3 * u * t * t;
-				float32 w4 = t * t * t;
+				f32 t = t_step * i_step;
+				f32 u = 1.0f - t;
+				f32 w1 = u * u * u;
+				f32 w2 = 3 * u * u * t;
+				f32 w3 = 3 * u * t * t;
+				f32 w4 = t * t * t;
 				line_to(src * w1 + cp1 * w2 + cp2 * w3 + dest * w4);
 			}
 		}
-		void DrawPath::end_stroke(float32 width, bool closed, bool antialiased)
+		void DrawPath::end_stroke(f32 width, bool closed, bool antialiased)
 		{
 			if (!m_recording)
 			{
@@ -87,7 +87,7 @@ namespace luna
 			{
 				return;
 			}
-			float32 half_width = width / 2.0f;
+			f32 half_width = width / 2.0f;
 			bool thick_line = width >= 1.0f ? true : false;
 			if (antialiased)
 			{
@@ -128,13 +128,13 @@ namespace luna
 					m_indices.reserve(m_points.size() * 6 - 6);
 				}
 			}
-			for (size_t i = 0; i < m_points.size(); ++i)
+			for (usize i = 0; i < m_points.size(); ++i)
 			{
 				PrimitiveVertex v;
 				v.color = m_points[i].color;
 				v.uv = m_points[i].uv;
 				Float2 dir;
-				float32 mulp = 1.0f;
+				f32 mulp = 1.0f;
 				if (i == 0)
 				{
 					if (closed)
@@ -208,9 +208,9 @@ namespace luna
 			{
 				if (thick_line)
 				{
-					for (uint32 i = 0; i < (uint32)m_points.size() - 1; ++i)
+					for (u32 i = 0; i < (u32)m_points.size() - 1; ++i)
 					{
-						uint32 indices[18] = {
+						u32 indices[18] = {
 							i * 4,
 							i * 4 + 1,
 							i * 4 + 4,
@@ -237,8 +237,8 @@ namespace luna
 					}
 					if (closed)
 					{
-						uint32 i = (uint32)m_points.size() - 1;
-						uint32 indices[18] = {
+						u32 i = (u32)m_points.size() - 1;
+						u32 indices[18] = {
 							i * 4,
 							i * 4 + 1,
 							0,
@@ -265,9 +265,9 @@ namespace luna
 				}
 				else
 				{
-					for (uint32 i = 0; i < (uint32)m_points.size() - 1; ++i)
+					for (u32 i = 0; i < (u32)m_points.size() - 1; ++i)
 					{
-						uint32 indices[12] = {
+						u32 indices[12] = {
 							i * 3 + 1,
 							i * 3,
 							i * 3 + 4,
@@ -286,8 +286,8 @@ namespace luna
 					}
 					if (closed)
 					{
-						uint32 i = (uint32)m_points.size() - 1;
-						uint32 indices[12] = {
+						u32 i = (u32)m_points.size() - 1;
+						u32 indices[12] = {
 							i * 3 + 1,
 							i * 3,
 							1,
@@ -308,9 +308,9 @@ namespace luna
 			}
 			else
 			{
-				for (uint32 i = 0; i < (uint32)m_points.size() - 1; ++i)
+				for (u32 i = 0; i < (u32)m_points.size() - 1; ++i)
 				{
-					uint32 indices[6] =
+					u32 indices[6] =
 					{
 						i * 2,
 						i * 2 + 1,
@@ -323,8 +323,8 @@ namespace luna
 				}
 				if (closed)
 				{
-					uint32 i = (uint32)m_points.size() - 1;
-					uint32 indices[6] =
+					u32 i = (u32)m_points.size() - 1;
+					u32 indices[6] =
 					{
 						i * 2,
 						i * 2 + 1,
@@ -355,13 +355,13 @@ namespace luna
 				m_vertices.reserve(m_points.size() * 2);
 				m_indices.reserve(m_points.size() * 9 - 6);
 				// If we choose antialiased shape, we need to calculate normals as well.
-				for (size_t i = 0; i < m_points.size(); ++i)
+				for (usize i = 0; i < m_points.size(); ++i)
 				{
 					PrimitiveVertex v;
 					v.color = m_points[i].color;
 					v.uv = m_points[i].uv;
 					Float2 dir;
-					float32 mulp = 1.0f;
+					f32 mulp = 1.0f;
 					if (i == 0)
 					{
 						Float2 dir_1 = normalize(m_points[i].pos - m_points.back().pos);
@@ -397,11 +397,11 @@ namespace luna
 					m_vertices.push_back(v);
 				}
 				// generate internal indices.
-				for (uint32 i = 0; i < (uint32)m_points.size() - 2; ++i)
+				for (u32 i = 0; i < (u32)m_points.size() - 2; ++i)
 				{
 					if (clockwise)
 					{
-						uint32 indices[3] = {
+						u32 indices[3] = {
 							0,
 							(i + 2) * 2,
 							(i + 1) * 2
@@ -410,7 +410,7 @@ namespace luna
 					}
 					else
 					{
-						uint32 indices[3] = {
+						u32 indices[3] = {
 							0,
 							(i + 1) * 2,
 							(i + 2) * 2
@@ -419,9 +419,9 @@ namespace luna
 					}
 				}
 				// generate outlines.
-				for (uint32 i = 0; i < (uint32)m_points.size() - 1; ++i)
+				for (u32 i = 0; i < (u32)m_points.size() - 1; ++i)
 				{
-					uint32 indices[6] = {
+					u32 indices[6] = {
 						i * 2,
 						i * 2 + 3,
 						i * 2 + 1,
@@ -431,8 +431,8 @@ namespace luna
 					};
 					m_indices.insert_n(m_indices.end(), indices, 6);
 				}
-				uint32 i = (uint32)m_points.size() - 1;
-				uint32 indices[6] = {
+				u32 i = (u32)m_points.size() - 1;
+				u32 indices[6] = {
 					i * 2,
 					1,
 					i * 2 + 1,
@@ -446,11 +446,11 @@ namespace luna
 			{
 				m_vertices = move(m_points);
 				m_indices.reserve(m_vertices.size() * 3 - 6);
-				for (uint32 i = 0; i < (uint32)m_vertices.size() - 2; ++i)
+				for (u32 i = 0; i < (u32)m_vertices.size() - 2; ++i)
 				{
 					if (clockwise)
 					{
-						uint32 indices[3] = {
+						u32 indices[3] = {
 							0,
 							i + 2,
 							i + 1
@@ -459,7 +459,7 @@ namespace luna
 					}
 					else
 					{
-						uint32 indices[3] = {
+						u32 indices[3] = {
 							0,
 							i + 1,
 							i + 2
@@ -472,8 +472,8 @@ namespace luna
 		}
 		void DrawPath::submit_triangle_list(IDrawList* draw_list)
 		{
-			luassert_usr(!m_recording);
-			draw_list->draw_triangle_list((uint32)m_vertices.size(), m_vertices.data(), (uint32)m_indices.size(), m_indices.data());
+			lucheck(!m_recording);
+			draw_list->draw_triangle_list((u32)m_vertices.size(), m_vertices.data(), (u32)m_indices.size(), m_indices.data());
 		}
 	}
 }

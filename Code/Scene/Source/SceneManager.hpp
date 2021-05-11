@@ -6,12 +6,12 @@
 */
 #pragma once
 #include "SceneHeader.hpp"
-#include <Base/HashMap.hpp>
-namespace luna
+#include <Runtime/HashMap.hpp>
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
-		extern Unconstructed<HashMap<P<IName>, P<IComponentType>>> g_component_types;
-		extern Unconstructed<HashMap<P<IName>, P<ISceneComponentType>>> g_scene_component_types;
+		extern Unconstructed<HashMap<Name, P<IComponentType>>> g_component_types;
+		extern Unconstructed<HashMap<Name, P<ISceneComponentType>>> g_scene_component_types;
 	}
 }

@@ -85,7 +85,7 @@ USAGE:
    For PNG, "stride_in_bytes" is the distance in bytes from the first byte of
    a row of pixels to the first byte of the next row of pixels.
 
-   PNG creates output files with the same number of components as the input.
+   PNG creates output files with the same number of components as the Input.
    The BMP format expands Y to RGB in the file format and does not
    output alpha.
 
@@ -106,7 +106,7 @@ USAGE:
    TGA supports RLE or non-RLE compressed data. To use non-RLE-compressed
    data, set the global variable 'stbi_write_tga_with_rle' to 0.
    
-   JPEG does ignore alpha channels in input data; quality is between 1 and 100.
+   JPEG does ignore alpha channels in Input data; quality is between 1 and 100.
    Higher quality looks better but results in a bigger image.
    JPEG baseline (no JPEG progressive).
 
@@ -179,7 +179,7 @@ STBIWDEF int stbi_write_hdr(char const *filename, int w, int h, int comp, const 
 STBIWDEF int stbi_write_jpg(char const *filename, int x, int y, int comp, const void  *data, int quality);
 
 #ifdef STBI_WINDOWS_UTF8
-STBIWDEF int stbiw_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* input);
+STBIWDEF int stbiw_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* Input);
 #endif
 #endif
 
@@ -292,9 +292,9 @@ static void stbi__stdio_write(void *context, void *data, int size)
 STBIW_EXTERN __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp, unsigned long flags, const char *str, int cbmb, wchar_t *widestr, int cchwide);
 STBIW_EXTERN __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int cp, unsigned long flags, const wchar_t *widestr, int cchwide, char *str, int cbmb, const char *defchar, int *used_default);
 
-STBIWDEF int stbiw_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* input)
+STBIWDEF int stbiw_convert_wchar_to_utf8(char *buffer, size_t bufferlen, const wchar_t* Input)
 {
-	return WideCharToMultiByte(65001 /* UTF8 */, 0, input, -1, buffer, (int) bufferlen, NULL, NULL);
+	return WideCharToMultiByte(65001 /* UTF8 */, 0, Input, -1, buffer, (int) bufferlen, NULL, NULL);
 }
 #endif
 
@@ -945,7 +945,7 @@ STBIWDEF unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, i
    STBIW_FREE(hash_table);
 
    {
-      // compute adler32 on input
+      // compute adler32 on Input
       unsigned int s1=1, s2=0;
       int blocklen = (int) (data_len % 5552);
       j=0;
@@ -1472,12 +1472,12 @@ static int stbi_write_jpg_core(stbi__write_context *s, int width, int height, in
          for(x = 0; x < width; x += 8) {
             float YDU[64], UDU[64], VDU[64];
             for(row = y, pos = 0; row < y+8; ++row) {
-               // row >= height => use last input row
+               // row >= height => use last Input row
                int clamped_row = (row < height) ? row : height - 1;
                int base_p = (stbi__flip_vertically_on_write ? (height-1-clamped_row) : clamped_row)*width*comp;
                for(col = x; col < x+8; ++col, ++pos) {
                   float r, g, b;
-                  // if col >= width => use pixel from last input column
+                  // if col >= width => use pixel from last Input column
                   int p = base_p + ((col < width) ? col : (width-1))*comp;
 
                   r = imageData[p+0];

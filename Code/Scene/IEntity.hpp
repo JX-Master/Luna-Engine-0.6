@@ -8,9 +8,9 @@
 #include <Core/Core.hpp>
 #include "IComponent.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
 		struct IScene;
 
@@ -23,28 +23,28 @@ namespace luna
 			virtual P<IScene> belonging_scene() = 0;
 
 			//! Gets the name of this entity.
-			virtual IName* name() = 0;
+			virtual Name name() = 0;
 			
 			//! Changes the name of this entity.
-			virtual RV set_name(IName* name) = 0;
+			virtual RV set_name(const Name& name) = 0;
 
 			//! Creates and attaches a new component to this entity.
 			//! @param[in] component_name The name of the component type.
 			//! @return Returns the new added component instance. If there is already a component attached, this function fails.
-			virtual R<IComponent*> add_component(IName* component_type) = 0;
+			virtual R<IComponent*> add_component(const Name& component_type) = 0;
 
 			//! Detaches one component with the specified type. The component will be deleted when detached.
 			//! @param[in] component_name The name of the component type.
-			virtual RV remove_component(IName* component_type) = 0;
+			virtual RV remove_component(const Name& component_type) = 0;
 
 			//! Detaches all components.
 			virtual void clear_components() = 0;
 
 			//! Gets the component with the specified type.
-			virtual R<IComponent*> get_component(IName* type_name) = 0;
+			virtual R<IComponent*> get_component(const Name& type_name) = 0;
 
 			//! Gets the component with the specified type, or creates a default one if it is not exist.
-			virtual R<IComponent*> add_or_get_component(IName* type_name) = 0;
+			virtual R<IComponent*> add_or_get_component(const Name& type_name) = 0;
 
 			//! Gets a vector of all components attached to this entity.
 			virtual Vector<IComponent*> components() = 0;

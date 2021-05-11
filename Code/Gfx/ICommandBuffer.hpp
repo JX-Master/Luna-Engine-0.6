@@ -5,33 +5,34 @@
 * @date 2020/3/10
 */
 #pragma once
-#include <Base/IObject.hpp>
+#include <Core/IObject.hpp>
+#include <Core/Interface.hpp>
 #include "IPipelineState.hpp"
 #include "IFrameBuffer.hpp"
-#include <Base/Math.hpp>
+#include <Runtime/Math.hpp>
 #include "IViewSet.hpp"
 #include "IRenderPass.hpp"
 #include "IShaderInputLayout.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		enum class ECommandQueueType : uint32
+		enum class ECommandQueueType : u32
 		{
 			graphic = 1,
 			compute = 2,
 			copy = 3,
 		};
 
-		enum class EClearFlag : uint32
+		enum class EClearFlag : u32
 		{
 			none = 0x00,
 			depth = 0x01,
 			stencil = 0x02
 		};
 
-		enum class ETextureCopyType : uint32
+		enum class ETextureCopyType : u32
 		{
 			subresource_index,	// When the referencing resource is a texture.
 			placed_footprint		// When the referencing resource is a buffer.
@@ -40,15 +41,15 @@ namespace luna
 		struct SubresourceFootprint
 		{
 			EResourceFormat format;
-			uint32 width;
-			uint32 height;
-			uint32 depth;
-			uint32 row_pitch;
+			u32 width;
+			u32 height;
+			u32 depth;
+			u32 row_pitch;
 		};
 
 		struct PlacedResourceFootprint
 		{
-			uint64 offset;
+			u64 offset;
 			SubresourceFootprint footprint;
 		};
 
@@ -59,10 +60,10 @@ namespace luna
 			union
 			{
 				PlacedResourceFootprint placed_footprint;
-				uint32 subresource_index;
+				u32 subresource_index;
 			};
 
-			static TextureCopyLocation as_placed_foorprint(IResource* _resource, uint64 _offset, EResourceFormat _format, uint32 _width, uint32 _height, uint32 _depth, uint32 _row_pitch)
+			static TextureCopyLocation as_placed_foorprint(IResource* _resource, u64 _offset, EResourceFormat _format, u32 _width, u32 _height, u32 _depth, u32 _row_pitch)
 			{
 				TextureCopyLocation r;
 				r.type = ETextureCopyType::placed_footprint;
@@ -76,7 +77,7 @@ namespace luna
 				return r;
 			}
 
-			static TextureCopyLocation as_subresource_index(IResource* _resource, uint32 _subresource_index)
+			static TextureCopyLocation as_subresource_index(IResource* _resource, u32 _subresource_index)
 			{
 				TextureCopyLocation r;
 				r.type = ETextureCopyType::subresource_index;
@@ -86,7 +87,7 @@ namespace luna
 			}
 		};
 
-		enum class EResourceBarrierType : uint32
+		enum class EResourceBarrierType : u32
 		{
 			//! Translates the state of the resource to a new state. In most of the time you don't need to call this 
 			//! manually, since the resource state tracking system built in Gfx tracks the resource state and inserts
@@ -104,20 +105,20 @@ namespace luna
 			uav = 3
 		};
 
-		enum class EResourceBarrierFlag : uint32
+		enum class EResourceBarrierFlag : u32
 		{
 			none = 0x00,
 			begin_only = 0x01,
 			end_only = 0x02,
 		};
 
-		constexpr uint32 resource_barrier_all_subresources_v = uint32_max_v;
+		constexpr u32 resource_barrier_all_subresources_v = u32_max;
 		struct IResource;
 
 		struct ResourceTransitionBarrierDesc
 		{
 			IResource* resource;
-			uint32 subresource;
+			u32 subresource;
 			EResourceState after;
 		};
 
@@ -143,7 +144,7 @@ namespace luna
 				ResourceUAVBarrierDesc uav;
 			};
 
-			static ResourceBarrierDesc as_transition(IResource* resource, EResourceState after, uint32 subresource = resource_barrier_all_subresources_v, EResourceBarrierFlag flags = EResourceBarrierFlag::none)
+			static ResourceBarrierDesc as_transition(IResource* resource, EResourceState after, u32 subresource = resource_barrier_all_subresources_v, EResourceBarrierFlag flags = EResourceBarrierFlag::none)
 			{
 				ResourceBarrierDesc r;
 				r.type = EResourceBarrierType::transition;
@@ -202,7 +203,7 @@ namespace luna
 			//! or the behavior is undefined. In order to make sure all commands are executed by GPU, call
 			//! `wait` to block the thread until this buffer gets finished, or you can use `try_wait` to test
 			//! if the buffer has finished execution. Calling `wait` and `try_wait` before the buffer is submitted
-			//! cause `e_bad_calling_time` failure.
+			//! cause `BasicError::bad_calling_time()` failure.
 			virtual RV reset() = 0;
 
 			//! Attaches one graphic device object to this command buffer. The command buffer keeps a strong reference 
@@ -240,8 +241,8 @@ namespace luna
 			//! * clear_depth_stencil_view
 			//! The following functions can only be called outside of one render pass range:
 			//! * submit
-			virtual void begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, uint32 num_rt_clear_values, const Float4U* clear_values,
-				float32 depth_clear_value, uint8 stencil_clear_value) = 0;
+			virtual void begin_render_pass(IRenderPass* render_pass, IFrameBuffer* fbo, u32 num_rt_clear_values, const Float4U* clear_values,
+				f32 depth_clear_value, u8 stencil_clear_value) = 0;
 
 			//! Sets the graphic or compute pipeline state.
 			virtual void set_pipeline_state(IPipelineState* pso) = 0;
@@ -250,10 +251,10 @@ namespace luna
 			virtual void set_graphic_shader_input_layout(IShaderInputLayout* shader_input_layout) = 0;
 
 			//! Sets vertex buffers.
-			virtual void set_vertex_buffers(uint32 start_slot, uint32 num_views, const VertexBufferViewDesc* views) = 0;
+			virtual void set_vertex_buffers(u32 start_slot, u32 num_views, const VertexBufferViewDesc* views) = 0;
 
 			//! Sets index buffer.
-			virtual void set_index_buffer(IResource* buffer, uint32 offset_in_bytes, uint32 size_in_bytes, EResourceFormat format) = 0;
+			virtual void set_index_buffer(IResource* buffer, u32 offset_in_bytes, u32 size_in_bytes, EResourceFormat format) = 0;
 
 			//! Sets the view set to be used by the graphic pipeline.
 			//! This must be called after `set_pipeline_state`.
@@ -263,46 +264,46 @@ namespace luna
 			virtual void set_primitive_topology(EPrimitiveTopology primitive_topology) = 0;
 
 			//! Sets the stream output buffer views. 
-			virtual void set_stream_output_targets(uint32 start_slot, uint32 num_views, const StreamOutputBufferView* views) = 0;
+			virtual void set_stream_output_targets(u32 start_slot, u32 num_views, const StreamOutputBufferView* views) = 0;
 
 			//! Bind one viewport to the rasterizer stage of the pipeline.
 			virtual void set_viewport(const Viewport& viewport) = 0;
 
 			//! Bind an array of viewports to the rasterizer stage of the pipeline.
-			virtual void set_viewports(uint32 num_viewports, const Viewport* viewports) = 0;
+			virtual void set_viewports(u32 num_viewports, const Viewport* viewports) = 0;
 
 			//! Binds one scissor rectangle to the rasterizer stage.
 			virtual void set_scissor_rect(const RectI& rects) = 0;
 
 			//! Binds an array of scissor rectangles to the rasterizer stage.
-			virtual void set_scissor_rects(uint32 num_rects, const RectI* rects) = 0;
+			virtual void set_scissor_rects(u32 num_rects, const RectI* rects) = 0;
 
 			//! Sets the blend factor that modulate values for a pixel shader, render target, or both.
-			virtual void set_blend_factor(const float32 blend_factor[4]) = 0;
+			virtual void set_blend_factor(const f32 blend_factor[4]) = 0;
 
 			//! Sets the reference value for depth stencil tests.
-			virtual void set_stencil_ref(uint32 stencil_ref) = 0;
+			virtual void set_stencil_ref(u32 stencil_ref) = 0;
 
 			//! Draw primitives.
-			virtual void draw(uint32 vertex_count, uint32 start_vertex_location) = 0;
+			virtual void draw(u32 vertex_count, u32 start_vertex_location) = 0;
 
 			//! Draw indexed primitives.
-			virtual void draw_indexed(uint32 index_count, uint32 start_index_location, int32 base_vertex_location) = 0;
+			virtual void draw_indexed(u32 index_count, u32 start_index_location, i32 base_vertex_location) = 0;
 
 			//! Draws indexed, instanced primitives.
-			virtual void draw_indexed_instanced(uint32 index_count_per_instance, uint32 instance_count, uint32 start_index_location,
-				int32 base_vertex_location, uint32 start_instance_location) = 0;
+			virtual void draw_indexed_instanced(u32 index_count_per_instance, u32 instance_count, u32 start_index_location,
+				i32 base_vertex_location, u32 start_instance_location) = 0;
 
 			//! Draws non-indexed, instanced primitives.
-			virtual void draw_instanced(uint32 vertex_count_per_instance, uint32 instance_count, uint32 start_vertex_location,
-				uint32 start_instance_location) = 0;
+			virtual void draw_instanced(u32 vertex_count_per_instance, u32 instance_count, u32 start_vertex_location,
+				u32 start_instance_location) = 0;
 
 			//! Clears the depth stencil view bound to the current render pass.
-			virtual void clear_depth_stencil_view(EClearFlag clear_flags, float32 depth, uint8 stencil, uint32 num_rects, const RectI* rects) = 0;
+			virtual void clear_depth_stencil_view(EClearFlag clear_flags, f32 depth, u8 stencil, u32 num_rects, const RectI* rects) = 0;
 
 			//! Clears the render target view bound to the current render pass.
 			//! @param[in] index The index of the render target view to clear in the frame buffers.
-			virtual void clear_render_target_view(uint32 index, const float32 color_rgba[4], uint32 num_rects, const RectI* rects) = 0;
+			virtual void clear_render_target_view(u32 index, const f32 color_rgba[4], u32 num_rects, const RectI* rects) = 0;
 
 			//! Finishes the current render pass.
 			virtual void end_render_pass() = 0;
@@ -311,10 +312,10 @@ namespace luna
 			virtual void copy_resource(IResource* dest, IResource* src) = 0;
 
 			//! Copies a region of a buffer from one resource to another.
-			virtual void copy_buffer_region(IResource* dest, uint64 dest_offset, IResource* src, uint64 src_offset, uint64 num_bytes) = 0;
+			virtual void copy_buffer_region(IResource* dest, u64 dest_offset, IResource* src, u64 src_offset, u64 num_bytes) = 0;
 
 			//! This method uses the GPU to copy texture data between two locations. 
-			virtual void copy_texture_region(const TextureCopyLocation& dst, uint32 dst_x, uint32 dst_y, uint32 dst_z,
+			virtual void copy_texture_region(const TextureCopyLocation& dst, u32 dst_x, u32 dst_y, u32 dst_z,
 				const TextureCopyLocation& src, const BoxU* src_box = nullptr) = 0;
 
 			//! Sets the compute shader input layout.
@@ -328,10 +329,10 @@ namespace luna
 			virtual void resource_barrier(const ResourceBarrierDesc& barriers) = 0;
 
 			//! Issues resource barriers.
-			virtual void resource_barriers(uint32 num_barriers, const ResourceBarrierDesc* barriers) = 0;
+			virtual void resource_barriers(u32 num_barriers, const ResourceBarrierDesc* barriers) = 0;
 
 			//! Executes a command list from a thread group.
-			virtual void dispatch(uint32 thread_group_count_x, uint32 thread_group_count_y, uint32 thread_group_count_z) = 0;
+			virtual void dispatch(u32 thread_group_count_x, u32 thread_group_count_y, u32 thread_group_count_z) = 0;
 
 			//! Submits the recorded content in this command buffer to the target command queue.
 			//! The command buffer can only be submitted once, and the only operation after the submit is to 

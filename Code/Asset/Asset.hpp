@@ -12,16 +12,14 @@
 #define LUNA_ASSET_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
 		//constexpr Guid err_domain_asset{ "{7941556e-fd28-48ef-ba4c-a5adfc44ed46}" };
 
 		//constexpr result_t e_asset_not_resolved = e_user_failure - 1;
 		//constexpr result_t e_asset_not_loaded = e_user_failure - 2;
-
-		LUNA_ASSET_API void init();
 
 		//! Registers an asset type. 
 		//! The asset system keeps a strong reference to the asset type object, all objects created for the 
@@ -29,10 +27,10 @@ namespace luna
 		LUNA_ASSET_API RV register_asset_type(IAssetType* type_obj);
 
 		//! Unregisters an asset type.
-		LUNA_ASSET_API RV unregister_asset_type(IName* type_name);
+		LUNA_ASSET_API RV unregister_asset_type(const Name& type_name);
 
 		//! Gets the registered asset type.
-		LUNA_ASSET_API RP<IAssetType> get_asset_type(IName* type_name);
+		LUNA_ASSET_API RP<IAssetType> get_asset_type(const Name& type_name);
 
 		//! Loads the asset metadata from the metadata file from the virtual file system and creates one 
 		//! empty asset instance.
@@ -44,10 +42,7 @@ namespace luna
 		//! the meta file, which is one of the following two files:
 		//! * {meta_path}.data.la
 		//! * {meta_path}.data.lb
-		//! @return Returns `s_ok` if the asset metadata is loaded from file; returns `s_already_done` if 
-		//! one asset with the same GUID already exists in the registry (the original registry will not be 
-		//! overwritten); returns failure on error.
-		LUNA_ASSET_API RP<IAsset> load_asset_meta(IPath* meta_path);
+		LUNA_ASSET_API RP<IAsset> load_asset_meta(const Path& meta_path);
 
 		//! Creates a new empty asset instance for the specified asset type.
 		//! 
@@ -57,13 +52,13 @@ namespace luna
 		//! a valid path before loading or saving meta & data information.
 		//! @param[in] asset_type The type of the new asset.
 		//! @param[in] guid The guid of the new asset. If this is `nullptr`, the new guid will be randomly generated.
-		LUNA_ASSET_API RP<IAsset> new_asset(IName* asset_type, const Guid* guid = nullptr);
+		LUNA_ASSET_API RP<IAsset> new_asset(const Name& asset_type, const Guid* guid = nullptr);
 
 		//! Fetches an asset by its GUID.
 		LUNA_ASSET_API RP<IAsset> fetch_asset(const Guid& asset_id);
 
 		//! Fetches an asset by its meta path. The path does not include extension.
-		LUNA_ASSET_API RP<IAsset> fetch_asset(IPath* meta_path);
+		LUNA_ASSET_API RP<IAsset> fetch_asset(const Path& meta_path);
 
 		//! Removes one asset from the asset registry. The asset system keeps strong references to the assets 
 		//! until it is removed.
@@ -151,8 +146,8 @@ namespace luna
 					return nullptr;
 				}
 				// Try to resolve the asset.
-				auto fetch = asset::fetch_asset(m_guid);
-				if (succeeded(fetch))
+				auto fetch = Asset::fetch_asset(m_guid);
+				if (fetch.valid())
 				{
 					ass = fetch.get();
 					m_ass = ass;

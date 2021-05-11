@@ -8,16 +8,16 @@
 #include "AssetSystem.hpp"
 #include "AssetMeta.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace asset
+	namespace Asset
 	{
-		int AssetLoadRequest::AssetLoadRequest::run()
+		void AssetLoadRequest::AssetLoadRequest::run()
 		{
 			auto ass = m_asset.lock();
 			if (!ass)
 			{
-				return 0;
+				return;
 			}
 			auto meta = static_cast<AssetMeta*>(ass->meta());
 			MutexGuard g(meta->mutex());
@@ -60,23 +60,25 @@ namespace luna
 			{
 				meta->internal_set_state(EAssetState::unloaded);
 				meta->internal_set_flags(meta->flags() | EAssetFlag::loading_error);
-				auto err = meta->error_object();
 				// Failed to load data.
-				auto rerr = err_from_code(lures);
-				err->set_err_result(rerr->err_result());
-				err->set_err_domain(rerr->err_domain());
-				err->set_err_var(rerr->err_var());
-				err->set_err_msg(rerr->err_msg());
+				if (lures == BasicError::error_object())
+				{
+					meta->error_object() = get_error_object();
+				}
+				else
+				{
+					meta->error_object() = Error(lures);
+				}
 			}
-			return 0;
+			return;
 		}
 
-		int AssetSaveRequest::run()
+		void AssetSaveRequest::run()
 		{
 			auto ass = m_asset.lock();
 			if (!ass)
 			{
-				return 0;
+				return;
 			}
 			auto meta = ass->meta();
 			MutexGuard g(meta->mutex());
@@ -87,12 +89,11 @@ namespace luna
 					// Save data.
 					lulet(mgr, route_mgr(meta->type()));
 					lulet(data, mgr->on_save_data(ass, m_params));
-					auto save_path = new_path();
-					save_path->assign(meta->data_path());
+					auto save_path = meta->data_path();
 					
 					if (m_format == EAssetSaveFormat::ascii)
 					{
-						save_path->append_extension("data.la");
+						save_path.append_extension("data.la");
 					}
 					else
 					{
@@ -111,45 +112,44 @@ namespace luna
 					// * "data_path" - Optional. If the path of the data is not the path of the asset, stores the 
 					// path of the data relative to the path of the asset.
 					// * "dependencies" - Array of Guids of all assets this asset depends on.
-					auto var = new_var(EVariantType::table);
+					auto var = Variant(EVariantType::table);
 					// Save type.
-					auto var_type = new_var(EVariantType::name);
-					var_type->name() = meta->type();
-					var->set_field(0, g_name_type, var_type);
+					auto var_type = Variant(EVariantType::name);
+					var_type.to_name() = meta->type();
+					var.set_field(0, g_name_type, var_type);
 					// Save guid.
-					auto var_guid = new_var1(EVariantType::u64, 2);
+					auto var_guid = Variant(EVariantType::u64, 2);
 					Guid guid = meta->guid();
-					var_guid->u64_buf()[0] = guid.low;
-					var_guid->u64_buf()[1] = guid.high;
-					var->set_field(0, g_name_guid, var_guid);
+					var_guid.to_u64_buf()[0] = guid.low;
+					var_guid.to_u64_buf()[1] = guid.high;
+					var.set_field(0, g_name_guid, var_guid);
 					// Save data path only if not default.
-					if (!meta->data_path()->equal_to(meta->meta_path()))
+					if (!meta->data_path().equal_to(meta->meta_path()))
 					{
-						auto relative_path = new_path();
-						luexp(relative_path->assign_relative(meta->meta_path(), meta->data_path()));
-						auto path_var = new_var(EVariantType::path);
-						path_var->path() = relative_path;
-						var->set_field(0, g_name_data_path, path_var);
+						auto relative_path = Path();
+						relative_path.assign_relative(meta->meta_path(), meta->data_path());
+						auto path_var = Variant(EVariantType::path);
+						path_var.to_path() = relative_path;
+						var.set_field(0, g_name_data_path, path_var);
 					}
 					// Save dependencies if not empty.
 					auto deps = meta->dependencies();
 					if (!deps.empty())
 					{
-						auto deps_var = new_var2(EVariantType::u64, 2, deps.size());
-						for (size_t i = 0; i < deps.size(); ++i)
+						auto deps_var = Variant(EVariantType::u64, 2, deps.size());
+						for (usize i = 0; i < deps.size(); ++i)
 						{
-							deps_var->u64_buf()[deps_var->index(0, i)] = deps[i].low;
-							deps_var->u64_buf()[deps_var->index(1, i)] = deps[i].high;
+							deps_var.to_u64_buf()[deps_var.index(0, i)] = deps[i].low;
+							deps_var.to_u64_buf()[deps_var.index(1, i)] = deps[i].high;
 						}
-						var->set_field(0, g_name_dependencies, deps_var);
+						var.set_field(0, g_name_dependencies, deps_var);
 					}
 					// Write to file.
-					auto save_path = new_path();
-					save_path->assign(meta->meta_path());
+					auto save_path = meta->meta_path();
 
 					if (m_format == EAssetSaveFormat::ascii)
 					{
-						save_path->append_extension("meta.la");
+						save_path.append_extension("meta.la");
 					}
 					else
 					{
@@ -160,18 +160,18 @@ namespace luna
 					luexp(encoder->encode(var, f));
 					f = nullptr;
 				}
-				m_res = s_ok;
+				m_res = 0;
 			}
 			lucatch
 			{
 				m_res = lures;
-				if (m_res == e_user_failure)
+				if (m_res == BasicError::error_object())
 				{
-					m_err = promote_err();
+					m_err = get_error_object();
 				}
 			}
 			m_finished = true;
-			return 0;
+			return;
 		}
 
 		IDispatchQueue* get_streaming_queue()

@@ -8,7 +8,7 @@
 #pragma once
 #include "IWaitable.hpp"
 
-namespace luna
+namespace Luna
 {
 	//! @interface IMutex
 	//! @threadsafe

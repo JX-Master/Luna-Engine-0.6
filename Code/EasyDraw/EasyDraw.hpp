@@ -5,7 +5,7 @@
 * @date 2019/10/6
 */
 #pragma once
-#include <Base/IObject.hpp>
+#include <Core/IObject.hpp>
 #include <Gfx/Gfx.hpp>
 #include "IDrawPath.hpp"
 #include "IFontTexture.hpp"
@@ -16,18 +16,16 @@
 #define LUNA_EASY_DRAW_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace edraw
+	namespace EasyDraw
 	{
-		LUNA_EASY_DRAW_API RV init();
-
 		//! Creates a new draw list.
 		LUNA_EASY_DRAW_API P<IDrawList> new_draw_list();
 
 		//! Creates a new draw list renderer.
 		//! @param[in] render_pass The render pass object for this renderer. This cannot be changed after the renderer is created.
-		LUNA_EASY_DRAW_API RP<IDrawListRenderer> new_draw_list_renderer(gfx::IRenderPass* render_pass);
+		LUNA_EASY_DRAW_API RP<IDrawListRenderer> new_draw_list_renderer(Gfx::IRenderPass* render_pass);
 
 		//! Create a new path object.
 		LUNA_EASY_DRAW_API P<IDrawPath> new_draw_path();
@@ -38,6 +36,6 @@ namespace luna
 		//! @param[in] command_buffer The command buffer used to upload textures. This call returns after the texture has
 		//! been uploaded, and this command buffer will be reset.
 		//! @remark The texture is created for the device that owns the command buffer used.
-		LUNA_EASY_DRAW_API RP<IFontTexture> new_font_texture(font::IFontAtlas* atlas, gfx::ICommandBuffer* command_buffer);
+		LUNA_EASY_DRAW_API RP<IFontTexture> new_font_texture(Font::IFontAtlas* atlas, Gfx::ICommandBuffer* command_buffer);
 	}
 }

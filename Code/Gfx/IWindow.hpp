@@ -6,13 +6,13 @@
 */
 #pragma once
 #include "IWindowEventListener.hpp"
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		struct IWindow;
 
-		enum class EMouseCursorShape : uint32
+		enum class EMouseCursorShape : u32
 		{
 			none = 0,					// Do not display and cursor shape in this window.
 			arrow,
@@ -36,7 +36,7 @@ namespace luna
 			//! Close the window and release all underlying resources for the window.
 			//! All methods of the window will be invalid after the window is closed.
 			//! The registered callbacks will be cleared after the window is closed.
-			//! @return `s_ok` if the window is successfully close, `e_bad_calling_time`
+			//! @return `RV()` if the window is successfully close, `BasicError::bad_calling_time()`
 			//! if the window is already closed before this call.
 			virtual RV close() = 0;
 
@@ -45,8 +45,8 @@ namespace luna
 			virtual bool closed() = 0;
 
 			//! set the window display mode.
-			//! @return `s_ok` if the window's display mode is set to the specified value
-			//! after the call. `e_bad_calling_time` if the window is already closed before this call.
+			//! @return `RV()` if the window's display mode is set to the specified value
+			//! after the call. `BasicError::bad_calling_time()` if the window is already closed before this call.
 			virtual RV set_display_mode(EWindowDisplayMode display_state) = 0;
 
 			//! Get the display mode of the window.
@@ -57,8 +57,8 @@ namespace luna
 			//! Show or hide the window.
 			//! @param[in] `true` if you want to display the window, or `hide` if you want to 
 			//! hide the window.
-			//! @return `s_ok` if the window's visibility is set to the specified value
-			//! after the call. `e_bad_calling_time` if the window is already closed before this call.
+			//! @return `RV()` if the window's visibility is set to the specified value
+			//! after the call. `BasicError::bad_calling_time()` if the window is already closed before this call.
 			virtual RV set_visible(bool visible) = 0;
 
 			//! Get the visibility of the window.
@@ -85,23 +85,29 @@ namespace luna
 			//! Get the scale factor of the window, which is native_size / size.
 			//! Using this value instead of calculating native_size / size manually, since the size is represented in integers and may
 			//! result in inaccuracy.
-			virtual float32 dpi_scale_factor() = 0;
+			virtual f32 dpi_scale_factor() = 0;
 
 			//! Set scaled the size of the window.
-			virtual RV set_size(uint32 width, uint32 height) = 0;
+			virtual RV set_size(u32 width, u32 height) = 0;
+
+			//! Gets the title of the window.
+			virtual String title() = 0;
+
+			//! Sets the title of the window.
+			virtual RV set_title(const c8* title_str) = 0;
 
 			//! Get the scaled position of the window relative to screen origin.
 			virtual Int2U position() = 0;
 
 			//! Set the scaled position of the window relative to screen origin.
-			virtual RV set_position(int32 x, int32 y) = 0;
+			virtual RV set_position(i32 x, i32 y) = 0;
 
 			//! Gets the mouse cursor shape in this window. The default cursor shape is arrow.
 			//! Always return `EMouseCursorShape::none` on platforms that do not have the mouse cursor.
 			virtual EMouseCursorShape mouse_cursor_shape() = 0;
 
 			//! Sets the mouse cursor shape in this window. 
-			//! This function returns `e_not_available` on platforms that do not have mouse cursor. 
+			//! This function returns `BasicError::not_supported()` on platforms that do not have mouse cursor. 
 			virtual RV set_mouse_cursor_shape(EMouseCursorShape cursor_shape) = 0;
 		};
 	}

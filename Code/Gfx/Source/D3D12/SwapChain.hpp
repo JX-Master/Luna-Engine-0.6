@@ -15,13 +15,13 @@
 #include "GraphicDevice.hpp"
 #include "CommandQueue.hpp"
 #include "../Windows/Window.hpp"
-#include <Base/TSAssert.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class GraphicDevice;
 			class BackBufferResource;
@@ -38,7 +38,7 @@ namespace luna
 
 				P<GraphicDevice> m_device;
 				P<CommandQueue> m_queue;
-				P<win::Window> m_window;
+				P<Win::Window> m_window;
 				ComPtr<IDXGISwapChain1> m_sc;
 				SwapChainDesc m_desc;
 
@@ -49,17 +49,15 @@ namespace luna
 				ComPtr<ID3D12RootSignature> m_root_signature;
 				ComPtr<ID3D12DescriptorHeap> m_rtvs;
 				ComPtr<ID3D12DescriptorHeap> m_srv;
-				size_t m_rtv_size;
+				usize m_rtv_size;
 
 				// Present resources, need to be reset when the swap chain is resized.
 				ComPtr<ID3D12PipelineState> m_pso;
 				Vector<ComPtr<ID3D12Resource>> m_back_buffers;
-				uint32 m_current_back_buffer;
+				u32 m_current_back_buffer;
 
 				SwapChain() :
-					luibind(get_module_allocator()),
 					m_event(NULL),
-					m_back_buffers(get_module_allocator()),
 					m_current_back_buffer(0) {}
 
 				~SwapChain()
@@ -74,10 +72,10 @@ namespace luna
 				//! Initializes all resources stored in device, which is shared between all swap chains for the same device.
 				RV init_shared_res();
 
-				RV init(win::Window* window, CommandQueue* queue, const SwapChainDesc& desc);
+				RV init(Win::Window* window, CommandQueue* queue, const SwapChainDesc& desc);
 
 				//! Called when the back buffer is resized or when the swap chain is initialized.
-				RV reset_back_buffer_resources(uint32 buffer_count, uint32 width, uint32 height, EResourceFormat new_format);
+				RV reset_back_buffer_resources(u32 buffer_count, u32 width, u32 height, EResourceFormat new_format);
 
 				virtual IGraphicDevice* get_device() override
 				{
@@ -97,13 +95,13 @@ namespace luna
 					DWORD res = ::WaitForSingleObject(m_event, 0);
 					if (res == WAIT_OBJECT_0)
 					{
-						return s_ok;
+						return RV();
 					}
 					if (res == WAIT_TIMEOUT)
 					{
-						return e_pending;
+						return BasicError::timeout();
 					}
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				virtual IWindow* bounding_window() override
@@ -115,8 +113,8 @@ namespace luna
 				{
 					return m_desc;
 				}
-				virtual RV present(IResource* resource, uint32 subresource, uint32 sync_interval) override;
-				virtual RV resize_buffers(uint32 buffer_count, uint32 width, uint32 height, EResourceFormat new_format) override;
+				virtual RV present(IResource* resource, u32 subresource, u32 sync_interval) override;
+				virtual RV resize_buffers(u32 buffer_count, u32 width, u32 height, EResourceFormat new_format) override;
 			};
 		}
 	}

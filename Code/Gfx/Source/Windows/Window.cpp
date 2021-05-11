@@ -8,11 +8,13 @@
 
 #ifdef LUNA_PLATFORM_WINDOWS
 
-namespace luna
+#include <Runtime/Unicode.hpp>
+
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			void Window::set_mouse_cursor_shape_internal(EMouseCursorShape shape)
 			{
@@ -54,36 +56,36 @@ namespace luna
 			{
 				if (!m_hwnd)
 				{
-					return e_bad_calling_time;
+					return BasicError::bad_calling_time();
 				}
 				MutexGuard g(m_mtx);
 				::DestroyWindow(m_hwnd);
 				m_hwnd = nullptr;
 				m_listeners.clear();
-				return s_ok;
+				return RV();
 			}
 			RV Window::set_display_mode(EWindowDisplayMode display_state)
 			{
 				if (!m_hwnd)
 				{
-					return e_bad_calling_time;
+					return BasicError::bad_calling_time();
 				}
 				switch (display_state)
 				{
-				case luna::gfx::EWindowDisplayMode::windowed:
+				case Luna::Gfx::EWindowDisplayMode::windowed:
 					::ShowWindow(m_hwnd, SW_RESTORE);
 					break;
-				case luna::gfx::EWindowDisplayMode::maximized:
+				case Luna::Gfx::EWindowDisplayMode::maximized:
 					::ShowWindow(m_hwnd, SW_MAXIMIZE);
 					break;
-				case luna::gfx::EWindowDisplayMode::minimized:
+				case Luna::Gfx::EWindowDisplayMode::minimized:
 					::ShowWindow(m_hwnd, SW_MINIMIZE);
 					break;
 				default:
 					lupanic();
 					break;
 				}
-				return s_ok;
+				return RV();
 			}
 			EWindowDisplayMode Window::display_mode()
 			{
@@ -106,7 +108,7 @@ namespace luna
 			{
 				if (!m_hwnd)
 				{
-					return e_bad_calling_time;
+					return BasicError::bad_calling_time();
 				}
 				if (visibile)
 				{
@@ -124,7 +126,7 @@ namespace luna
 				{
 					::ShowWindow(m_hwnd, SW_HIDE);
 				}
-				return s_ok;
+				return RV();
 			}
 
 			bool Window::visible()
@@ -152,27 +154,45 @@ namespace luna
 				ret.x = r.right - r.left;
 				ret.y = r.bottom - r.top;
 				// Get system DPI.
-				float32 scaled = dpi_scale_factor();
-				ret.x = (uint32)(ret.x / scaled);
-				ret.y = (uint32)(ret.y / scaled);
+				f32 scaled = dpi_scale_factor();
+				ret.x = (u32)(ret.x / scaled);
+				ret.y = (u32)(ret.y / scaled);
 				return ret;
 			}
-			float32 Window::dpi_scale_factor()
+			f32 Window::dpi_scale_factor()
 			{
 				//HWND hd = GetDesktopWindow();
 				int zoom = GetDpiForWindow(m_hwnd);
-				float32 scaled = (float32)zoom / 96.0f;
+				f32 scaled = (f32)zoom / 96.0f;
 				return scaled;
 			}
-			RV Window::set_size(uint32 width, uint32 height)
+			RV Window::set_size(u32 width, u32 height)
 			{
 				RECT r;
 				::GetClientRect(m_hwnd, &r);
 				if (::MoveWindow(m_hwnd, r.left, r.top, width, height, TRUE))
 				{
-					return s_ok;
+					return RV();
 				}
-				return e_failure;
+				return BasicError::failure();
+			}
+			String Window::title()
+			{
+				wchar_t buf[260];
+				u32 buf_sz = ::GetWindowTextW(m_hwnd, buf, 260);
+				buf[buf_sz] = 0;
+				u32 u8_sz = (u32)utf16_to_utf8_len((c16*)buf);
+				String r;
+				r.resize(u8_sz, '\0');
+				utf16_to_utf8(r.data(), r.size() + 1, (c16*)buf);
+				return r;
+			}
+			RV Window::set_title(const c8* title_str)
+			{
+				wchar_t buf[260];
+				utf8_to_utf16((c16*)buf, 260, title_str);
+				BOOL r = ::SetWindowTextW(m_hwnd, buf);
+				return r ? RV() : BasicError::bad_system_call();
 			}
 			Int2U Window::position()
 			{
@@ -183,15 +203,15 @@ namespace luna
 				ret.y = p.y;
 				return ret;
 			}
-			RV Window::set_position(int32 x, int32 y)
+			RV Window::set_position(i32 x, i32 y)
 			{
 				RECT r;
 				::GetClientRect(m_hwnd, &r);
 				if (::MoveWindow(m_hwnd, x, y, r.right - r.left, r.bottom - r.top, FALSE))
 				{
-					return s_ok;
+					return RV();
 				}
-				return e_failure;
+				return BasicError::failure();
 			}
 		}
 	}

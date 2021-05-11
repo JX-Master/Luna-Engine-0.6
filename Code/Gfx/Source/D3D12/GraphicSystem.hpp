@@ -13,11 +13,11 @@
 
 #include "../Windows/GraphicSystemWindows.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			class GraphicDevice;
 			class SwapChain;

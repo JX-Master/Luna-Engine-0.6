@@ -7,9 +7,9 @@
 */
 #pragma once
 #include "IWaitable.hpp"
-namespace luna
+namespace Luna
 {
-	enum class EThreadPriority : int32
+	enum class EThreadPriority : i32
 	{
 		low = 0,
 		normal = 1,
@@ -25,6 +25,6 @@ namespace luna
 		luiid("{9e4fbbb8-0751-4703-bfb5-246dd1cf8b04}");
 
 		//! Set thread priority.
-		virtual void set_priority(EThreadPriority priority) = 0;
+		virtual RV set_priority(EThreadPriority priority) = 0;
 	};
 }

@@ -11,7 +11,7 @@
 #define LUNA_OBJ_LOADER_API 
 #endif
 
-namespace luna
+namespace Luna
 {
 	namespace obj_loader
 	{

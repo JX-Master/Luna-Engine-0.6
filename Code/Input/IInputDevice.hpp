@@ -5,13 +5,13 @@
 * @date 2020/2/8
 */
 #pragma once
-#include <Base/IObject.hpp>
+#include <Core/IObject.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		enum class EInputDeviceFlag : uint32
+		enum class EInputDeviceFlag : u32
 		{
 			none = 0x00,
 			//! The state of this device is buffered and only gets updated when `update` is called. This can be useful if 

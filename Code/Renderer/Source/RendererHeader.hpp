@@ -5,16 +5,8 @@
 * @date 2020/3/9
 */
 #pragma once
-#include <Base/PlatformDefines.hpp>
+#include <Runtime/PlatformDefines.hpp>
 
 #define LUNA_RENDERER_API LUNA_EXPORT
 
 #include "../Renderer.hpp"
-
-namespace luna
-{
-	inline IAllocator* get_module_allocator()
-	{
-		return get_global_heap();
-	}
-}

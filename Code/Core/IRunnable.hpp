@@ -5,9 +5,9 @@
 * @date 2018/12/24
  */
 #pragma once
-#include <Base/IObject.hpp>
+#include "IObject.hpp"
 
-namespace luna
+namespace Luna
 {
 	//! The callback that will be called by a thread or a fiber when it gets
 	//! run.
@@ -16,10 +16,6 @@ namespace luna
 		luiid("{d96813d5-8ebb-46a3-ad55-1d116a91f80d}");
 
 		//! Called when the thread or fiber gets run.
-		//! @return Returns 0 if the thread successfully exits, returns nun-zero 
-		//! otherwise. 
-		//! The return value is passed to operation system if needed. The engine
-		//! does not use this value.
-		virtual int run() = 0;
+		virtual void run() = 0;
 	};
 }

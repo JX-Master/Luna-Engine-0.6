@@ -5,9 +5,9 @@
 * @date 2020/1/26
 */
 #pragma once
-#include "IVariant.hpp"
+#include "Variant.hpp"
 #include "IStream.hpp"
-namespace luna
+namespace Luna
 {
 	struct IDecoder : public IObject
 	{
@@ -20,6 +20,6 @@ namespace luna
 		//! where an error occurs.
 		//! 
 		//! The stream must be readable and seekable in order to used by the decoder.
-		virtual RP<IVariant> decode(IStream* source_stream) = 0;
+		virtual R<Variant> decode(IStream* source_stream) = 0;
 	};
 }

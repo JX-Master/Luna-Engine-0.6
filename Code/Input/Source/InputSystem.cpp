@@ -5,12 +5,14 @@
 * @date 2020/2/8
 */
 #include "InputSystem.hpp"
+#include <Core/Core.hpp>
+#include <Runtime/Module.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		Unconstructed<Vector<Pair<P<IName>, P<IInputDevice>>>> m_devices;
+		Unconstructed<Vector<Pair<Name, P<IInputDevice>>>> m_devices;
 		P<IMutex> m_mtx;
 		P<IObject> m_platform_devices;
 
@@ -33,23 +35,25 @@ namespace luna
 		RV init()
 		{
 			m_mtx = new_mutex();
-			m_devices.construct(get_global_heap());
-			result_t r = platform_input_init();
-			if (failed(r))
+			m_devices.construct();
+			RV r = platform_input_init();
+			if (!r.valid())
 			{
 				m_devices.destruct();
 				m_mtx = nullptr;
 				return r;
 			}
-			add_module("Input", deinit);
-			return s_ok;
+			return RV();
 		}
 
 		void deinit()
 		{
 			m_devices.destruct();
 			m_mtx = nullptr;
+			m_platform_devices = nullptr;
 		}
+
+		StaticRegisterModule m(u8"Input", u8"Core", init, deinit);
 
 		void update()
 		{
@@ -61,10 +65,10 @@ namespace luna
 			}
 		}
 
-		Vector<P<IName>> get_devices()
+		Vector<Name> get_devices()
 		{
 			MutexGuard g(m_mtx);
-			Vector<P<IName>> names(get_module_allocator());
+			Vector<Name> names;
 			remove_empty();
 			names.reserve(m_devices.get().size());
 			for (auto& i : m_devices.get())
@@ -74,61 +78,59 @@ namespace luna
 			return names;
 		}
 
-		RP<IInputDevice> get_device(IName* device_name)
+		RP<IInputDevice> get_device(const Name& device_name)
 		{
-			luassert_usr(device_name);
 			MutexGuard g(m_mtx);
 			remove_empty();
 			for (auto& i : m_devices.get())
 			{
-				if (i.first.get() == device_name)
+				if (i.first == device_name)
 				{
 					return i.second;
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 
-		RV mount_device(IName* device_name, IInputDevice* device)
+		RV mount_device(const Name& device_name, IInputDevice* device)
 		{
-			luassert_usr(device_name && device);
+			lucheck(device);
 			MutexGuard g(m_mtx);
 			remove_empty();
 			for (auto& i : m_devices.get())
 			{
-				if (i.first.get() == device_name)
+				if (i.first == device_name)
 				{
 					if (!i.second.empty())
 					{
-						return e_item_already_exists;
+						return BasicError::already_exists();
 					}
 					i.second = device;
-					return s_ok;
+					return RV();
 				}
 			}
-			m_devices.get().push_back(make_pair(makep(device_name), makewp(device)));
-			return s_ok;
+			m_devices.get().push_back(make_pair(device_name, makewp(device)));
+			return RV();
 		}
 
-		RV unmount_device(IName* device_name)
+		RV unmount_device(const Name& device_name)
 		{
-			luassert_usr(device_name);
 			MutexGuard g(m_mtx);
 			remove_empty();
 			auto iter = m_devices.get().begin();
 			while (iter != m_devices.get().end())
 			{
-				if (iter->first.get() == device_name)
+				if (iter->first == device_name)
 				{
 					m_devices.get().erase(iter);
-					return s_ok;
+					return RV();
 				}
 				else
 				{
 					++iter;
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 	}
 }

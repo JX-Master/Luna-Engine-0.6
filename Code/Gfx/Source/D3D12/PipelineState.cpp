@@ -11,15 +11,15 @@
 #include "GraphicSystem.hpp"
 #include "D3D12Common.hpp"
 
-#include <Base/Vector.hpp>
+#include <Runtime/Vector.hpp>
 
 #include "RenderPass.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			D3D12_BLEND encode_blend_factor(EBlendFactor f)
 			{
@@ -166,7 +166,7 @@ namespace luna
 				d.GS.BytecodeLength = desc.gs.length;
 				d.GS.pShaderBytecode = desc.gs.code;
 
-				Vector<D3D12_SO_DECLARATION_ENTRY> stream_entries(get_module_allocator());
+				Vector<D3D12_SO_DECLARATION_ENTRY> stream_entries;
 				d.StreamOutput.NumEntries = desc.stream_output.num_entries;
 				d.StreamOutput.NumStrides = desc.stream_output.num_strides;
 				d.StreamOutput.pBufferStrides = desc.stream_output.buffer_strides;
@@ -176,7 +176,7 @@ namespace luna
 				{
 					stream_entries.resize(desc.stream_output.num_entries);
 					d.StreamOutput.pSODeclaration = stream_entries.data();
-					for (size_t i = 0; i < stream_entries.size(); ++i)
+					for (usize i = 0; i < stream_entries.size(); ++i)
 					{
 						D3D12_SO_DECLARATION_ENTRY& dst = stream_entries[i];
 						const StreamOutputDeclarationEntry& src = desc.stream_output.entries[i];
@@ -196,7 +196,7 @@ namespace luna
 				{
 					d.BlendState.AlphaToCoverageEnable = desc.blend_state.alpha_to_coverage_enable ? TRUE : FALSE;
 					d.BlendState.IndependentBlendEnable = desc.blend_state.independent_blend_enable ? TRUE : FALSE;
-					for (uint32 i = 0; i < 8; ++i)
+					for (u32 i = 0; i < 8; ++i)
 					{
 						D3D12_RENDER_TARGET_BLEND_DESC& rt = d.BlendState.RenderTarget[i];
 						const RenderTargetBlendDesc& srt = desc.blend_state.rt[i];
@@ -280,14 +280,14 @@ namespace luna
 					d.DepthStencilState.BackFace.StencilFunc = encode_comparison_func(desc.depth_stencil_state.back_face.stencil_func);
 				}
 
-				Vector<D3D12_INPUT_ELEMENT_DESC> input_elements(get_module_allocator());
+				Vector<D3D12_INPUT_ELEMENT_DESC> input_elements;
 				if (desc.input_layout.num_elements)
 				{
-					uint32 num_elements = desc.input_layout.num_elements;
+					u32 num_elements = desc.input_layout.num_elements;
 					input_elements.resize(num_elements);
 					d.InputLayout.NumElements = num_elements;
 					d.InputLayout.pInputElementDescs = input_elements.data();
-					for (uint32 i = 0; i < num_elements; ++i)
+					for (u32 i = 0; i < num_elements; ++i)
 					{
 						D3D12_INPUT_ELEMENT_DESC& e = input_elements[i];
 						const InputElementDesc& se = desc.input_layout.input_elements[i];
@@ -347,11 +347,11 @@ namespace luna
 				}
 
 				d.NumRenderTargets = rp->m_desc.num_attachments;
-				for (uint32 i = 0; i < 8; ++i)
+				for (u32 i = 0; i < 8; ++i)
 				{
 					d.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
 				}
-				for (uint32 i = 0; i < d.NumRenderTargets; ++i)
+				for (u32 i = 0; i < d.NumRenderTargets; ++i)
 				{
 					d.RTVFormats[i] = encode_resource_format(rp->m_desc.attachments[i].format);
 				}

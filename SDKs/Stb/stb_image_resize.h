@@ -127,16 +127,16 @@
          less-than-ideal results for non-premultiplied-alpha images.
 
          5. If you do not pass the flag STBIR_FLAG_ALPHA_PREMULTIPLIED,
-         then the resizer weights the contribution of input pixels
+         then the resizer weights the contribution of Input pixels
          based on their alpha values, or, equivalently, it multiplies
          the alpha value into the color channels, resamples, then divides
          by the resultant alpha value. Input pixels which have alpha=0 do
-         not contribute at all to output pixels unless _all_ of the input
+         not contribute at all to output pixels unless _all_ of the Input
          pixels affecting that output pixel have alpha=0, in which case
          the result for that pixel is the same as it would be without
          STBIR_FLAG_ALPHA_PREMULTIPLIED. However, this is only true for
-         input images in integer formats. For input images in float format,
-         input pixels with alpha=0 have no effect, and output pixels
+         Input images in integer formats. For Input images in float format,
+         Input pixels with alpha=0 have no effect, and output pixels
          which have alpha=0 will be 0 in all channels. (For float images,
          you can manually achieve the same result by adding a tiny epsilon
          value to the alpha channel of every image, and then subtracting
@@ -210,15 +210,15 @@ typedef uint32_t stbir_uint32;
 //
 // Easy-to-use API:
 //
-//     * "input pixels" points to an array of image data with 'num_channels' channels (e.g. RGB=3, RGBA=4)
-//     * input_w is input image width (x-axis), input_h is input image height (y-axis)
+//     * "Input pixels" points to an array of image data with 'num_channels' channels (e.g. RGB=3, RGBA=4)
+//     * input_w is Input image width (x-axis), input_h is Input image height (y-axis)
 //     * stride is the offset between successive rows of image data in memory, in bytes. you can
 //       specify 0 to mean packed continuously in memory
 //     * alpha channel is treated identically to other channels.
 //     * colorspace is linear or sRGB as specified by function name
 //     * returned result is 1 for success or 0 in case of an error.
 //       #define STBIR_ASSERT() to trigger an assert on parameter validation errors.
-//     * Memory required grows approximately linearly with input and output size, but with
+//     * Memory required grows approximately linearly with Input and output size, but with
 //       discontinuities at input_w == output_w and input_h == output_h.
 //     * These functions use a "default" resampling filter defined at compile time. To change the filter,
 //       you can change the compile-time defaults by #defining STBIR_DEFAULT_FILTER_UPSAMPLE
@@ -372,7 +372,7 @@ STBIRDEF int stbir_resize_region(  const void *input_pixels , int input_w , int 
                                    stbir_filter filter_horizontal,  stbir_filter filter_vertical,
                                    stbir_colorspace space, void *alloc_context,
                                    float s0, float t0, float s1, float t1);
-// (s0, t0) & (s1, t1) are the top-left and bottom right corner (uv addressing style: [0, 1]x[0, 1]) of a region of the input image to use.
+// (s0, t0) & (s1, t1) are the top-left and bottom right corner (uv addressing style: [0, 1]x[0, 1]) of a region of the Input image to use.
 
 //
 //
@@ -877,7 +877,7 @@ stbir__inline static int stbir__use_height_upsampling(stbir__info* stbir_info)
     return stbir__use_upsampling(stbir_info->vertical_scale);
 }
 
-// This is the maximum number of input samples that can affect an output sample
+// This is the maximum number of Input samples that can affect an output sample
 // with the given filter
 static int stbir__get_filter_pixel_width(stbir_filter filter, float scale)
 {
@@ -1004,7 +1004,7 @@ stbir__inline static int stbir__edge_wrap(stbir_edge edge, int n, int max)
     return stbir__edge_wrap_slow(edge, n, max);
 }
 
-// What input pixels contribute to this output pixel?
+// What Input pixels contribute to this output pixel?
 static void stbir__calculate_sample_range_upsample(int n, float out_filter_radius, float scale_ratio, float out_shift, int* in_first_pixel, int* in_last_pixel, float* in_center_of_out)
 {
     float out_pixel_center = (float)n + 0.5f;
@@ -1019,7 +1019,7 @@ static void stbir__calculate_sample_range_upsample(int n, float out_filter_radiu
     *in_last_pixel = (int)(floor(in_pixel_influence_upperbound - 0.5));
 }
 
-// What output pixels does this input pixel contribute to?
+// What output pixels does this Input pixel contribute to?
 static void stbir__calculate_sample_range_downsample(int n, float in_pixels_radius, float scale_ratio, float out_shift, int* out_first_pixel, int* out_last_pixel, float* out_center_of_in)
 {
     float in_pixel_center = (float)n + 0.5f;
@@ -1259,7 +1259,7 @@ static void stbir__decode_scanline(stbir__info* stbir_info, int n)
 
     int x = -stbir_info->horizontal_filter_pixel_margin;
 
-    // special handling for STBIR_EDGE_ZERO because it needs to return an item that doesn't appear in the input,
+    // special handling for STBIR_EDGE_ZERO because it needs to return an item that doesn't appear in the Input,
     // and we want to avoid paying overhead on every pixel if not STBIR_EDGE_ZERO
     if (edge_vertical == STBIR_EDGE_ZERO && (n < 0 || n >= stbir_info->input_h))
     {

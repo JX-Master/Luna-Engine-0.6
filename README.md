@@ -10,13 +10,13 @@ Building prerequisites:
 
 * Windows 10
 * Visual Studio 2017+ with C++17 Support
+* CMake 3.20+
 
 Building Steps:
 
 1. Clone the project.
-2. Add `/Tools/` to `PATH`.
 3. Run `gen_vs2017.bat` or `gen_vs2019.bat`
-4. To build `Studio` project, you need to configure compile options for shader files manually (`ps_5_0` for shaders with `Pixel` suffix, `cs_5_0` for shaders with `CS` suffix). You may also need to copy the compiled shader files to `/Solution/` directory manually.
+3. Open `./Solution/Luna.sln` and build from Visual Studio.
 
 ## License
 

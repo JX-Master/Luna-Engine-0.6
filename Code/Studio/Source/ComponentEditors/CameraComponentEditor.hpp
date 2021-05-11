@@ -6,7 +6,7 @@
 */
 #pragma once
 #include "../IComponentEditorType.hpp"
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -16,19 +16,18 @@ namespace luna
 			lucid("{e1357298-fac6-4f81-92c6-0903c818c8e3}");
 			luiimpl(CameraComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<scene::IComponent> m_component;
+			Name m_type_name;
+			WP<Scene::IComponent> m_component;
 
-			CameraComponentEditor(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Camera")) {}
+			CameraComponentEditor() :
+				m_type_name(Name("Camera")) {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class CameraComponentEditorType : public IComponentEditorType
@@ -37,19 +36,18 @@ namespace luna
 			lucid("{c267e4d9-d29e-4e60-8d98-f87e0c6ac0fa}");
 			luiimpl(CameraComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			CameraComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Camera")) {}
+			CameraComponentEditorType() :
+				m_type_name(Name("Camera")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<CameraComponentEditor>(get_module_allocator()));
+				auto r = newobj<CameraComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;

@@ -7,19 +7,19 @@
 #pragma once
 #include <Scene/Scene.hpp>
 #include "IModel.hpp"
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
-		struct IModelRenderer : public scene::IComponent
+		struct IModelRenderer : public Scene::IComponent
 		{
 			luiid("{378ef507-3204-4fd0-9706-82a3be288241}");
 
 			//! Gets the mesh this renderer component references to.
-			virtual asset::PAsset<IModel> model() = 0;
+			virtual Asset::PAsset<IModel> model() = 0;
 
 			//! Sets the mesh this renderer component references to.
-			virtual void set_model(asset::PAsset<IModel> model) = 0;
+			virtual void set_model(Asset::PAsset<IModel> model) = 0;
 		};
 	}
 }

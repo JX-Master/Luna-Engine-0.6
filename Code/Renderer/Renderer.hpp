@@ -11,29 +11,21 @@
 #define LUNA_RENDERER_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace renderer
+	namespace Renderer
 	{
-		struct RenderSystemStartupParams
-		{
-			//! The graphic adapter to be used for the main device.
-			gfx::IGraphicAdapter* adapter = nullptr;
-		};
-
-		//! Initializes the renderer module.
-		LUNA_RENDERER_API RV init(const RenderSystemStartupParams* params = nullptr);
 
 		//! Gets the main graphic device.
-		LUNA_RENDERER_API gfx::IGraphicDevice* device();
+		LUNA_RENDERER_API Gfx::IGraphicDevice* device();
 
 		//! Gets the main graphic command queue for the main graphic device.
-		LUNA_RENDERER_API gfx::ICommandQueue* main_graphic_queue();
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_graphic_queue();
 
 		//! Gets the main compute command queue for the main graphic device.
-		LUNA_RENDERER_API gfx::ICommandQueue* main_compute_queue();
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_compute_queue();
 
 		//! Gets the main copy command queue for the main graphic device.
-		LUNA_RENDERER_API gfx::ICommandQueue* main_copy_queue();
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_copy_queue();
 	}
 }

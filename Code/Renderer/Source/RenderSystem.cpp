@@ -5,37 +5,30 @@
 * @date 2020/3/9
 */
 #include "RenderSystem.hpp"
+#include <Runtime/Module.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace renderer
+	namespace Renderer
 	{
-		using namespace gfx;
+		using namespace Gfx;
 
-		P<gfx::IGraphicDevice> m_main_device;
-		P<gfx::ICommandQueue> m_main_graphic_queue;
-		P<gfx::ICommandQueue> m_main_compute_queue;
-		P<gfx::ICommandQueue> m_main_copy_queue;
+		P<Gfx::IGraphicDevice> m_main_device;
+		P<Gfx::ICommandQueue> m_main_graphic_queue;
+		P<Gfx::ICommandQueue> m_main_compute_queue;
+		P<Gfx::ICommandQueue> m_main_copy_queue;
 
-		LUNA_RENDERER_API RV init(const RenderSystemStartupParams* params)
+		RV init()
 		{
 			lutry
 			{
-				if (params)
-				{
-					luset(m_main_device, new_device(params->adapter));
-				}
-				else
-				{
-					luset(m_main_device, new_device());
-				}
+				luset(m_main_device, new_device());
 				luset(m_main_graphic_queue, m_main_device->new_command_queue(CommandQueueDesc(ECommandQueueType::graphic, ECommandQueuePriority::normal)));
 				luset(m_main_compute_queue, m_main_device->new_command_queue(CommandQueueDesc(ECommandQueueType::compute, ECommandQueuePriority::normal)));
 				luset(m_main_copy_queue, m_main_device->new_command_queue(CommandQueueDesc(ECommandQueueType::copy, ECommandQueuePriority::normal)));
-				add_module("Renderer", deinit);
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 		void deinit()
 		{
@@ -44,19 +37,20 @@ namespace luna
 			m_main_graphic_queue = nullptr;
 			m_main_device = nullptr;
 		}
-		LUNA_RENDERER_API gfx::IGraphicDevice* device()
+		StaticRegisterModule m(u8"Renderer", u8"Core;Gfx", init, deinit);
+		LUNA_RENDERER_API Gfx::IGraphicDevice* device()
 		{
 			return m_main_device.get();
 		}
-		LUNA_RENDERER_API gfx::ICommandQueue* main_graphic_queue()
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_graphic_queue()
 		{
 			return m_main_graphic_queue.get();
 		}
-		LUNA_RENDERER_API gfx::ICommandQueue* main_compute_queue()
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_compute_queue()
 		{
 			return m_main_compute_queue.get();
 		}
-		LUNA_RENDERER_API gfx::ICommandQueue* main_copy_queue()
+		LUNA_RENDERER_API Gfx::ICommandQueue* main_copy_queue()
 		{
 			return m_main_copy_queue.get();
 		}

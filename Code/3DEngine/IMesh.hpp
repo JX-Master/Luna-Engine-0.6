@@ -8,9 +8,9 @@
 #include <Asset/Asset.hpp>
 #include <Gfx/Gfx.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
 		//! The vertex format.
 		struct Vertex
@@ -26,8 +26,8 @@ namespace luna
 
 		struct MeshPieceDesc
 		{
-			uint32 first_index_offset;
-			uint32 num_indices;
+			u32 first_index_offset;
+			u32 num_indices;
 		};
 
 		//! @interface IMesh
@@ -38,7 +38,7 @@ namespace luna
 		//! 
 		//! The mesh is updated to GPU as two buffers: one buffer for vertex data and one buffer for index data. All 
 		//! pieces are grouped in one index buffer and can be indexed by its offset from the base address.
-		struct IMesh : public asset::IAsset
+		struct IMesh : public Asset::IAsset
 		{
 			luiid("{8d9cc712-702e-4050-a77b-d739fb9c8d47}");
 
@@ -47,31 +47,31 @@ namespace luna
 			//! 
 			//! @param[in] vertex_data The vertex data passed in. The data is interpreted as const Vertex* array. The system keeps a strong
 			//! reference to this blob until the asset is reloaded.
-			//! @param[in] index_data The index data passed in. The data is interpreted as const uint32* array. The system keeps a strong
+			//! @param[in] index_data The index data passed in. The data is interpreted as const u32* array. The system keeps a strong
 			//! reference to this blob until the asset is reloaded.
-			virtual void reset(IBlob* vertex_data, IBlob* index_data, uint32 num_pieces, const MeshPieceDesc* pieces) = 0;
+			virtual void reset(const Blob& vertex_data, const Blob& index_data, u32 num_pieces, const MeshPieceDesc* pieces) = 0;
 
 			//! Gets the vertex buffer. This call must be called when the mesh is loaded.
-			virtual P<gfx::IResource> vertex_buffer() = 0;
+			virtual P<Gfx::IResource> vertex_buffer() = 0;
 
 			//! Gets the index buffer. This call must be called when the mesh is loaded.
-			virtual P<gfx::IResource> index_buffer() = 0;
+			virtual P<Gfx::IResource> index_buffer() = 0;
 
 			//! Gets the number of vertices in the vertex buffer.
-			virtual uint32 count_vertices() = 0;
+			virtual u32 count_vertices() = 0;
 
 			//! Gets the number of indices in the index buffer.
-			virtual uint32 count_indices() = 0;
+			virtual u32 count_indices() = 0;
 
 			//! Gets the number of pieces. This call must be called when the mesh is loaded.
-			virtual uint32 count_pieces() = 0;
+			virtual u32 count_pieces() = 0;
 			
 			//! Gets the offset of the first index for the specified piece. This call must be called when the mesh is loaded.
 			//! The offset is counted by `n` uint32s from the start of the index buffer, not by `n` bytes.
-			virtual uint32 piece_first_index_offset(uint32 piece_index) = 0;
+			virtual u32 piece_first_index_offset(u32 piece_index) = 0;
 
 			//! Gets the number of indices for the specified piece. This call must be called when the mesh is loaded.
-			virtual uint32 piece_count_indices(uint32 piece_index) = 0;
+			virtual u32 piece_count_indices(u32 piece_index) = 0;
 		};
 	}
 }

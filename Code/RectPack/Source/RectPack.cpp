@@ -4,25 +4,18 @@
 * @author JXMaster
 * @date 2019/10/9
 */
-#include "RectPack.hpp"
+#include "RectPackHeader.hpp"
 #include "RectPackContext.hpp"
-namespace luna
+#include <Runtime/Module.hpp>
+namespace Luna
 {
-	namespace rpack
+	namespace RectPack
 	{
-		void deinit()
-		{
+		StaticRegisterModule m(u8"RectPack", "Core", nullptr, nullptr);
 
-		}
-
-		void init()
+		LUNA_RECT_PACK_API P<IRectPackContext> new_context(u32 width, u32 height)
 		{
-			add_module("RectPack", deinit);
-		}
-
-		P<IRectPackContext> new_context(uint32 width, uint32 height)
-		{
-			P<RectPackContext> ctx = box_ptr(new_obj<RectPackContext>(get_module_allocator()));
+			P<RectPackContext> ctx = newobj<RectPackContext>();
 			ctx->reset(width, height);
 			return ctx;
 		}

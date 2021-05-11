@@ -6,7 +6,7 @@
 */
 #pragma once
 #include "../IComponentEditorType.hpp"
-namespace luna
+namespace Luna
 {
 	namespace editor
 	{
@@ -16,20 +16,19 @@ namespace luna
 			lucid("{7a2f49a1-a375-4936-a9cd-004f71442f33}");
 			luiimpl(TransformComponentEditor, IComponentEditor, IObject);
 
-			P<IName> m_type_name;
-			WP<scene::IComponent> m_component;
+			Name m_type_name;
+			WP<Scene::IComponent> m_component;
 
 			Float3U m_cached_rotation_eular = { 0.0f, 0.0f, 0.0f };
 			
-			TransformComponentEditor(IAllocator* alloc) :
-				luibind(alloc) {}
+			TransformComponentEditor()  {}
 
-			virtual IName* type_name() override
+			virtual Name type_name() override
 			{
 				return m_type_name;
 			}
 
-			virtual void on_render(imgui::IContext* ctx) override;
+			virtual void on_render(ImGui::IContext* ctx) override;
 		};
 
 		class TransformComponentEditorType : public IComponentEditorType
@@ -38,19 +37,18 @@ namespace luna
 			lucid("{15a0a5a4-1eba-466e-b2cb-211ca97c173c}");
 			luiimpl(TransformComponentEditorType, IComponentEditorType, IObject);
 
-			P<IName> m_type_name;
+			Name m_type_name;
 
-			TransformComponentEditorType(IAllocator* alloc) :
-				luibind(alloc),
-				m_type_name(intern_name("Transform")) {}
+			TransformComponentEditorType() :
+				m_type_name(Name("Transform")) {}
 
-			virtual IName* type() override
+			virtual Name type() override
 			{
 				return m_type_name;
 			}
-			virtual P<IComponentEditor> new_editor(scene::IComponent* component) override
+			virtual P<IComponentEditor> new_editor(Scene::IComponent* component) override
 			{
-				auto r = box_ptr(new_obj<TransformComponentEditor>(get_module_allocator()));
+				auto r = newobj<TransformComponentEditor>();
 				r->m_component = component;
 				r->m_type_name = m_type_name;
 				return r;

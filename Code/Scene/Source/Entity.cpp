@@ -7,61 +7,61 @@
 #include "Entity.hpp"
 #include "Scene.hpp"
 #include "SceneManager.hpp"
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
-		RP<IVariant> Entity::serialize()
+		R<Variant> Entity::serialize()
 		{
 			lutsassert();
-			P<IVariant> data = new_var(EVariantType::table);
+			Variant data = Variant(EVariantType::table);
 			lutry
 			{
-				auto components_node = new_var(EVariantType::table);
+				auto components_node = Variant(EVariantType::table);
 				for (auto& i : m_components)
 				{
 					lulet(component_node, i->serialize());
-					components_node->set_field(0, i->type_object()->type_name(), component_node);
+					components_node.set_field(0, i->type_object()->type_name(), component_node);
 				}
-				data->set_field(0, intern_name("components"), components_node);
+				data.set_field(0, Name(u8"components"), components_node);
 			}
 			lucatchret;
 			return data;
 		}
 
-		RV Entity::pre_deserialize(IVariant* obj)
+		RV Entity::pre_deserialize(const Variant& obj)
 		{
 			lutsassert();
 			lutry
 			{
 				clear_components();
-				lulet(components_node, obj->field(0, intern_name("components")));
-				lulet(components, components_node->fields(0));
+				auto& components_node = obj.field(0, u8"components");
+				auto components = components_node.fields(0);
 				for (auto& i : components)
 				{
 					luexp(add_component(i));
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
-		RV Entity::deserialize(IVariant* obj)
+		RV Entity::deserialize(const Variant& obj)
 		{
 			lutsassert();
 			lutry
 			{
-				lulet(components_node, obj->field(0, intern_name("components")));
-				lulet(components, components_node->fields(0));
+				auto& components_node = obj.field(0, u8"components");
+				auto components = components_node.fields(0);
 				for (auto& i : components)
 				{
 					lulet(comp, get_component(i));
-					lulet(comp_data, components_node->field(0, i));
+					auto& comp_data = components_node.field(0, i);
 					luexp(comp->deserialize(comp_data));
 				}
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 
 		P<IScene> Entity::belonging_scene()
@@ -69,15 +69,15 @@ namespace luna
 			return m_belonging_scene.lock();
 		}
 
-		IName* Entity::name()
+		Name Entity::name()
 		{
 			return m_name;
 		}
 
-		RV Entity::set_name(IName* name)
+		RV Entity::set_name(const Name& name)
 		{
 			lutsassert();
-			luassert_usr(name);
+			lucheck(name);
 			P<Scene> s = m_belonging_scene.lock();
 			if (s)
 			{
@@ -87,19 +87,19 @@ namespace luna
 				auto iter = s->m_entities.find(name);
 				if (iter != s->m_entities.end())
 				{
-					return e_item_already_exists;
+					return BasicError::already_exists();
 				}
-				s->m_entities.insert(Pair<P<IName>, P<Entity>>(name, this));
+				s->m_entities.insert(Pair<Name, P<Entity>>(name, this));
 				if (m_name)
 				{
 					s->m_entities.erase(m_name);
 				}
 			}
 			m_name = name;
-			return s_ok;
+			return RV();
 		}
 
-		R<IComponent*> Entity::add_component(IName* component_type)
+		R<IComponent*> Entity::add_component(const Name& component_type)
 		{
 			lutsassert();
 			// Check name.
@@ -107,19 +107,19 @@ namespace luna
 			{
 				if (i->type_object()->type_name() == component_type)
 				{
-					return e_item_already_exists;
+					return BasicError::already_exists();
 				}
 			}
 			// Create component.
 			auto iter = g_component_types.get().find(component_type);
 			if (iter == g_component_types.get().end())
 			{
-				return e_type_dismatch;
+				return BasicError::not_found();
 			}
 			auto component = iter->second->new_component(this);
 			if (failed(component))
 			{
-				return component.result();
+				return component.errcode();
 			}
 
 			// Attach the component to this entity.
@@ -135,7 +135,7 @@ namespace luna
 			return component.get();
 		}
 
-		RV Entity::remove_component(IName* component_type)
+		RV Entity::remove_component(const Name& component_type)
 		{
 			lutsassert();
 			for (auto iter = m_components.begin(); iter != m_components.end(); ++iter)
@@ -150,10 +150,10 @@ namespace luna
 						auto _ = s->meta()->internal_remove_dependency(i);
 					}
 					m_components.erase(iter);
-					return s_ok;
+					return RV();
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 
 		void Entity::clear_components()
@@ -166,7 +166,7 @@ namespace luna
 			}
 		}
 
-		R<IComponent*> Entity::get_component(IName* type_name)
+		R<IComponent*> Entity::get_component(const Name& type_name)
 		{
 			lutsassert();
 			for (auto& i : m_components)
@@ -176,13 +176,13 @@ namespace luna
 					return i.get();
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 
 		Vector<IComponent*> Entity::components()
 		{
 			lutsassert();
-			Vector<IComponent*> ret(get_module_allocator());
+			Vector<IComponent*> ret;
 			ret.reserve(m_components.size());
 			for (auto& i : m_components)
 			{

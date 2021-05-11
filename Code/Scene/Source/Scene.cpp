@@ -7,61 +7,61 @@
 #include "Scene.hpp"
 #include "SceneManager.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace scene
+	namespace Scene
 	{
 		void Scene::reset()
 		{
-			m_meta->load(asset::EAssetLoadFlag::force_reload | asset::EAssetLoadFlag::procedural, nullptr);
+			m_meta->load(Asset::EAssetLoadFlag::force_reload | Asset::EAssetLoadFlag::procedural, Variant());
 		}
-		R<IEntity*> Scene::add_entity(IName* entity_name)
+		R<IEntity*> Scene::add_entity(const Name& entity_name)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			// Check name.
 			auto iter = m_entities.find(entity_name);
 			if (iter != m_entities.end())
 			{
-				return e_item_already_exists;
+				return BasicError::already_exists();
 			}
 			// Create Entity.
-			P<Entity> e = box_ptr(new_obj<Entity>(get_module_allocator()));
+			P<Entity> e = newobj<Entity>();
 			e->m_name = entity_name;
 			e->m_belonging_scene = this;
 			// Attach the entity to this scene.
-			m_entities.insert(Pair<P<IName>, P<Entity>>(entity_name, e));
+			m_entities.insert(Pair<Name, P<Entity>>(entity_name, e));
 			return e.get();
 		}
-		RV Scene::remove_entity(IName* entity_name)
+		RV Scene::remove_entity(const Name& entity_name)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			auto iter = m_entities.find(entity_name);
 			if (iter != m_entities.end())
 			{
 				iter->second->clear_components();
 				m_entities.erase(iter);
-				return s_ok;
+				return RV();
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
-		R<IEntity*> Scene::find_entity(IName* name)
+		R<IEntity*> Scene::find_entity(const Name& name)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			auto iter = m_entities.find(name);
 			if (iter != m_entities.end())
 			{
 				return iter->second.get();
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 		Vector<IEntity*> Scene::entities()
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
-			Vector<IEntity*> ret(get_module_allocator());
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			Vector<IEntity*> ret;
 			ret.reserve(m_entities.size());
 			for (auto& i : m_entities)
 			{
@@ -72,23 +72,23 @@ namespace luna
 		void Scene::clear_entities()
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			auto ents = entities();
 			for (auto& i : ents)
 			{
 				auto _ = remove_entity(i->name());
 			}
 		}
-		R<ISceneComponent*> Scene::add_scene_component(IName* component_type)
+		R<ISceneComponent*> Scene::add_scene_component(const Name& component_type)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			// Check name.
 			for (auto& i : m_scene_components)
 			{
 				if (i->type_object()->type_name() == component_type)
 				{
-					return e_item_already_exists;
+					return BasicError::already_exists();
 				}
 			}
 			
@@ -96,13 +96,13 @@ namespace luna
 			auto iter = g_scene_component_types.get().find(component_type);
 			if (iter == g_scene_component_types.get().end())
 			{
-				return e_type_dismatch;
+				return BasicError::not_found();
 			}
 			auto component = iter->second->new_component(this);
 
 			if (failed(component))
 			{
-				return component.result();
+				return component.errcode();
 			}
 
 			// Attach the component to this scene.
@@ -116,10 +116,10 @@ namespace luna
 			}
 			return component.get();
 		}
-		RV Scene::remove_scene_component(IName* component_type)
+		RV Scene::remove_scene_component(const Name& component_type)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			for (auto iter = m_scene_components.begin(); iter != m_scene_components.end(); ++iter)
 			{
 				if (component_type == iter->get()->type_object()->type_name())
@@ -131,25 +131,25 @@ namespace luna
 						auto _ = meta()->internal_remove_dependency(i);
 					}
 					m_scene_components.erase(iter);
-					return s_ok;
+					return RV();
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 		void Scene::clear_scene_components()
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			auto components = m_scene_components;
 			for (auto& i : components)
 			{
 				auto _ = remove_scene_component(i->type_object()->type_name());
 			}
 		}
-		R<ISceneComponent*> Scene::get_scene_component(IName* type_name)
+		R<ISceneComponent*> Scene::get_scene_component(const Name& type_name)
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 			for (auto& i : m_scene_components)
 			{
 				if (i->type_object()->type_name() == type_name)
@@ -157,14 +157,14 @@ namespace luna
 					return i.get();
 				}
 			}
-			return e_item_not_exist;
+			return BasicError::not_found();
 		}
 		Vector<ISceneComponent*> Scene::scene_components()
 		{
 			MutexGuard g(m_meta->mutex());
-			luassert_msg_usr(m_meta->state() != asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
+			lucheck_msg(m_meta->state() != Asset::EAssetState::unloaded, "This call is not allowed when the scene is not loaded.");
 
-			Vector<ISceneComponent*> ret(get_module_allocator());
+			Vector<ISceneComponent*> ret;
 			ret.reserve(m_scene_components.size());
 			for (auto& i : m_scene_components)
 			{

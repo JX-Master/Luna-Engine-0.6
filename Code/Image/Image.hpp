@@ -11,13 +11,14 @@
 #define LUNA_IMAGE_API
 #endif
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
-
-		//! Initializes the image module.
-		LUNA_IMAGE_API void init();
+		namespace ImageError
+		{
+			LUNA_IMAGE_API errcode_t file_parse_error();
+		}
 
 		//! Creates one new empty image object. The data in the image is uninitialized.
 		LUNA_IMAGE_API P<IImage> new_image(const ImageDesc& desc);

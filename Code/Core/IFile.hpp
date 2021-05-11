@@ -6,9 +6,9 @@
 */
 #pragma once
 #include "IStream.hpp"
-namespace luna
+namespace Luna
 {
-	enum class EFileAttributeFlag : uint32
+	enum class EFileAttributeFlag : u32
 	{
 		none = 0x00,
 		read_only = 0x01,
@@ -17,7 +17,7 @@ namespace luna
 		character_special = 0x08,	// This file is an character special file on UNIX/Linux systems.
 	};
 
-	enum class EFileOpenFlag : uint32
+	enum class EFileOpenFlag : u32
 	{
 		none = 0x00,
 		//! Grants read access to the file so that `read` operations can be performed.
@@ -35,7 +35,7 @@ namespace luna
 		user_buffering = 0x04,
 	};
 
-	enum class EFileCreationMode : uint32
+	enum class EFileCreationMode : u32
 	{
 		//! Always creates a new file and opens it. If the file already exists, the old file content
 		//! will be discarded and the file is treated as a new empty file.
@@ -55,10 +55,10 @@ namespace luna
 
 	struct FileAttribute
 	{
-		uint64 size;
-		uint64 creation_time;
-		uint64 last_access_time;
-		uint64 last_write_time;
+		u64 size;
+		u64 creation_time;
+		u64 last_access_time;
+		u64 last_write_time;
 		EFileAttributeFlag attributes;
 	};
 
@@ -68,6 +68,6 @@ namespace luna
 	{
 		luiid("{c61fbf68-89dc-4776-8a99-cc855ff8289e}");
 
-		
+		// No additional methods.
 	};
 }

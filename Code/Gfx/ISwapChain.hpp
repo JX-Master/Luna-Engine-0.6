@@ -8,9 +8,9 @@
 #include "GraphicDefines.hpp"
 #include "IGraphicDeviceChild.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
 		struct IResource;
 		struct IWindow;
@@ -19,20 +19,20 @@ namespace luna
 		{
 			//! The width of the swap chain back buffer. 
 			//! Specify 0 will determine the size from the bounding window's native size.
-			uint32 width;
+			u32 width;
 			//! The width of the swap chain back buffer. 
 			//! Specify 0 will determine the size from the bounding window's native size.
-			uint32 height;
+			u32 height;
 			EResourceFormat format;
-			uint32 buffer_count;
+			u32 buffer_count;
 			bool windowed;
 
 			SwapChainDesc() = default;
 			SwapChainDesc(
-				uint32 _width,
-				uint32 _height,
+				u32 _width,
+				u32 _height,
 				EResourceFormat _format,
-				uint32 _buffer_count,
+				u32 _buffer_count,
 				bool _windowed
 			) :
 				width(_width),
@@ -82,7 +82,7 @@ namespace luna
 			//! @remark This call is unsynchronized, the call submits the present request to the command queue and returns immediately. Use `ISwapChain::wait`
 			//! or `ISwapChain::try_wait` to wait for the present call to be processed. If another present call is submitted before the last present call 
 			//! gets processed, the current blocks until the last present call gets finished to prevent error.
-			virtual RV present(IResource* resource, uint32 subresource, uint32 sync_interval) = 0;
+			virtual RV present(IResource* resource, u32 subresource, u32 sync_interval) = 0;
 
 			//! Changes the count, size or format of the back buffer. This should be called when the window is resized.
 			//! @param[in] buffer_count The new buffer count. Set to 0 to preserve the former buffer count.
@@ -90,7 +90,7 @@ namespace luna
 			//! @param[in] height The height of the back buffer. Specify 0 will determine the size from the bounding window's native size.
 			//! @param[in] new_format The new format of the back buffer.
 			//! @return Returns success if the resize operation succeeded, failure otherwise.
-			virtual RV resize_buffers(uint32 buffer_count, uint32 width, uint32 height, EResourceFormat new_format) = 0;
+			virtual RV resize_buffers(u32 buffer_count, u32 width, u32 height, EResourceFormat new_format) = 0;
 		};
 	}
 }

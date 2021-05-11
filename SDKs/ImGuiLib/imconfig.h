@@ -62,15 +62,15 @@
 //---- Define constructor and implicit cast operators to convert back<>forth between your math types and ImVec2/ImVec4.
 // This will be inlined as part of ImVec2 and ImVec4 class declarations.
 
-#include <Base/Math.hpp>
+#include <Runtime/Math.hpp>
 
 #define IM_VEC2_CLASS_EXTRA                                                 \
-        ImVec2(const luna::Float2& f) { x = f.x; y = f.y; }                       \
-        operator luna::Float2() const { return luna::Float2(x,y); }
+        ImVec2(const Luna::Float2& f) { x = f.x; y = f.y; }                       \
+        operator Luna::Float2() const { return Luna::Float2(x,y); }
 
 #define IM_VEC4_CLASS_EXTRA                                                 \
-        ImVec4(const luna::Float4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
-        operator luna::Float4() const { return luna::Float4(x,y,z,w); }
+        ImVec4(const Luna::Float4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
+        operator Luna::Float4() const { return Luna::Float4(x,y,z,w); }
 
 
 //---- Use 32-bit vertex indices (default is 16-bit) is one way to allow large meshes with more than 64K vertices.

@@ -8,9 +8,9 @@
 #include "STBImageWrite.hpp"
 #include <Core/Core.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		void stbi_write_func(void* context, void* data, int size)
 		{

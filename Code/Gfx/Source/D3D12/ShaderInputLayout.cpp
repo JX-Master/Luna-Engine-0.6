@@ -8,17 +8,17 @@
 
 #ifdef LUNA_GFX_D3D12
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			RV ShaderInputLayout::init(const ShaderInputLayoutDesc& desc)
 			{
 				m_groups.resize(desc.num_groups);
 
-				for (uint32 i = 0; i < desc.num_groups; ++i)
+				for (u32 i = 0; i < desc.num_groups; ++i)
 				{
 					m_groups[i] = desc.groups[i];
 				}
@@ -29,10 +29,10 @@ namespace luna
 				d.NumParameters = desc.num_groups;
 				D3D12_ROOT_PARAMETER* params = (D3D12_ROOT_PARAMETER*)alloca(sizeof(D3D12_ROOT_PARAMETER) * desc.num_groups);
 				d.pParameters = params;
-				uint32 ranges_count = desc.num_groups;
+				u32 ranges_count = desc.num_groups;
 				D3D12_DESCRIPTOR_RANGE* ranges = (D3D12_DESCRIPTOR_RANGE*)alloca(sizeof(D3D12_DESCRIPTOR_RANGE) * ranges_count);
 				// for every group (view table).
-				for (uint32 i = 0; i < desc.num_groups; ++i)
+				for (u32 i = 0; i < desc.num_groups; ++i)
 				{
 					// One range per group.
 					const ShaderInputGroupDesc& group = desc.groups[i];
@@ -123,15 +123,15 @@ namespace luna
 				ComPtr<ID3DBlob> err;
 				if (FAILED(D3D12SerializeRootSignature(&d, D3D_ROOT_SIGNATURE_VERSION_1_0, b.GetAddressOf(), err.GetAddressOf())))
 				{
-					set_err(e_bad_system_call, "Failed to create D3D12 root signature: %s", err->GetBufferPointer());
-					return e_user_failure;
+					get_error_object() = Error(BasicError::bad_system_call(), "Failed to create D3D12 root signature: %s", err->GetBufferPointer());
+					return BasicError::error_object();
 				}
 				if (FAILED(m_device->m_device->CreateRootSignature(0, b->GetBufferPointer(), b->GetBufferSize(), IID_PPV_ARGS(&m_rs))))
 				{
-					set_err(e_bad_system_call, "Failed to create D3D12 root signature.");
-					return e_user_failure;
+					get_error_object() = Error(BasicError::bad_system_call(), "Failed to create D3D12 root signature.");
+					return BasicError::error_object();
 				}
-				return s_ok;
+				return RV();
 			}
 		}
 	}

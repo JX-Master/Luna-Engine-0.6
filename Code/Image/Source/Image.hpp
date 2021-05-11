@@ -6,49 +6,32 @@
 */
 #pragma once
 #include "ImageHeader.hpp"
-#include <Base/Interface.hpp>
-#include <Base/TSAssert.hpp>
+#include <Core/Interface.hpp>
+#include <Runtime/TSAssert.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		class Image : public IImage
 		{
 		public:
 			lucid("{a069bfc7-7481-43e9-80c2-baa2f5bd241b}");
-			luiimpl(Image, IImage, IBlob, IObject);
+			luiimpl(Image, IImage, IObject);
 			lutsassert_lock();
 
 			ImageDesc m_desc;
-			void* m_buffer;
-			size_t m_buffer_size;
+			Blob m_blob;
 
-			Image(IAllocator* alloc) :
-				luibind(alloc),
-				m_buffer(nullptr),
-				m_buffer_size(0) {}
+			Image() {}
 
-			~Image()
-			{
-				if (m_buffer)
-				{
-					memfree(m_buffer);
-					m_buffer = nullptr;
-				}
-				m_buffer_size = 0;
-			}
+			~Image() {}
 
 			void init(const ImageDesc& desc);
 
-			virtual const void* data() override
+			virtual Blob& data() override
 			{
-				return m_buffer;
-			}
-
-			virtual size_t size() override
-			{
-				return m_buffer_size;
+				return m_blob;
 			}
 
 			virtual ImageDesc desc() override
@@ -58,14 +41,9 @@ namespace luna
 
 			virtual P<IImage> reset(const ImageDesc& desc) override;
 
-			virtual void* buffer() override
-			{
-				return m_buffer;
-			}
-
 			virtual RV save(IStream* target_stream, EImageTargetFormat format) override;
-			virtual RV upload_data_to_texture(gfx::IResource* resource, uint32 subresource, gfx::ICommandBuffer* cmd_buffer,
-				uint32 dest_x, uint32 dest_y, uint32 dest_z, const RectU& src_rect) override;
+			virtual RV upload_data_to_texture(Gfx::IResource* resource, u32 subresource, Gfx::ICommandBuffer* cmd_buffer,
+				u32 dest_x, u32 dest_y, u32 dest_z, const RectU& src_rect) override;
 		};
 	}
 }

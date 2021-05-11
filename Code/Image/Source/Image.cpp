@@ -7,9 +7,9 @@
 #include "Image.hpp"
 #include "IO/STBImageWrite.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace image
+	namespace Image
 	{
 		inline int stbiw_get_comp(EImagePixelFormat format)
 		{
@@ -73,16 +73,15 @@ namespace luna
 		void Image::init(const ImageDesc& desc)
 		{
 			m_desc = desc;
-			m_buffer_size = desc.width * desc.height * size_per_pixel(desc.format);
-			m_buffer = memalloc(m_buffer_size);
+			usize sz = desc.width * desc.height * size_per_pixel(desc.format);
+			m_blob.resize(sz);
 		}
 
 		P<IImage> Image::reset(const ImageDesc& desc)
 		{
-			P<Image> img = box_ptr(new_obj<Image>(get_module_allocator()));
+			P<Image> img = newobj<Image>();
 			img->m_desc = m_desc;
-			img->m_buffer = m_buffer;
-			img->m_buffer_size = m_buffer_size;
+			img->m_blob = move(m_blob);
 			init(desc);
 			return img;
 		}
@@ -90,67 +89,71 @@ namespace luna
 		RV Image::save(IStream* target_stream, EImageTargetFormat format)
 		{
 			lutsassert();
-			luassert_usr(target_stream);
+			lucheck(target_stream);
 			if (!check_format(format, m_desc.format))
 			{
-				set_err(e_type_dismatch, "The specified encode format does not support the image pixel format.");
-				return e_user_failure;
+				get_error_object() = Error(BasicError::bad_arguments(), "The specified encode format does not support the image pixel format.");
+				return BasicError::error_object();
 			}
 			int comp = stbiw_get_comp(m_desc.format);
 			int res;
 			auto cur = target_stream->tell();
+			if (failed(cur))
+			{
+				return cur.errcode();
+			}
 			switch (format)
 			{
 			case EImageTargetFormat::png:
-				res = stbi_write_png_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_buffer, m_desc.width * size_per_pixel(m_desc.format));
+				res = stbi_write_png_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_blob.data(), m_desc.width * (u32)size_per_pixel(m_desc.format));
 				break;
 			case EImageTargetFormat::bmp:
-				res = stbi_write_bmp_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_buffer);
+				res = stbi_write_bmp_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_blob.data());
 				break;
 			case EImageTargetFormat::tga:
-				res = stbi_write_tga_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_buffer);
+				res = stbi_write_tga_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_blob.data());
 				break;
 			case EImageTargetFormat::jpeg:
-				res = stbi_write_jpg_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_buffer, 80);
+				res = stbi_write_jpg_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, m_blob.data(), 80);
 				break;
 			case EImageTargetFormat::hdr:
-				res = stbi_write_hdr_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, (float32*)m_buffer);
+				res = stbi_write_hdr_to_func(stbi_write_func, (void*)target_stream, m_desc.width, m_desc.height, comp, (f32*)m_blob.data());
 				break;
 			default:
 				lupanic();
 			}
 			if (!res)
 			{
-				auto _ = target_stream->seek(cur, ESeekMode::begin);
-				return e_failure;
+				auto _ = target_stream->seek(cur.get(), ESeekMode::begin);
+				return ImageError::file_parse_error();
 			}
-			return s_ok;
+			return RV();
 		}
 
-		RV Image::upload_data_to_texture(gfx::IResource* resource, uint32 subresource, gfx::ICommandBuffer* cmd_buffer,
-			uint32 dest_x, uint32 dest_y, uint32 dest_z, const RectU& src_rect)
+		RV Image::upload_data_to_texture(Gfx::IResource* resource, u32 subresource, Gfx::ICommandBuffer* cmd_buffer,
+			u32 dest_x, u32 dest_y, u32 dest_z, const RectU& src_rect)
 		{
-			using namespace gfx;
+			using namespace Gfx;
 			lutry
 			{
 				if (m_desc.format == EImagePixelFormat::rgb8_unorm ||
 				m_desc.format == EImagePixelFormat::rgb16_unorm)
 				{
-					set_err(e_type_dismatch, "Image pixel formats rgb8_unorm and rgb16_unorm are not supported by Gfx, consider using rgba alternatives.");
-					return e_user_failure;
+					get_error_object() = Error(BasicError::bad_arguments(), "Image pixel formats rgb8_unorm and rgb16_unorm are not supported by Gfx, consider using rgba alternatives.");
+					return BasicError::error_object();
 				}
 				auto dev = resource->get_device();
 				// Calculates the data required for upload buffer.
-				uint32 pitch_alignment;
+				u32 pitch_alignment;
 				dev->check_feature_support(EDeviceFeature::texture_data_pitch_alignment, &pitch_alignment);
-				size_t copy_size_per_row = size_per_pixel(m_desc.format) * (src_rect.right - src_rect.left);
-				size_t buf_row_pitch = align_upper(copy_size_per_row, pitch_alignment);
-				size_t buf_slice_pitch = buf_row_pitch * (src_rect.bottom - src_rect.top);
-				size_t buf_size = buf_slice_pitch;
+				usize copy_size_per_row = size_per_pixel(m_desc.format) * (src_rect.right - src_rect.left);
+				usize buf_row_pitch = align_upper(copy_size_per_row, pitch_alignment);
+				usize buf_slice_pitch = buf_row_pitch * (src_rect.bottom - src_rect.top);
+				usize buf_size = buf_slice_pitch;
 				lulet(buf, dev->new_resource(ResourceDesc::buffer(EAccessType::upload, EResourceUsageFlag::none, buf_size)));
 				lulet(buf_data, buf->map_subresource(0, false, 1, 0));
-				memcpy_bitmap3d(buf_data, m_buffer, copy_size_per_row, (src_rect.bottom - src_rect.top),
-					1, buf_row_pitch, m_desc.width * size_per_pixel(m_desc.format), buf_slice_pitch, m_buffer_size);
+				memcpy_bitmap3d(buf_data, m_blob.data(), copy_size_per_row, (src_rect.bottom - src_rect.top),
+					1, buf_row_pitch, m_desc.width * size_per_pixel(m_desc.format), buf_slice_pitch, m_blob.size());
 				buf->unmap_subresource(0, true);
 				cmd_buffer->resource_barrier(ResourceBarrierDesc::as_transition(resource, EResourceState::copy_dest, subresource));
 				TextureCopyLocation srcl, destl;
@@ -159,7 +162,7 @@ namespace luna
 				srcl.placed_footprint.footprint.width = src_rect.right - src_rect.left;
 				srcl.placed_footprint.footprint.height = src_rect.bottom - src_rect.top;
 				srcl.placed_footprint.footprint.depth = 1;
-				srcl.placed_footprint.footprint.row_pitch = (uint32)buf_row_pitch;
+				srcl.placed_footprint.footprint.row_pitch = (u32)buf_row_pitch;
 				EResourceFormat res_format = pixel_format_to_resource_format(m_desc.format);
 				srcl.placed_footprint.footprint.format = res_format;
 				srcl.resource = buf;
@@ -172,7 +175,7 @@ namespace luna
 				cmd_buffer->wait();
 			}
 			lucatchret;
-			return s_ok;
+			return RV();
 		}
 	}
 }

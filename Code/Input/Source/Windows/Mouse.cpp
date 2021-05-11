@@ -9,13 +9,13 @@
 
 #ifdef LUNA_PLATFORM_WINDOWS
 
-#include <Base/Platform/Windows/MiniWin.hpp>
+#include <Runtime/Source/Platform/Windows/MiniWin.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace input
+	namespace Input
 	{
-		namespace win
+		namespace Win
 		{
 			bool Mouse::key_down(EMouseKey mouse_key)
 			{
@@ -42,10 +42,10 @@ namespace luna
 				}
 				return (GetAsyncKeyState(key) & 0x8000) ? true : false;
 			}
-			RV Mouse::set_pos(int32 x, int32 y)
+			RV Mouse::set_pos(i32 x, i32 y)
 			{
 				BOOL r = ::SetCursorPos(x, y);
-				return r ? s_ok : e_failure;
+				return r ? RV() : BasicError::bad_system_call();
 			}
 		}
 	}

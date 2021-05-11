@@ -8,11 +8,11 @@
 #include <Asset/Asset.hpp>
 #include <Texture/ITexture.hpp>
 
-namespace luna
+namespace Luna
 {
-	namespace e3d
+	namespace E3D
 	{
-		enum class EMeterialType : uint32
+		enum class EMeterialType : u32
 		{
 			// Opaque Standard PBR: Base Color/Roughness/Normal/Metallic/Emissive
 			lit = 0,
@@ -21,7 +21,7 @@ namespace luna
 		};
 
 		//! @interface IMaterial
-		struct IMaterial : public asset::IAsset
+		struct IMaterial : public Asset::IAsset
 		{
 			luiid("{d2ae697d-b3ca-4f7d-82d1-ccfc047be8ce}");
 
@@ -29,25 +29,25 @@ namespace luna
 
 			virtual void set_material_type(EMeterialType type) = 0;
 
-			virtual asset::PAsset<texture::ITexture> base_color() = 0;
+			virtual Asset::PAsset<Texture::ITexture> base_color() = 0;
 
-			virtual asset::PAsset<texture::ITexture> roughness() = 0;
+			virtual Asset::PAsset<Texture::ITexture> roughness() = 0;
 
-			virtual asset::PAsset<texture::ITexture> normal() = 0;
+			virtual Asset::PAsset<Texture::ITexture> normal() = 0;
 
-			virtual asset::PAsset<texture::ITexture> metallic() = 0;
+			virtual Asset::PAsset<Texture::ITexture> metallic() = 0;
 
-			virtual asset::PAsset<texture::ITexture> emissive() = 0;
+			virtual Asset::PAsset<Texture::ITexture> emissive() = 0;
 
-			virtual void set_base_color(asset::PAsset<texture::ITexture> tex) = 0;
+			virtual void set_base_color(Asset::PAsset<Texture::ITexture> tex) = 0;
 
-			virtual void set_roughness(asset::PAsset<texture::ITexture> tex) = 0;
+			virtual void set_roughness(Asset::PAsset<Texture::ITexture> tex) = 0;
 
-			virtual void set_normal(asset::PAsset<texture::ITexture> tex) = 0;
+			virtual void set_normal(Asset::PAsset<Texture::ITexture> tex) = 0;
 
-			virtual void set_metallic(asset::PAsset<texture::ITexture> tex) = 0;
+			virtual void set_metallic(Asset::PAsset<Texture::ITexture> tex) = 0;
 
-			virtual void set_emissive(asset::PAsset<texture::ITexture> tex) = 0;
+			virtual void set_emissive(Asset::PAsset<Texture::ITexture> tex) = 0;
 		};
 	}
 }

@@ -9,12 +9,12 @@
 #include "../GfxHeader.hpp"
 
 #ifdef LUNA_PLATFORM_WINDOWS
-#include <Base/Vector.hpp>
-namespace luna
+#include <Runtime/Vector.hpp>
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace win
+		namespace Win
 		{
 			//! The IWindow implementation on Windows.
 			class Window : public IWindow
@@ -30,8 +30,6 @@ namespace luna
 				bool m_first_show;
 
 				Window() :
-					luibind(get_module_allocator()),
-					m_listeners(get_module_allocator()),
 					m_hwnd(nullptr),
 					m_mouse_cursor_shape(EMouseCursorShape::arrow),
 					m_first_show(true) 
@@ -65,13 +63,17 @@ namespace luna
 
 				virtual UInt2U dpi_scaled_size() override;
 
-				virtual float32 dpi_scale_factor() override;
+				virtual f32 dpi_scale_factor() override;
 
-				virtual RV set_size(uint32 width, uint32 height) override;
+				virtual RV set_size(u32 width, u32 height) override;
+
+				virtual String title() override;
+
+				virtual RV set_title(const c8* title_str) override;
 
 				virtual Int2U position() override;
 
-				virtual RV set_position(int32 x, int32 y) override;
+				virtual RV set_position(i32 x, i32 y) override;
 
 				virtual EMouseCursorShape mouse_cursor_shape() override
 				{
@@ -85,7 +87,7 @@ namespace luna
 						m_mouse_cursor_shape = cursor_shape;
 						set_mouse_cursor_shape_internal(cursor_shape);
 					}
-					return s_ok;
+					return RV();
 				}
 			};
 		}

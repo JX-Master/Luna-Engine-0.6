@@ -11,11 +11,11 @@
 #include "../Windows/Window.hpp"
 #include "Resource.hpp"
 
-namespace luna
+namespace Luna
 {
-	namespace gfx
+	namespace Gfx
 	{
-		namespace d3d12
+		namespace D3D12
 		{
 			struct SwapChainVert
 			{
@@ -65,7 +65,7 @@ namespace luna
 						if (FAILED(m_device->m_device->CreateCommittedResource(&heap_props, D3D12_HEAP_FLAG_NONE,
 							&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&m_device->m_swap_chain_vert_buf))))
 						{
-							return e_bad_system_call;
+							return BasicError::bad_system_call();
 						}
 
 						// Create a temp buffer on upload heap.
@@ -74,7 +74,7 @@ namespace luna
 						if (FAILED(m_device->m_device->CreateCommittedResource(&heap_props, D3D12_HEAP_FLAG_NONE,
 							&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&upload_buffer))))
 						{
-							return e_bad_system_call;
+							return BasicError::bad_system_call();
 						}
 
 						// Upload the data.
@@ -90,18 +90,18 @@ namespace luna
 						m_li->CopyBufferRegion(m_device->m_swap_chain_vert_buf.Get(), 0, upload_buffer.Get(), 0, sizeof(SwapChainVert) * 3);
 						if (FAILED(m_li->Close()))
 						{
-							return e_bad_system_call;
+							return BasicError::bad_system_call();
 						}
 						ID3D12CommandList* exe_list = m_li.Get();
 						m_queue->m_queue->ExecuteCommandLists(1, &exe_list);
-						uint64 wait_value = m_fence->GetCompletedValue() + 1;
+						u64 wait_value = m_fence->GetCompletedValue() + 1;
 						if (FAILED(m_fence->SetEventOnCompletion(wait_value, m_event)))
 						{
-							return e_bad_system_call;
+							return BasicError::bad_system_call();
 						}
 						if (FAILED(m_queue->m_queue->Signal(m_fence.Get(), wait_value)))
 						{
-							return e_bad_system_call;
+							return BasicError::bad_system_call();
 						}
 					}
 					// Create Pipeline State.
@@ -191,8 +191,8 @@ namespace luna
 							ComPtr<ID3DBlob> err;
 							if (FAILED(D3D12SerializeRootSignature(&root_signature, D3D_ROOT_SIGNATURE_VERSION_1_0, m_device->m_swap_chain_root_signature_data.GetAddressOf(), err.GetAddressOf())))
 							{
-								set_err(e_bad_system_call, "Failed to create root signature for Swap Chain: %s", (const char*)err->GetBufferPointer());
-								return e_user_failure;
+								get_error_object() = Error(BasicError::bad_system_call(), "Failed to create root signature for Swap Chain: %s", (const char*)err->GetBufferPointer());
+								return BasicError::error_object();
 							}
 						}
 					}
@@ -201,34 +201,34 @@ namespace luna
 					DWORD wait_result = WaitForSingleObject(m_event, INFINITE);
 					if (wait_result != WAIT_OBJECT_0)
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					if (FAILED(m_ca->Reset()))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					if (FAILED(m_li->Reset(m_ca.Get(), NULL)))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 				}
 				lucatchret;
 				m_device->m_swap_chain_initialized = true;
-				return s_ok;
+				return RV();
 			}
 
-			RV SwapChain::init(win::Window* window, CommandQueue* queue, const SwapChainDesc& desc)
+			RV SwapChain::init(Win::Window* window, CommandQueue* queue, const SwapChainDesc& desc)
 			{
 				m_window = window;
 				m_queue = queue;
 				m_device = queue->get_device();
 				ComPtr<IDXGIFactory2> dxgifac;
-				win::m_dxgi.As(&dxgifac);
+				Win::m_dxgi.As(&dxgifac);
 
 				m_event = ::CreateEventA(NULL, TRUE, TRUE, NULL);
 				if (!m_event)
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_desc = desc;
 				if (!m_desc.width || !m_desc.height)
@@ -267,23 +267,23 @@ namespace luna
 
 				if (FAILED(dxgifac->CreateSwapChainForHwnd(queue->m_queue.Get(), window->m_hwnd, &d, &fsd, NULL, &m_sc)))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				HRESULT hr = m_device->m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_device->m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_ca));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_device->m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_ca.Get(), NULL, IID_PPV_ARGS(&m_li));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				D3D12_DESCRIPTOR_HEAP_DESC heap_desc;
@@ -294,7 +294,7 @@ namespace luna
 				hr = m_device->m_device->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&m_rtvs));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_rtv_size = m_device->m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 				heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -303,7 +303,7 @@ namespace luna
 				hr = m_device->m_device->CreateDescriptorHeap(&heap_desc, IID_PPV_ARGS(&m_srv));
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				lutry
@@ -317,31 +317,31 @@ namespace luna
 					if (FAILED(m_device->m_device->CreateRootSignature(0, m_device->m_swap_chain_root_signature_data->GetBufferPointer(), m_device->m_swap_chain_root_signature_data->GetBufferSize(),
 						IID_PPV_ARGS(&m_root_signature))))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					luexp(reset_back_buffer_resources(m_desc.buffer_count, m_desc.width, m_desc.height, m_desc.format));
 
 					hr = m_li->Close();
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 				}
 				lucatchret;
-				return s_ok;
+				return RV();
 			}
-			RV SwapChain::reset_back_buffer_resources(uint32 buffer_count, uint32 width, uint32 height, EResourceFormat new_format)
+			RV SwapChain::reset_back_buffer_resources(u32 buffer_count, u32 width, u32 height, EResourceFormat new_format)
 			{
-				luassert_usr(buffer_count <= 8);
+				lucheck(buffer_count <= 8);
 				// Fetch resources.
 				m_back_buffers.resize(buffer_count);
 				D3D12_CPU_DESCRIPTOR_HANDLE h = m_rtvs->GetCPUDescriptorHandleForHeapStart();
-				for (uint32 i = 0; i < buffer_count; ++i)
+				for (u32 i = 0; i < buffer_count; ++i)
 				{
 					HRESULT hr = m_sc->GetBuffer(i, IID_PPV_ARGS(&m_back_buffers[i]));
 					if (FAILED(hr))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 					m_device->m_device->CreateRenderTargetView(m_back_buffers[i].Get(), NULL, h);
 					h.ptr += m_rtv_size;
@@ -372,10 +372,10 @@ namespace luna
 					pipeline.InputLayout.NumElements = 2;
 					pipeline.InputLayout.pInputElementDescs = input_elements;
 					pipeline.pRootSignature = m_root_signature.Get();
-					pipeline.VS.pShaderBytecode = m_device->m_swap_chain_vs->data();
-					pipeline.VS.BytecodeLength = m_device->m_swap_chain_vs->size();
-					pipeline.PS.pShaderBytecode = m_device->m_swap_chain_ps->data();
-					pipeline.PS.BytecodeLength = m_device->m_swap_chain_ps->size();
+					pipeline.VS.pShaderBytecode = m_device->m_swap_chain_vs.data();
+					pipeline.VS.BytecodeLength = m_device->m_swap_chain_vs.size();
+					pipeline.PS.pShaderBytecode = m_device->m_swap_chain_ps.data();
+					pipeline.PS.BytecodeLength = m_device->m_swap_chain_ps.size();
 					pipeline.DS.BytecodeLength = 0;
 					pipeline.DS.pShaderBytecode = NULL;
 					pipeline.HS.BytecodeLength = 0;
@@ -442,17 +442,17 @@ namespace luna
 					pipeline.NodeMask = 0;
 					if (FAILED(m_device->m_device->CreateGraphicsPipelineState(&pipeline, IID_PPV_ARGS(&m_pso))))
 					{
-						return e_bad_system_call;
+						return BasicError::bad_system_call();
 					}
 				}
 				m_desc.buffer_count = buffer_count;
 				m_desc.width = width;
 				m_desc.height = height;
 				m_desc.format = new_format;
-				return s_ok;
+				return RV();
 			}
 
-			RV SwapChain::present(IResource* resource, uint32 subresource, uint32 sync_interval)
+			RV SwapChain::present(IResource* resource, u32 subresource, u32 sync_interval)
 			{
 				lutsassert();
 				wait();
@@ -460,16 +460,16 @@ namespace luna
 				HRESULT hr = m_ca->Reset();
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				hr = m_li->Reset(m_ca.Get(), m_pso.Get());
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				if (!::ResetEvent(m_event))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				// Blit the resource to the back buffer.
 				Resource* res = static_cast<Resource*>(resource);
@@ -533,29 +533,29 @@ namespace luna
 
 				if (FAILED(m_li->Close()))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
 				ID3D12CommandList* cmdlist = m_li.Get();
 				m_queue->m_queue->ExecuteCommandLists(1, &cmdlist);
-				if (FAILED(m_sc->Present(sync_interval, 0)) ? e_failure : s_ok)
+				if (FAILED(m_sc->Present(sync_interval, 0)))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 
-				uint64 wait_value = m_fence->GetCompletedValue() + 1;
+				u64 wait_value = m_fence->GetCompletedValue() + 1;
 				if (FAILED(m_fence->SetEventOnCompletion(wait_value, m_event)))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				if (FAILED(m_queue->m_queue->Signal(m_fence.Get(), wait_value)))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				m_current_back_buffer = (m_current_back_buffer + 1) % (m_desc.buffer_count);
-				return s_ok;
+				return RV();
 			}
-			RV SwapChain::resize_buffers(uint32 buffer_count, uint32 width, uint32 height, EResourceFormat new_format)
+			RV SwapChain::resize_buffers(u32 buffer_count, u32 width, u32 height, EResourceFormat new_format)
 			{
 				lutsassert();
 				wait();
@@ -587,7 +587,7 @@ namespace luna
 				HRESULT hr = m_sc->ResizeBuffers(buffer_count, width, height, encode_resource_format(new_format), DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 				if (FAILED(hr))
 				{
-					return e_bad_system_call;
+					return BasicError::bad_system_call();
 				}
 				return reset_back_buffer_resources(buffer_count, width, height, new_format);
 			}
