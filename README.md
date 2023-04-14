@@ -1,3 +1,5 @@
+**Note: Luna Engine v0.6 is obsolete and is no longer maintained. For a newer version of Luna Engine, refer to [JX-Master/LunaSDK](https://github.com/JX-Master/LunaSDK).**
+
 # Luna Engine v0.6
 
 This repository hosts the source code for Luna Engine v0.6, which is currently my personal game engine project for learning & research purposes.
